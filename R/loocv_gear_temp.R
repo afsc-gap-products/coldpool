@@ -2,33 +2,12 @@
 # Sean Rohan <sean.rohan@@noaa.gov>
 # Last update:April 7, 2021
 
-# Make ODBC connection ---
+# Leave-one-out cross-validation of candidate interpolation methods
 
-loocv_gear_temp <- function() {
-  
-channel <- get_connected()
+loocv_gear_temp <- function(temp_data_path) {
 
-temperature_df <- sqlQuery(channel, "select gear_temperature,
-         start_latitude,
-         start_longitude,
-         end_latitude,
-         end_longitude,
-         stationid,
-         stratum,
-         cruise
-         from racebase.haul where
-         region = 'BS' and
-         (stratum in (10,20,31,32,41,42,43,50,61,62,82,90)) and 
-         bottom_depth < 201 and
-         (haul_type in (3,13))") %>%
-  dplyr::mutate(LATITUDE = (START_LATITUDE + END_LATITUDE)/2,
-                LONGITUDE = (START_LONGITUDE + END_LONGITUDE)/2,
-                YEAR = floor(CRUISE/100)) %>%
-  dplyr::select(-START_LATITUDE, 
-                -END_LATITUDE, 
-                -START_LONGITUDE, 
-                -END_LONGITUDE) %>%
-  dplyr::filter(!is.na(GEAR_TEMPERATURE), !is.na(LATITUDE), !is.na(LONGITUDE))
+temperature_df <- read.csv(file = temp_data_path,
+                           stringsAsFactors = FALSE)
 
 # Columns to lowercase because I could have done a better job designing loocv_2 ----
 names(temperature_df) <- tolower(names(temperature_df))
@@ -51,7 +30,7 @@ for(i in 1:length(year_vec)) {
                                           lon.col = "longitude",
                                           lat.col = "latitude",
                                           var.col = "gear_temperature",
-                                          pre = paste0("_GEAR_TEMPERATURE_", year_vec[i]),
+                                          pre = paste0("_gear_temperature_", year_vec[i]),
                                           scale.vars = FALSE,
                                           center = FALSE,
                                           scale = FALSE)

@@ -3,36 +3,12 @@
 #' @param proj_crs CRS string to use for interpolation as a character vector (CRS should have units of meters)
 #' @param cell_resolution Interpolation grid cell dimension in meters.
 
-interpolate_gear_temp <- function(proj_crs, 
+interpolate_gear_temp <- function(temp_data_path,
+                                  proj_crs, 
                                   cell_resolution) {
   
-  # Make ODBC connection ---
-  print("Connecting")
-  channel <- get_connected()
-  temperature_df <- sqlQuery(channel, "select gear_temperature,
-         start_latitude,
-         start_longitude,
-         end_latitude,
-         end_longitude,
-         stationid,
-         stratum,
-         haul_type,
-         performance,
-         cruise
-         from racebase.haul where
-         region = 'BS' and
-         (stratum in (10,20,31,32,41,42,43,50,61,62,82,90)) and 
-         cruise > 198200 and
-         bottom_depth < 201 and
-         (haul_type in (3,13))") %>%
-    dplyr::mutate(LATITUDE = (START_LATITUDE + END_LATITUDE)/2,
-                  LONGITUDE = (START_LONGITUDE + END_LONGITUDE)/2,
-                  YEAR = floor(CRUISE/100)) %>%
-    dplyr::select(-START_LATITUDE, 
-                  -END_LATITUDE, 
-                  -START_LONGITUDE, 
-                  -END_LONGITUDE) %>%
-    dplyr::filter(!is.na(GEAR_TEMPERATURE), !is.na(LATITUDE), !is.na(LONGITUDE))
+  temperature_df <- read.csv(file = temp_data_path,
+                             stringsAsFactors = FALSE)
   
   names(temperature_df) <- tolower(names(temperature_df))
   
