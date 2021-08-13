@@ -32,6 +32,7 @@ get_data <- function(channel) {
   names(temperature_all_hauls_df) <- tolower(names(temperature_all_hauls_df))
   
   print("Writing temperature data for all hauls to csv")
+  ifelse(!dir.exists(file.path(here::here("data"))), dir.create(file.path(here::here("data"))), FALSE)
   write.csv(temperature_all_hauls_df,
             file = here::here("data", paste0(Sys.Date(), "_all_temperature_data.csv")),
             row.names = FALSE)

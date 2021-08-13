@@ -38,6 +38,7 @@ for(i in 1:length(year_vec)) {
 
 # Generate vector of loocv files with "GEAR_TEMPERATURE" in the title.
 # I'd suggest using a loop here if you only want a subset of years on each plot.
+ifelse(!dir.exists(file.path(here::here("output"))), dir.create(file.path(here::here("output"))), FALSE)
 temp_dir <- dir(here::here("output"), full.names = TRUE)
 temp_dir <- temp_dir[grep("GEAR_TEMPERATURE", temp_dir)]
 

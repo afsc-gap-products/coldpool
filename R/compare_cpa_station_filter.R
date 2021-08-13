@@ -54,6 +54,7 @@ compare_cpa_station_filter <- function(sel_year = 2000,
                                                neat.labels = TRUE)
   
   # Bob's IDW interpolation with resample stations versus IDW (nmax = 4) without resample ----
+  ifelse(!dir.exists(file.path(here::here("plots"))), dir.create(file.path(here::here("plots"))), FALSE)
   tiff(file = here::here("plots", paste0("resample_effect", sel_year, ".tiff")), 
        width = 169, 
        height = 81, 
