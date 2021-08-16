@@ -10,7 +10,7 @@ compare_cpa_station_filter <- function(sel_year = 2000,
                                        sel_old_raster = "./data/idw_files/bt00_idw/",
                                        sel_idw4_geotiff = "./output/raster/idw_nmax4_2000_gear_temperature.tif",
                                        set_crs = "EPSG:3338",
-                                       temp_data_path = here::here("data", paste0("2021-04-11_all_temperature_data.csv"))) {
+                                       temp_data_path = here::here("data", list.files(here::here("data"))[length(list.files(here::here("data")))])) {
   
   # Load map layers ----
   sebs_layers <- akgfmaps::get_base_layers(select.region = "sebs",
