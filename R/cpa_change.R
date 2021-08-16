@@ -98,7 +98,8 @@ cpa_change_df <- annual_cpa_df %>%
                   toupper()) %>%
   dplyr::inner_join(method_labels_df)
 
-ggplot(data = cpa_change_df,
+png(file = here::here("plots", "cpa_by_year_methods_rel_diff.png"), width = 169, height = 81, units = "mm", res = fig_res)
+print(ggplot(data = cpa_change_df,
        aes(x = year,
            y = rel_diff,
            color = label)) + 
@@ -110,8 +111,11 @@ ggplot(data = cpa_change_df,
                      values = color_vec) +
   theme_bw() +
   theme()
+)
+dev.off()
 
-ggplot(data = cpa_change_df,
+png(file = here::here("plots", "cpa_by_year_methods_abs_diff.png"), width = 169, height = 81, units = "mm", res = fig_res)
+print(ggplot(data = cpa_change_df,
        aes(x = year,
            y = abs_diff,
            color = label)) + 
@@ -123,6 +127,8 @@ ggplot(data = cpa_change_df,
                      values = color_vec) +
   theme_bw() +
   theme()
+)
+dev.off()
 
 cpa_change_df %>%
   dplyr::group_by(variable) %>%
@@ -130,7 +136,8 @@ cpa_change_df %>%
                    mean_rel_diff = mean (rel_diff),
                    median_rel_diff = median(rel_diff))
 
-ggplot(data = cpa_change_df, 
+png(file = here::here("plots", "cpa_combined_methods_rel_diff.png"), width = 169, height = 81, units = "mm", res = fig_res)
+print(ggplot(data = cpa_change_df, 
        aes(x = label,
            y = rel_diff)) + 
   geom_hline(yintercept = 0) +
@@ -141,8 +148,11 @@ ggplot(data = cpa_change_df,
   theme(axis.text.x = element_text(angle = 90,
                                    vjust = 0.5,
                                    hjust = 1))
+)
+dev.off()
 
-ggplot(data = cpa_change_df, 
+png(file = here::here("plots", "cpa_combined_methods_abs_diff.png"), width = 169, height = 81, units = "mm", res = fig_res)
+print(ggplot(data = cpa_change_df, 
        aes(x = label,
            y = abs_diff)) + 
   geom_hline(yintercept = 0) +
@@ -153,4 +163,6 @@ ggplot(data = cpa_change_df,
   theme(axis.text.x = element_text(angle = 90,
                                    vjust = 0.5,
                                    hjust = 1))
+)
+dev.off()
 
