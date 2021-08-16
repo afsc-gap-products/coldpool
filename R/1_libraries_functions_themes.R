@@ -1,5 +1,5 @@
 # Load libraries ----
-remotes::install_github("sean-rohan-noaa/akgfmaps", R_REMOTES_NO_ERRORS_FROM_WARNINGS="true", ref = "dev")
+#remotes::install_github("sean-rohan-noaa/akgfmaps", R_REMOTES_NO_ERRORS_FROM_WARNINGS="true", ref = "dev")
 library(akgfmaps) # GitHub: sean-rohan-NOAA/akgfmaps
 library(getPass)
 library(ggthemes)
@@ -18,6 +18,7 @@ source(here::here("R", "get_data.R"))
 source(here::here("R", "loocv_gear_temp.R"))
 source(here::here("R", "interpolate_gear_temp.R"))
 source(here::here("R", "plot_loocv_rmse.R"))
+source(here::here("R", "compare_cpa_station_filter.R"))
 
 
 # Connect ----

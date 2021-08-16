@@ -10,7 +10,7 @@ channel <- get_connected()
 # Get temperature data and write csvs to data directory ----
 # Writes: 
 # -- /data/[date]_all_temperature_data.csv: Temperature data from all hauls
-# -- /data/[date]_index_hauls_temperature_data.csv: Temperature dat for haul types 3 and 13
+# -- /data/[date]_index_hauls_temperature_data.csv: Temperature data for haul types 3 and 13
 get_data(channel = channel)
 
 # Leave one out cross-validation to compare interpolation methods ----
@@ -28,9 +28,11 @@ interpolate_gear_temp(temp_data_path =  here::here("data", list.files(here::here
                       cell_resolution = 5000)
 
 # Make plots and tables showing differences among methods (in progress, cpa_change.R) ----
-# cpa_change.R
-compare_cpa_station_filter(sel_year = 2000,
-                           sel_old_raster = "./data/idw_files/bt00_idw/",
-                           sel_idw4_geotiff = "./output/raster/idw_nmax4_2000_gear_temperature.tif",
-                           set_crs = "EPSG:3338",
-                           temp_data_path = here::here("data", list.files(here::here("data"))[2]))
+source(here::here("R", "cpa_change.R"))
+
+# Determine Effect of interpolating with and without RKC resample (not done in either approach so no issues here)
+#compare_cpa_station_filter(sel_year = 2000,
+#                           sel_old_raster = "./data/idw_files/bt00_idw/",
+#                           sel_idw4_geotiff = "./output/raster/idw_nmax4_2000_gear_temperature.tif",
+#                           set_crs = "EPSG:3338",
+#                           temp_data_path = here::here("data", list.files(here::here("data"))[length(list.files(here::here("data")))]))
