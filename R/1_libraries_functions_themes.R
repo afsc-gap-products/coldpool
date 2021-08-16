@@ -1,4 +1,5 @@
 # Load libraries ----
+remotes::install_github("sean-rohan-noaa/akgfmaps", R_REMOTES_NO_ERRORS_FROM_WARNINGS="true", ref = "dev")
 library(akgfmaps) # GitHub: sean-rohan-NOAA/akgfmaps
 library(getPass)
 library(ggthemes)
