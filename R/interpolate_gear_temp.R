@@ -39,6 +39,7 @@ interpolate_gear_temp <- function(temp_data_path,
     
   }
   
+  cpa_out_ste <- dplyr::select(cpa_out, year, ste_lte2) # cold pool area for only best method
 
   # Write cold pool area calculations to csv ----
   print("Checking for output directory")
@@ -49,6 +50,9 @@ interpolate_gear_temp <- function(temp_data_path,
   print("Writing cold pool area to output")
   write.csv(cpa_out, 
             file = here::here("output", "estimated_cpa", "cpa_out.csv"), 
+            row.names = FALSE)
+  write.csv(cpa_out_ste, 
+            file = here::here("output", "estimated_cpa", "cpa_out_ste.csv"), 
             row.names = FALSE)
   
 }
