@@ -46,7 +46,7 @@ temp_dir <- temp_dir[grep("gear_temperature", temp_dir)]
 
 # Prediction error plots ----
 print("Making RSPE violin plots")
-plot_loocv_rmse(sel_paths = temp_dir[1:8],
+plot_loocv_rmse(sel_paths = temp_dir[1:9],
                 y_lab = expression(RSPE~(degree*C)),
                 sel_var = "GEAR_TEMPERATURE",
                 make_plot = TRUE,
@@ -54,7 +54,7 @@ plot_loocv_rmse(sel_paths = temp_dir[1:8],
                 suffix = "_1",
                 fig_res = 600)
 
-plot_loocv_rmse(sel_paths = temp_dir[9:16],
+plot_loocv_rmse(sel_paths = temp_dir[10:18],
                 y_lab = expression(RSPE~(degree*C)),
                 sel_var = "GEAR_TEMPERATURE",
                 make_plot = TRUE,
@@ -62,7 +62,7 @@ plot_loocv_rmse(sel_paths = temp_dir[9:16],
                 suffix = "_2",
                 fig_res = 600)
 
-plot_loocv_rmse(sel_paths = temp_dir[17:24],
+plot_loocv_rmse(sel_paths = temp_dir[19:27],
                 y_lab = expression(RSPE~(degree*C)),
                 sel_var = "GEAR_TEMPERATURE",
                 make_plot = TRUE,
@@ -70,7 +70,7 @@ plot_loocv_rmse(sel_paths = temp_dir[17:24],
                 suffix = "_3",
                 fig_res = 600)
 
-plot_loocv_rmse(sel_paths = temp_dir[25:32],
+plot_loocv_rmse(sel_paths = temp_dir[28:36],
                 y_lab = expression(RSPE~(degree*C)),
                 sel_var = "GEAR_TEMPERATURE",
                 make_plot = TRUE,
@@ -78,7 +78,7 @@ plot_loocv_rmse(sel_paths = temp_dir[25:32],
                 suffix = "_4",
                 fig_res = 600)
 
-plot_loocv_rmse(sel_paths = temp_dir[33:38],
+plot_loocv_rmse(sel_paths = temp_dir[37:39],
                 y_lab = expression(RSPE~(degree*C)),
                 sel_var = "GEAR_TEMPERATURE",
                 make_plot = TRUE,
