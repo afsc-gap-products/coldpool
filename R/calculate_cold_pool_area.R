@@ -1,8 +1,8 @@
 #' Calculate cold pool area in the southeastern Bering Sea using varying interpolation methods
 #' 
-#' Calculate cold pool area using nearest-neighbor interpolation, inverse distance weighting, and ordinary kriging methods.
+#' Compare 
 #' 
-#' @param dat Input data frame. Must include columns for latitude, longitde, and variable to be interpolated.
+#' @param dat Input data frame. Must include columns for latitude, longitude, and variable to be interpolated.
 #' @param dat.year Year
 #' @param var.col Character vector denoting the name of the variable column.
 #' @param lat.col Character vector indicating the name of the latitude column.
@@ -12,7 +12,7 @@
 #' @param cell.resolution Dimensions of interpolation grid cell in meters.
 #' @param nm Maximum number of cells to use for interpolation. 
 #' @param pre Prefix for file names in output (in development.)
-#' @param write.to.file If true, writes output to GeoTIFF format file. Default = FALSE.
+#' @param write.to.file Logical. Should GeoTIFF rasters be written to output directory?
 #' @export
 
 calculate_cold_pool_area <- function(dat,
@@ -20,12 +20,12 @@ calculate_cold_pool_area <- function(dat,
                                 var.col,
                                 lat.col,
                                 lon.col,
-                                in.crs = "+proj=longlat",
+                                in.crs = "+proj=longlat +datum=NAD83",
                                 interpolation.crs,
                                 cell.resolution,
                                 nm = Inf,
                                 pre = NA,
-                                write.to.file = FALSE)
+                                write.to.file = TRUE)
 {
   names(dat)[which(names(dat) == var.col)] <- "var.col"
   names(dat)[which(names(dat) == lat.col)] <- "lat.col"
@@ -60,48 +60,59 @@ calculate_cold_pool_area <- function(dat,
                          nmax = 4)
   nn.predict <- predict(nn_fit, as(sp_interp.raster, "SpatialGrid"))
   
-  cpe_lte2_nn <- rasterize_and_mask(nn.predict, 
+  cpe_lte2_nn <- akgfmaps::rasterize_and_mask(nn.predict, 
                                sebs_layers$survey.area) %>% 
     cpa_from_raster(temperature_threshold = 2)
   
-  cpe_lte0_nn <- rasterize_and_mask(nn.predict, 
+  cpe_lte0_nn <- akgfmaps::rasterize_and_mask(nn.predict, 
                                     sebs_layers$survey.area) %>% 
     cpa_from_raster(temperature_threshold = 0)
   
-  # Inverse distance weighting with nmax = 4 (Lauth method) ----
+  # Inverse distance weighting w/ nmax = 4 (ArcGIS Default) ----
   idw_nmax4_fit <- gstat::gstat(formula = var.col ~ 1, 
                           locations = sp_interp.df,
                           set = list(idp = 2),
                           nmax = 4)
   idw_nmax4.predict <- predict(idw_nmax4_fit, as(sp_interp.raster, "SpatialGrid"))
   
-  cpe_lte2_idw_nmax4 <- rasterize_and_mask(idw_nmax4.predict, 
+  cpe_lte2_idw_nmax4 <- akgfmaps::rasterize_and_mask(idw_nmax4.predict, 
                                 sebs_layers$survey.area) %>% 
     cpa_from_raster(temperature_threshold = 2)
   
-  cpe_lte0_idw_nmax4 <- rasterize_and_mask(idw_nmax4.predict, 
+  cpe_lte0_idw_nmax4 <- akgfmaps::rasterize_and_mask(idw_nmax4.predict, 
                                     sebs_layers$survey.area) %>% 
     cpa_from_raster(temperature_threshold = 0)
   
-  # Inverse distance weighting  ----
+  # Inverse distance weighting w/ nmax = Inf
   idw_fit <- gstat::gstat(formula = var.col ~ 1, 
                           locations = sp_interp.df,
                           set = list(idp = 2),
-                          nmax = nm)
+                          nmax = Inf)
+  
   idw.predict <- predict(idw_fit, as(sp_interp.raster, "SpatialGrid"))
   
-  cpe_lte2_idw <- rasterize_and_mask(idw.predict, 
-                                     sebs_layers$survey.area) %>% 
+  cpe_lte2_idw <- akgfmaps::rasterize_and_mask(idw.predict, 
+                                               sebs_layers$survey.area) %>% 
     cpa_from_raster(temperature_threshold = 2)
   
-  cpe_lte0_idw <- rasterize_and_mask(idw.predict, 
-                                     sebs_layers$survey.area) %>% 
+  cpe_lte0_idw <- akgfmaps::rasterize_and_mask(idw.predict, 
+                                               sebs_layers$survey.area) %>% 
     cpa_from_raster(temperature_threshold = 0)
   
   # Set up a new IDW for ordinary kriging ----
   idw_vgm_fit <- gstat::gstat(formula = var.col ~ 1, 
                               locations = sp_interp.df, 
-                              nmax = nm)
+                              nmax = Inf)
+  
+  idw_fit.predict <- predict(idw_fit, as(sp_interp.raster, "SpatialGrid"))
+  
+  cpe_lte2_idw <- akgfmaps::rasterize_and_mask(idw.predict, 
+                                               sebs_layers$survey.area) %>% 
+    cpa_from_raster(temperature_threshold = 2)
+  
+  cpe_lte0_idw <- akgfmaps::rasterize_and_mask(idw.predict, 
+                                               sebs_layers$survey.area) %>% 
+    cpa_from_raster(temperature_threshold = 0)
   
   # Ordinary Kriging: Exponential VGM----
   exp.vgfit <- gstat::fit.variogram(variogram(idw_vgm_fit), 
@@ -112,11 +123,11 @@ calculate_cold_pool_area <- function(dat,
                    nmax = nm)
   exp.predict <- predict(exp_fit, as(sp_interp.raster, "SpatialGrid"))
   
-  cpe_lte2_exp <- rasterize_and_mask(exp.predict, 
+  cpe_lte2_exp <- akgfmaps::rasterize_and_mask(exp.predict, 
                                 sebs_layers$survey.area) %>% 
     cpa_from_raster(temperature_threshold = 2)
   
-  cpe_lte0_exp <- rasterize_and_mask(exp.predict, 
+  cpe_lte0_exp <- akgfmaps::rasterize_and_mask(exp.predict, 
                                      sebs_layers$survey.area) %>% 
     cpa_from_raster(temperature_threshold = 0)
   
@@ -129,11 +140,11 @@ calculate_cold_pool_area <- function(dat,
                           nmax = nm)
   sph.predict <- predict(sph_fit, as(sp_interp.raster, "SpatialGrid"))
   
-  cpe_lte2_sph <- rasterize_and_mask(sph.predict, 
+  cpe_lte2_sph <- akgfmaps::rasterize_and_mask(sph.predict, 
                                 sebs_layers$survey.area) %>% 
     cpa_from_raster(temperature_threshold = 2)
   
-  cpe_lte0_sph <- rasterize_and_mask(sph.predict, 
+  cpe_lte0_sph <- akgfmaps::rasterize_and_mask(sph.predict, 
                                      sebs_layers$survey.area) %>% 
     cpa_from_raster(temperature_threshold = 0)
   
@@ -146,11 +157,11 @@ calculate_cold_pool_area <- function(dat,
                           nmax = nm)
   bes.predict <- predict(bes_fit, as(sp_interp.raster, "SpatialGrid"))
   
-  cpe_lte2_bes <- rasterize_and_mask(bes.predict, 
+  cpe_lte2_bes <- akgfmaps::rasterize_and_mask(bes.predict, 
                                 sebs_layers$survey.area) %>% 
     cpa_from_raster(temperature_threshold = 2)
   
-  cpe_lte0_bes <- rasterize_and_mask(bes.predict, 
+  cpe_lte0_bes <- akgfmaps::rasterize_and_mask(bes.predict, 
                                      sebs_layers$survey.area) %>% 
     cpa_from_raster(temperature_threshold = 0)
   
@@ -163,11 +174,11 @@ calculate_cold_pool_area <- function(dat,
                           nmax = nm)
   gau.predict <- predict(gau_fit, as(sp_interp.raster, "SpatialGrid"))
   
-  cpe_lte2_gau <- rasterize_and_mask(gau.predict, 
+  cpe_lte2_gau <- akgfmaps::rasterize_and_mask(gau.predict, 
                                 sebs_layers$survey.area) %>% 
     cpa_from_raster(temperature_threshold = 2)
   
-  cpe_lte0_gau <- rasterize_and_mask(gau.predict, 
+  cpe_lte0_gau <- akgfmaps::rasterize_and_mask(gau.predict, 
                                      sebs_layers$survey.area) %>% 
     cpa_from_raster(temperature_threshold = 0)
   
@@ -180,7 +191,7 @@ calculate_cold_pool_area <- function(dat,
                           nmax = nm)
   cir.predict <- predict(cir_fit, as(sp_interp.raster, "SpatialGrid"))
   
-  cpe_lte2_cir <- rasterize_and_mask(cir.predict, 
+  cpe_lte2_cir <- akgfmaps::rasterize_and_mask(cir.predict, 
                                 sebs_layers$survey.area) %>% 
     cpa_from_raster(temperature_threshold = 2)
   
@@ -197,11 +208,11 @@ calculate_cold_pool_area <- function(dat,
                           nmax = nm)
   mat.predict <- predict(mat_fit, as(sp_interp.raster, "SpatialGrid"))
   
-  cpe_lte2_mat <- rasterize_and_mask(mat.predict, 
+  cpe_lte2_mat <- akgfmaps::rasterize_and_mask(mat.predict, 
                                 sebs_layers$survey.area) %>% 
     cpa_from_raster(temperature_threshold = 2)
   
-  cpe_lte0_mat <- rasterize_and_mask(mat.predict, 
+  cpe_lte0_mat <- akgfmaps::rasterize_and_mask(mat.predict, 
                                      sebs_layers$survey.area) %>% 
     cpa_from_raster(temperature_threshold = 0)
   
@@ -214,7 +225,7 @@ calculate_cold_pool_area <- function(dat,
                           nmax = nm)
   ste.predict <- predict(ste_fit, as(sp_interp.raster, "SpatialGrid"))
   
-  cpe_lte2_ste <- rasterize_and_mask(ste.predict, 
+  cpe_lte2_ste <- akgfmaps::rasterize_and_mask(ste.predict, 
                                 sebs_layers$survey.area) %>% 
     cpa_from_raster(temperature_threshold = 2)
   
@@ -223,23 +234,23 @@ calculate_cold_pool_area <- function(dat,
     cpa_from_raster(temperature_threshold = 0)
   
   # Thin-plate spline ----
-  tps_fit <- fields::Tps(coordinates(sp_interp.df), 
+  tps_fit <- fields::Tps(sp::coordinates(sp_interp.df), 
                          sp_interp.df$var.col)
   tps.predict <- raster::interpolate(sp_interp.raster, 
                                      tps_fit)
   
-  cpe_lte2_tps <- rasterize_and_mask(tps.predict, 
+  cpe_lte2_tps <- akgfmaps::rasterize_and_mask(tps.predict, 
                                 sebs_layers$survey.area) %>% 
     cpa_from_raster(temperature_threshold = 2)
   
-  cpe_lte0_tps <- rasterize_and_mask(tps.predict, 
+  cpe_lte0_tps <- akgfmaps::rasterize_and_mask(tps.predict, 
                                      sebs_layers$survey.area) %>% 
     cpa_from_raster(temperature_threshold = 0)
   
   cpe_df <- data.frame(year = dat.year,
-                       nn_lte2 = cpe_lte2_nn, 
-                       idw_nmax4_lte2 = cpe_lte2_idw_nmax4, 
-                       idw_lte2 = cpe_lte2_idw, 
+                       nn_lte2 = cpe_lte2_nn,
+                       idw_nmax4_lte2 = cpe_lte2_idw_nmax4,
+                       idw_lte2 = cpe_lte2_idw,
                        bes_lte2 = cpe_lte2_bes, 
                        exp_lte2 = cpe_lte2_exp, 
                        cir_lte2 = cpe_lte2_cir, 
@@ -248,9 +259,9 @@ calculate_cold_pool_area <- function(dat,
                        mat_lte2 = cpe_lte2_mat,
                        ste_lte2 = cpe_lte2_ste,
                        tps_lte2 = cpe_lte2_tps,
-                       nn_lte0 = cpe_lte0_nn, 
-                       idw_nmax4_lte0 = cpe_lte0_idw_nmax4,
-                       idw_lte0 = cpe_lte0_idw,
+                       nn_lte0 = cpe_lte0_nn,
+                       idw_nmax4_lte2 = cpe_lte2_idw_nmax4,
+                       idw_lte0 = cpe_lte0_idw, 
                        bes_lte0 = cpe_lte0_bes, 
                        exp_lte0 = cpe_lte0_exp, 
                        cir_lte0 = cpe_lte0_cir, 
@@ -268,62 +279,52 @@ calculate_cold_pool_area <- function(dat,
     if(!dir.exists("./output/raster/")) {
       dir.create("./output/raster/")
     }
-
     # write unmasked surfaces to raster
     raster::writeRaster(raster::raster(nn.predict), 
                         filename = paste0("./output/raster/nn_", dat.year, "_", var.col, ".tif" ),
                         format = "GTiff", 
                         overwrite = TRUE)
-    
-    raster::writeRaster(raster::raster(idw.predict), 
-                        filename = paste0("./output/raster/idw_", dat.year, "_", var.col, ".tif" ),
-                        format = "GTiff", 
-                        overwrite = TRUE)
-    
     raster::writeRaster(raster::raster(idw_nmax4.predict), 
                         filename = paste0("./output/raster/idw_nmax4_", dat.year, "_", var.col, ".tif" ),
                         format = "GTiff", 
                         overwrite = TRUE)
-    
+    raster::writeRaster(raster::raster(idw.predict), 
+                        filename = paste0("./output/raster/idw_", dat.year, "_", var.col, ".tif" ),
+                        format = "GTiff", 
+                        overwrite = TRUE)
     raster::writeRaster(raster::raster(exp.predict), 
                         filename = paste0("./output/raster/exp_", dat.year, "_", var.col, ".tif" ),
                         format = "GTiff", 
                         overwrite = TRUE)
-    
     raster::writeRaster(raster::raster(sph.predict), 
                         filename = paste0("./output/raster/sph_", dat.year, "_", var.col, ".tif" ),
                         format = "GTiff", 
                         overwrite = TRUE)
-    
     raster::writeRaster(raster::raster(bes.predict), 
                         filename = paste0("./output/raster/bes_", dat.year, "_", var.col, ".tif" ),
                         format = "GTiff", 
                         overwrite = TRUE)
-    
-    raster::writeRaster(raster::raster(gau.predict), 
+    raster::writeRaster(raster::raster(gau.predict),  
                         filename = paste0("./output/raster/gau_", dat.year, "_", var.col, ".tif" ),
                         format = "GTiff", 
                         overwrite = TRUE)
-    
     raster::writeRaster(raster::raster(cir.predict), 
                         filename = paste0("./output/raster/cir_", dat.year, "_", var.col, ".tif" ),
                         format = "GTiff", 
                         overwrite = TRUE)
-    
     raster::writeRaster(raster::raster(mat.predict), 
                         filename = paste0("./output/raster/mat_", dat.year, "_", var.col, ".tif" ),
                         format = "GTiff", 
                         overwrite = TRUE)
-    
     raster::writeRaster(raster::raster(ste.predict), 
                         filename = paste0("./output/raster/ste_", dat.year, "_", var.col, ".tif" ),
                         format = "GTiff", 
                         overwrite = TRUE)
-    
     raster::writeRaster(tps.predict, 
                         filename = paste0("./output/raster/tps_", dat.year, "_", var.col, ".tif" ),
                         format = "GTiff", 
                         overwrite = TRUE)
+    
   }
   
   return(cpe_df)
