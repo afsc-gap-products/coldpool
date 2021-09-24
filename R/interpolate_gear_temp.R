@@ -6,10 +6,10 @@
 interpolate_gear_temp <- function(temp_data_path,
                                   proj_crs, 
                                   cell_resolution) {
-  
+  temp_data_path <- here::here("data", "2021-09-23_index_hauls_temperature_data.csv")
   temperature_df <- read.csv(file = temp_data_path,
                              stringsAsFactors = FALSE)
-  
+  temperature_df <- dplyr::filter(temperature_df, cruise == 201601)
   names(temperature_df) <- tolower(names(temperature_df))
   
   # Vector of years ----
@@ -18,7 +18,7 @@ interpolate_gear_temp <- function(temp_data_path,
   print("Calculating cold pool area and making rasters")
   for(i in 1:length(year_vec)) {
     
-    cpa_year <- akgfmaps::calculate_cold_pool_area(dplyr::filter(temperature_df, year == year_vec[i]),
+    cpa_year <- calculate_cold_pool_area(dat = dplyr::filter(temperature_df, year == year_vec[i]),
                                                    dat.year = year_vec[i],
                                                    in.crs = "+proj=longlat",
                                                    interpolation.crs = proj_crs,
