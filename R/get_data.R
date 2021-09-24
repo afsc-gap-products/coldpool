@@ -48,11 +48,13 @@ get_data <- function(channel) {
          stratum,
          haul_type,
          performance,
-         cruise
+         cruise,
+         bottom_depth
          from racebase.haul where
          region = 'BS' and
          (stratum in (10,20,31,32,41,42,43,50,61,62,82,90)) and 
          cruise > 198200 and
+         performance >= 0 and
          bottom_depth < 201 and
          (haul_type in (3,13))") %>%
     dplyr::mutate(LATITUDE = (START_LATITUDE + END_LATITUDE)/2,
