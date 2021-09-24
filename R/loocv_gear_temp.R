@@ -1,6 +1,6 @@
 # Evaluate methods for interpolating EBS bottom temperature using leave-one-out cross validation
 # Sean Rohan <sean.rohan@@noaa.gov>
-# Last update:April 7, 2021
+# Last update: September 24, 2021
 
 # Leave-one-out cross-validation of candidate interpolation methods
 
@@ -45,7 +45,6 @@ temp_dir <- temp_dir[grep("gear_temperature", temp_dir)]
 
 # Prediction error plots ----
 print("Making RSPE violin plots")
-
 for(i in seq(1, length(year_vec), by = 9)){
   plot_loocv_rmse(sel_paths = temp_dir[i:min(i+8, length(year_vec))],
                 y_lab = expression(RSPE~(degree*C)),
