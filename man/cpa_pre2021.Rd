@@ -19,7 +19,7 @@ A data frame with 38 rows and 9 columns:
 }
 }
 \source{
-\url{https://www.fisheries.noaa.gov/about/alaska-fisheries-science-center}
+\url{https://www.fisheries.noaa.gov/contact/groundfish-assessment-program}
 }
 \usage{
 cpa_pre2021
