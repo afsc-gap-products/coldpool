@@ -1,0 +1,24 @@
+---
+title: "ESR Cold Pool Index"
+author: "Sean Rohan and Lewis Barnett"
+date: "9/24/2021"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(coldpool)
+fig_res <- 300
+proj_crs <- "EPSG:3338"
+
+```
+
+## Estimate cold pool area with candidate interpolation methods
+
+```{r calc_index, echo=FALSE, message=FALSE, warning=TRUE}
+
+# Calculate cold pool area using candidate interpolation methods
+cpa_df <- interpolate_gear_temp(temp_data_path = here::here("data", "2021-09-24_index_hauls_temperature_data.csv"),
+                        proj_crs = proj_crs,
+                        cell_resolution = 5000) # 5x5 km pixels
+```
