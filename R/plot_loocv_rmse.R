@@ -9,6 +9,7 @@
 #' @param by_cruise Logical. Should panels be divided by cruise? Default = FALSE plots panels by year.
 #' @param suffix Text to append to a plot file name.
 #' @param fig_res Resolution for the figure.
+#' @export
 
 plot_loocv_rmse <- function(sel_paths = dir("./output/loocv", full.names = TRUE),
                             y_lab = NULL,

@@ -1,6 +1,6 @@
-#' Calculate cold pool area in the southeastern Bering Sea using varying interpolation methods
+#' Calculate cold pool area iusing candidate interpolation methods
 #' 
-#' Compare 
+#' This function runs interpolations, raster masking using akgfmaps::rasterize_and_mask(), and coldpool::cpa_from_raster to calculate cold pool area using 
 #' 
 #' @param dat Input data frame. Must include columns for latitude, longitude, and variable to be interpolated.
 #' @param dat.year Year
@@ -12,7 +12,8 @@
 #' @param cell.resolution Dimensions of interpolation grid cell in meters.
 #' @param nm Maximum number of cells to use for interpolation. 
 #' @param pre Prefix for file names in output (in development.)
-#' @param write.to.file Logical. Should GeoTIFF rasters be written to output directory?
+#' @param write.to.file Logical. Should GeoTIFF rasters be written to output directory? Causes error when run from an Rmd.
+#' @return Returns a data frame containing cold pool areas estimated by interpolation methods, for cutoffs at zero degrees and two degrees C. If argument write.to.file = TRUE, also writes a GeoTIFF raster to output directory.
 #' @export
 
 calculate_cold_pool_area <- function(dat,
@@ -273,55 +274,55 @@ calculate_cold_pool_area <- function(dat,
   
   if(write.to.file) {
     print("Writing rasters")
-    if(!dir.exists("./output/")) {
-      dir.create("./output/")
+    if(!dir.exists(here::here("output"))) {
+      dir.create(here::here("output"))
     }
-    if(!dir.exists("./output/raster/")) {
-      dir.create("./output/raster/")
+    if(!dir.exists(here::here("output", "raster"))) {
+      dir.create(here::here("output", "raster"))
     }
     # write unmasked surfaces to raster
     raster::writeRaster(raster::raster(nn.predict), 
-                        filename = paste0("./output/raster/nn_", dat.year, "_", var.col, ".tif" ),
+                        filename = here::here("output", "raster", paste0("nn_", dat.year, "_", var.col, ".tif" )),
                         format = "GTiff", 
                         overwrite = TRUE)
     raster::writeRaster(raster::raster(idw_nmax4.predict), 
-                        filename = paste0("./output/raster/idw_nmax4_", dat.year, "_", var.col, ".tif" ),
+                        filename = here::here("output", "raster", paste0("idw_nmax4_", dat.year, "_", var.col, ".tif" )),
                         format = "GTiff", 
                         overwrite = TRUE)
     raster::writeRaster(raster::raster(idw.predict), 
-                        filename = paste0("./output/raster/idw_", dat.year, "_", var.col, ".tif" ),
+                        filename = here::here("output", "raster", paste0("idw_", dat.year, "_", var.col, ".tif" )),
                         format = "GTiff", 
                         overwrite = TRUE)
     raster::writeRaster(raster::raster(exp.predict), 
-                        filename = paste0("./output/raster/exp_", dat.year, "_", var.col, ".tif" ),
+                        filename = here::here("output", "raster", paste0("exp_", dat.year, "_", var.col, ".tif" )),
                         format = "GTiff", 
                         overwrite = TRUE)
     raster::writeRaster(raster::raster(sph.predict), 
-                        filename = paste0("./output/raster/sph_", dat.year, "_", var.col, ".tif" ),
+                        filename = here::here("output", "raster", paste0("sph_", dat.year, "_", var.col, ".tif" )),
                         format = "GTiff", 
                         overwrite = TRUE)
     raster::writeRaster(raster::raster(bes.predict), 
-                        filename = paste0("./output/raster/bes_", dat.year, "_", var.col, ".tif" ),
+                        filename = here::here("output", "raster", paste0("bes_", dat.year, "_", var.col, ".tif" )),
                         format = "GTiff", 
                         overwrite = TRUE)
     raster::writeRaster(raster::raster(gau.predict),  
-                        filename = paste0("./output/raster/gau_", dat.year, "_", var.col, ".tif" ),
+                        filename = here::here("output", "raster", paste0("gau_", dat.year, "_", var.col, ".tif" )),
                         format = "GTiff", 
                         overwrite = TRUE)
     raster::writeRaster(raster::raster(cir.predict), 
-                        filename = paste0("./output/raster/cir_", dat.year, "_", var.col, ".tif" ),
+                        filename =here::here("output", "raster", paste0("cir_", dat.year, "_", var.col, ".tif" )),
                         format = "GTiff", 
                         overwrite = TRUE)
     raster::writeRaster(raster::raster(mat.predict), 
-                        filename = paste0("./output/raster/mat_", dat.year, "_", var.col, ".tif" ),
+                        filename = here::here("output", "raster", paste0("mat_", dat.year, "_", var.col, ".tif" )),
                         format = "GTiff", 
                         overwrite = TRUE)
     raster::writeRaster(raster::raster(ste.predict), 
-                        filename = paste0("./output/raster/ste_", dat.year, "_", var.col, ".tif" ),
+                        filename = here::here("output", "raster", paste0("ste_", dat.year, "_", var.col, ".tif" )),
                         format = "GTiff", 
                         overwrite = TRUE)
     raster::writeRaster(tps.predict, 
-                        filename = paste0("./output/raster/tps_", dat.year, "_", var.col, ".tif" ),
+                        filename = here::here("output", "raster", paste0("tps_", dat.year, "_", var.col, ".tif" )),
                         format = "GTiff", 
                         overwrite = TRUE)
     
