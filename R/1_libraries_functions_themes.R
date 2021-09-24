@@ -4,13 +4,14 @@ library(akgfmaps) # GitHub: sean-rohan-NOAA/akgfmaps
 library(getPass)
 library(ggthemes)
 library(here)
+library(fields)
 library(lubridate)
 library(metR)
 library(raster)
 library(RODBC)
+library(sp)
 library(stringr)
 library(tidyverse)
-library(TLUtilities) # GitHub: sean-rohan-NOAA/TLUtilities
 library(viridis)
 
 # Functions ----
@@ -19,7 +20,8 @@ source(here::here("R", "loocv_gear_temp.R"))
 source(here::here("R", "interpolate_gear_temp.R"))
 source(here::here("R", "plot_loocv_rmse.R"))
 source(here::here("R", "compare_cpa_station_filter.R"))
-
+source(here::here("R", "loocv_2.R"))
+source(here::here("R", "calculate_cold_pool_area.R"))
 
 # Connect ----
 get_connected <- function(schema = 'AFSC'){
@@ -34,6 +36,9 @@ get_connected <- function(schema = 'AFSC'){
 
 # Plotting ----
 fig_res <- 300
+
+# CRS
+proj_crs <- "EPSG:3338"
 
 # Themes ----
 

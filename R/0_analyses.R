@@ -17,14 +17,15 @@ get_data(channel = channel)
 # Writes:
 # -- /plots/RSPE_violin_GEAR_TEMPERATURE_[n].png: Plots of root square prediction error for interpolation methods.
 # -- /output/[date]_rmse_loocv_GEAR_TEMPERATURE_[year].csv: Results of leave-one-out cross validation.
-loocv_gear_temp(temp_data_path =  here::here("data", list.files(here::here("data"))[length(list.files(here::here("data")))])) # update file name manually if need specific data file date
+loocv_gear_temp(temp_data_path =  here::here("data", "2021-09-24_index_hauls_temperature_data.csv"),
+                proj_crs = proj_crs) # update file name manually if need specific data file date
 
 # Calculate cold pool area using interpolation methods ----
 # Writes:
 # -- /output/raster/[method]_[year]_gear_temperature.tif: GeoTIFF raster files for each interpolation method and year
 # -- /output/estimate_cpa/cpa_out.csv: Cold pool areas by year for each interpolation method.
-interpolate_gear_temp(temp_data_path =  here::here("data", list.files(here::here("data"))[length(list.files(here::here("data")))]),
-                      proj_crs = "EPSG:3338",
+interpolate_gear_temp(temp_data_path =  here::here("data", "2021-09-24_index_hauls_temperature_data.csv"),
+                      proj_crs = proj_crs,
                       cell_resolution = 5000)
 
 # Make plots and tables showing differences among methods (in progress, cpa_change.R) ----
@@ -34,5 +35,5 @@ source(here::here("R", "cpa_change.R"))
 #compare_cpa_station_filter(sel_year = 2000,
 #                           sel_old_raster = "./data/idw_files/bt00_idw/",
 #                           sel_idw4_geotiff = "./output/raster/idw_nmax4_2000_gear_temperature.tif",
-#                           set_crs = "EPSG:3338",
+#                           set_crs = proj_crs,
 #                           temp_data_path = here::here("data", list.files(here::here("data"))[length(list.files(here::here("data")))]))
