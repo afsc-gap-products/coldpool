@@ -12,7 +12,8 @@ get_data <- function(channel) {
          haul_type,
          performance,
          start_time,
-         cruise
+         cruise, 
+         bottom_depth
          from racebase.haul where
          region = 'BS' and
          (stratum in (10,20,31,32,41,42,43,50,61,62,82,90)) and 
