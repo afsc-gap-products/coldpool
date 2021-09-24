@@ -6,3 +6,17 @@ This repository contains a package for calculating the Cold Pool Index for the e
 This repository also includes an analysis to compare interpolation methods for calculating the cold pool index.
 
 The most recent version of this package was developed and tested using R 4.1.1.
+
+# Installation
+
+1. Install the [github.com/sean-rohan-NOAA/akgfmaps](akgfmaps package) from GitHub prior to installing coldpool, as follows:
+```{r}
+devtools::install_github("sean-rohan-noaa/akgfmaps", build_vignettes = TRUE)
+```
+
+If you encounter problems installing the akgfmaps package, please refer to the akgfmaps GitHub repository.
+
+2. Install the coldpool package using the following code:
+```{r}
+devtools::install_github("sean-rohan-noaa/coldpool")
+```
