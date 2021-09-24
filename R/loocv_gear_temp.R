@@ -37,52 +37,22 @@ for(i in 1:length(year_vec)) {
 }
 
 # Generate vector of loocv files with "GEAR_TEMPERATURE" in the title.
-# I'd suggest using a loop here if you only want a subset of years on each plot.
 ifelse(!dir.exists(file.path(here::here("output"))), dir.create(file.path(here::here("output"))), FALSE)
 ifelse(!dir.exists(file.path(here::here("output", "loocv"))), dir.create(file.path(here::here("output", "loocv"))), FALSE)
 ifelse(!dir.exists(file.path(here::here("plots"))), dir.create(file.path(here::here("plots"))), FALSE)
-temp_dir <- dir(here::here("output"), full.names = TRUE)
+temp_dir <- dir(here::here("output"), full.names = TRUE) # check that this doesn't include prior data pulls
 temp_dir <- temp_dir[grep("gear_temperature", temp_dir)]
 
 # Prediction error plots ----
 print("Making RSPE violin plots")
-plot_loocv_rmse(sel_paths = temp_dir[1:9],
-                y_lab = expression(RSPE~(degree*C)),
-                sel_var = "GEAR_TEMPERATURE",
-                make_plot = TRUE,
-                by_cruise = FALSE,
-                suffix = "_1",
-                fig_res = 600)
 
-plot_loocv_rmse(sel_paths = temp_dir[10:18],
+for(i in seq(1, length(year_vec), by = 9)){
+  plot_loocv_rmse(sel_paths = temp_dir[i:min(i+8, length(year_vec))],
                 y_lab = expression(RSPE~(degree*C)),
                 sel_var = "GEAR_TEMPERATURE",
                 make_plot = TRUE,
                 by_cruise = FALSE,
-                suffix = "_2",
+                suffix = paste0("_", match(i, seq(1, length(year_vec), by = 9))),
                 fig_res = 600)
-
-plot_loocv_rmse(sel_paths = temp_dir[19:27],
-                y_lab = expression(RSPE~(degree*C)),
-                sel_var = "GEAR_TEMPERATURE",
-                make_plot = TRUE,
-                by_cruise = FALSE,
-                suffix = "_3",
-                fig_res = 600)
-
-plot_loocv_rmse(sel_paths = temp_dir[28:36],
-                y_lab = expression(RSPE~(degree*C)),
-                sel_var = "GEAR_TEMPERATURE",
-                make_plot = TRUE,
-                by_cruise = FALSE,
-                suffix = "_4",
-                fig_res = 600)
-
-plot_loocv_rmse(sel_paths = temp_dir[37:39],
-                y_lab = expression(RSPE~(degree*C)),
-                sel_var = "GEAR_TEMPERATURE",
-                make_plot = TRUE,
-                by_cruise = FALSE,
-                suffix = "_5",
-                fig_res = 600)
+  }
 }
