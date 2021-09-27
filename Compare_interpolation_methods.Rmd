@@ -109,9 +109,9 @@ annual_cpa_df <- read.csv(file = here::here("output",
 annual_cpa_df <- annual_cpa_df[,c(1, which(stringr::str_detect(names(annual_cpa_df), "_lte2")))]
 
 combined_cpa_df <- annual_cpa_df %>% 
-  melt(id.vars = "year") %>%
+  reshape2::melt(id.vars = "year") %>%
   dplyr::bind_rows(lauth_cpa_df %>% 
-                     melt(id.vars = "year")) %>%
+                     reshape2::melt(id.vars = "year")) %>%
   dplyr::mutate(method = stringr::str_remove(variable, "_lte2") %>% 
                   toupper()) %>%
   dplyr::inner_join(method_labels_df)
@@ -143,7 +143,7 @@ print(ggplot() +
 dev.off()
 
 cpa_change_df <- annual_cpa_df %>% 
-  melt(id.vars = "year") %>%
+  reshape2::melt(id.vars = "year") %>%
   dplyr::inner_join(lauth_cpa_df) %>%
   dplyr::mutate(rel_diff = 100*(value - `Old IDW`)/`Old IDW`,
                 abs_diff = value - `Old IDW`) %>%
