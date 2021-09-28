@@ -37,12 +37,13 @@
 #' @format A 1L character vector
 "ebs_proj_crs"
 
-#' Raster layers of temperature for the eastern Bering Sea
+#' Temperature in the eastern Bering Sea at 5-km resolution
 #' 
-#' 5x5 km resolution raster grid of temperature in the eastern Bering Sea continental shelf survey area, from summer bottom trawl surveys conducted by AFSC/RACE/GAP.
+#' Summer bottom temperatures on the the eastern Bering Sea continental shelf survey area, calculated from interpolation of temperature data from summer bottom trawl surveys conducted by AFSC/RACE/GAP. To load ebs_summer_temperature, it is necessary to first load the coldpool package or raster and sp packages. Raster layers were interpolated using ordinary kriging with Matern covariance \href{https://doi.org/10.1007/978-1-4612-1494-6}{(Stein, 1999)}.
 #' 
-#' @format A rasterLayer with number of layers equal to the number of survey years (1982-2021).
+#' @format A RasterStack class with 39 layers, one for every year from 1982-2021, except for 2020 (due to survey cancellation).
 #' #' \describe{
-#'      \item{ste_(year)_gear_temperature}{Raster layer of temperature for a given year from ordinary kriging interpolation with Stein's Matern variogram.}
+#'      \item{ste_(year)_gear_temperature}{Raster layer of temperature for a given year}
 #' }
+#' @source \url{https://www.fisheries.noaa.gov/contact/groundfish-assessment-program}
 "ebs_summer_temperature"
