@@ -69,7 +69,7 @@ jobs:
         run: |
           remotes::install_deps(dependencies = TRUE)
           remotes::install_cran("rcmdcheck")
-          remotes::install_github('sean-rohan-noaa/akgfmaps', build_vignettes = FALSE)
+          remotes::install_github("sean-rohan-noaa/akgfmaps", build_vignettes = FALSE)
         shell: Rscript {0}
 
       - name: Check
