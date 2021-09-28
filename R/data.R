@@ -40,7 +40,7 @@
 
 #' Temperature in the eastern Bering Sea at 5-km resolution
 #' 
-#' Summer bottom temperatures on the the eastern Bering Sea continental shelf survey area, calculated from interpolation of temperature data from summer bottom trawl surveys conducted by AFSC/RACE/GAP. To load ebs_summer_temperature, it is necessary to first load the coldpool package or raster and sp packages. Raster layers were interpolated using ordinary kriging with Matern covariance \href{https://doi.org/10.1007/978-1-4612-1494-6}{(Stein, 1999)}.
+#' Summer bottom temperatures on the the eastern Bering Sea continental shelf survey area, calculated from interpolation of temperature data from summer bottom trawl surveys conducted by AFSC/RACE/GAP. To load ebs_summer_temperature, it is necessary to first load the coldpool package or raster and sp packages. Raster layers were interpolated using ordinary kriging with Matern covariance \doi{10.1007/978-1-4612-1494-6}{(Stein, 1999)}.
 #' 
 #' @format A RasterStack class with 39 layers, one for every year from 1982-2021, except for 2020 (due to survey cancellation).
 #' #' \describe{
