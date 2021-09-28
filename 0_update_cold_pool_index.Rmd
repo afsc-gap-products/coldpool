@@ -1,5 +1,5 @@
 ---
-title: "How to update the Cold Pool Index"
+title: "Update the Cold Pool Index and Average Temperature"
 author: 
 - affiliation: RACE
   description: Research Fish Biologist
@@ -15,19 +15,22 @@ addr:
 
 # Introduction
 
-This document contains code that updates the annual summer Cold Pool Index and average summer bottom temperature for the eastern Bering Sea continental shelf, based on data collected during AFSC/RACE/GAP bottom trawl surveys. The code herein is used to interpolate bottom temperature (i.e., gear temperature in RACEBASE), calculate cold pool area and average bottom temperature, GeoTIFF rasters of temperature with a 5x5 km resolution, then update data sets included with the coldpool package.
+This document provides code for updating the annual summer Cold Pool Index and average summer bottom temperature for the eastern Bering Sea continental shelf. The data used are collected during AFSC/RACE/GAP bottom trawl surveys of the eastern Bering Sea continental shelf and the code herein is used to interpolate bottom temperature (i.e., gear temperature in RACEBASE), calculate cold pool area and average bottom temperature, produce GeoTIFF rasters of temperature with a 5x5 km resolution, and update data sets that are included with the coldpool package.
 
 # 1. Setup project options
 
 ```{r setup, include=TRUE, message=FALSE, warning=FALSE, echo=FALSE}
 library(coldpool)
 
-# Set global options
+# Set global options ----
 fig_res <- 300
 proj_crs <- coldpool:::ebs_proj_crs
 
 # Should data included in the package be updated with new data (i.e. for annual update)? ----
 update_sysdata <- TRUE
+
+# Filepath to csv containing data to use for temperature interpolation ----
+csv_path <- here::here("data", "2021-09-24_index_hauls_temperature_data.csv")
 ```
 
 # 2. Retrieve temperature data
@@ -58,7 +61,7 @@ Writes:
 - /output/raster/[METHOD]_[YEAR]_gear_temperature.tif: GeoTIFF rasters of gear temperature, by method and year, with 5x5 km grid resolution.
 
 ```{r interpolate, include=TRUE, message=FALSE, warning=FALSE, echo = FALSE}
-cpa_df <- interpolate_gear_temp(temp_data_path = here::here("data", "2021-09-24_index_hauls_temperature_data.csv"),
+cpa_df <- interpolate_gear_temp(temp_data_path = csv_path,
                                 proj_crs = proj_crs,
                                 cell_resolution = 5000, 
                                 select_years = 1982:2021) # 5x5 km grid resolution
@@ -66,7 +69,7 @@ cpa_df <- interpolate_gear_temp(temp_data_path = here::here("data", "2021-09-24_
 
 # 4. Add cold pool index and mean bottom temperature data to R/sysdata ----
 
-Update sysdata with cold pool area estimates.
+Update sysdata with cold pool area, average temperature estimates, and 5-km resolution rasters of temperature in the eastern Bering Sea.
 
 ```{r cpa_to_sysdata}
 # Write cold pool index and average gear temperature table to R/sysdata.R ----
@@ -101,13 +104,13 @@ Update version number in DESCRIPTION and update documentation using:
 devtools::document(roclets = c('rd', 'collate', 'namespace'))
 ```
 
-Reinstall coldpool package with the update:
+After updating, reinstall the coldpool package:
 ```{r install, eval=FALSE, include = TRUE}
 Rcmd.exe INSTALL --no-multiarch --with-keep.source cold_pool
 ```
 
-#6. Check that data appears
-Check that the updated cold pool index data appears.
+#6. Check that data appears correctly
+Check that the updated cold pool index data is included in the package.
 ```{r qaqc, eval = TRUE, include = TRUE}
 print(coldpool:::cold_pool_index)
 ```
