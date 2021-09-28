@@ -1,24 +1,13 @@
-# Get gear temperature data from all hauls, write to 'data/[date]_all_temperature_data.csv
+#' Get gear temperature data from all hauls, write to 'data/[date]_all_temperature_data.csv
+#' 
+#' @param channel ODBC connection as an RODBC class
+#' @export
 
 get_data <- function(channel) {
-  
-  temperature_all_hauls_df <- sqlQuery(channel, "select gear_temperature,
-         start_latitude,
-         start_longitude,
-         end_latitude,
-         end_longitude,
-         stationid,
-         stratum,
-         haul_type,
-         performance,
-         start_time,
-         cruise, 
-         bottom_depth
-         from racebase.haul where
-         region = 'BS' and
-         (stratum in (10,20,31,32,41,42,43,50,61,62,82,90)) and 
-         cruise > 198200 and
-         bottom_depth < 201") %>%
+    
+  temperature_all_hauls_df <- RODBC::sqlQuery(channel, coldpool::sql_to_rqry(system.file("sql", 
+                                                                                         "ebs_gear_temperature_all_hauls.sql", 
+                                                                                         package = "coldpool"))) %>%
     dplyr::mutate(LATITUDE = (START_LATITUDE + END_LATITUDE)/2,
                   LONGITUDE = (START_LONGITUDE + END_LONGITUDE)/2,
                   YEAR = floor(CRUISE/100)) %>%
@@ -38,26 +27,10 @@ get_data <- function(channel) {
             file = here::here("data", paste0(Sys.Date(), "_all_temperature_data.csv")),
             row.names = FALSE)
   
-  # Index hauls
-  
-  temperature_df <- sqlQuery(channel, "select gear_temperature,
-         start_latitude,
-         start_longitude,
-         end_latitude,
-         end_longitude,
-         stationid,
-         stratum,
-         haul_type,
-         performance,
-         cruise,
-         bottom_depth
-         from racebase.haul where
-         region = 'BS' and
-         (stratum in (10,20,31,32,41,42,43,50,61,62,82,90)) and 
-         cruise > 198200 and
-         performance >= 0 and
-         bottom_depth < 201 and
-         (haul_type in (3,13))") %>%
+  # Gear temperature for SEBS index stations
+  temperature_df <- RODBC::sqlQuery(channel, coldpool::sql_to_rqry(system.file("sql", 
+                                                               "ebs_gear_temperature_cold_pool_hauls.sql", 
+                                                               package = "coldpool"))) %>%
     dplyr::mutate(LATITUDE = (START_LATITUDE + END_LATITUDE)/2,
                   LONGITUDE = (START_LONGITUDE + END_LONGITUDE)/2,
                   YEAR = floor(CRUISE/100)) %>%

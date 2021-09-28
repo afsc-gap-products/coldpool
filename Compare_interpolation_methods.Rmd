@@ -1,5 +1,44 @@
-# Cold pool area comparison
+---
+title: "Compare interpolation methods"
+author: "Sean Rohan and Lewis Barnett"
+date: "9/24/2021"
+output: word_document
+---
 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(coldpool)
+
+# Plotting ----
+fig_res <- 300
+
+# CRS
+proj_crs <- coldpool:::ebs_proj_crs
+
+```
+
+# Conduct cross-validation
+
+```{r loocv}
+  # Leave one out cross-validation to compare interpolation methods ----
+  # Writes:
+  # -- /plots/RSPE_violin_GEAR_TEMPERATURE_[n].png: Plots of root square prediction error for interpolation methods.
+  # -- /output/[date]_rmse_loocv_GEAR_TEMPERATURE_[year].csv: Results of leave-one-out cross validation.
+  loocv_gear_temp(temp_data_path =  here::here("data", "2021-09-24_index_hauls_temperature_data.csv"),
+                  proj_crs = proj_crs) # update file name manually if need specific data file date
+  
+  # Calculate cold pool area using interpolation methods ----
+  # Writes:
+  # -- /output/raster/[method]_[year]_gear_temperature.tif: GeoTIFF raster files for each interpolation method and year
+  # -- /output/estimate_cpa/cpa_out.csv: Cold pool areas by year for each interpolation method.
+cpa_df <- interpolate_gear_temp(temp_data_path =  here::here("data", "2021-09-24_index_hauls_temperature_data.csv"),
+                        proj_crs = proj_crs,
+                        cell_resolution = 5000)
+```
+
+# Comparison of interpolation methods
+
+```{r}
 # Set up method labels 
 method_labels_df <- data.frame(method = c("BES",
                                           "CIR",
@@ -38,8 +77,7 @@ color_vec <- c("OK-BES" = "#4E79A7",
                "Historical" = "black")
 
 # Load cold pool calculations from Bob Lauth ----
-lauth_cpa_df <- read.csv(file = here::here("data", 
-                                           "cpa_areas2019.csv"),
+lauth_cpa_df <- read.csv(file = system.file("extdata", "cpa_areas2019.csv", package = "coldpool"),
                          stringsAsFactors = FALSE) %>%
   dplyr::select(YEAR, 
                 AREA_SUM_KM2_LTE2) %>%
@@ -56,9 +94,9 @@ annual_cpa_df <- read.csv(file = here::here("output",
 annual_cpa_df <- annual_cpa_df[,c(1, which(stringr::str_detect(names(annual_cpa_df), "_lte2")))]
 
 combined_cpa_df <- annual_cpa_df %>% 
-  melt(id.vars = "year") %>%
+  reshape2::melt(id.vars = "year") %>%
   dplyr::bind_rows(lauth_cpa_df %>% 
-                     melt(id.vars = "year")) %>%
+                     reshape2::melt(id.vars = "year")) %>%
   dplyr::mutate(method = stringr::str_remove(variable, "_lte2") %>% 
                   toupper()) %>%
   dplyr::inner_join(method_labels_df)
@@ -90,7 +128,7 @@ print(ggplot() +
 dev.off()
 
 cpa_change_df <- annual_cpa_df %>% 
-  melt(id.vars = "year") %>%
+  reshape2::melt(id.vars = "year") %>%
   dplyr::inner_join(lauth_cpa_df) %>%
   dplyr::mutate(rel_diff = 100*(value - `Old IDW`)/`Old IDW`,
                 abs_diff = value - `Old IDW`) %>%
@@ -165,4 +203,40 @@ print(ggplot(data = cpa_change_df,
                                    hjust = 1))
 )
 dev.off()
+```
 
+```{r}
+library(coldpool)
+
+mean_temp_df <- data.frame(YEAR = c(1982:2019, 2021),
+                           Mean = numeric(length = 1L))
+
+sebs_layers <- akgfmaps::get_base_layers(select.region = "sebs", set.crs = coldpool:::ebs_proj_crs)
+
+for(i in 1:nrow(mean_temp_df)) {
+  mean_temp_ste <- raster::raster(here::here("output", "raster", paste0("ste_", mean_temp_df$YEAR[i], "_gear_temperature.tif"))) %>%
+    akgfmaps::rasterize_and_mask(amask = sebs_layers$survey.area)
+  mean_temp_df$Mean[i] <- mean(mean_temp_ste@data@values, na.rm = TRUE)
+  print(plot(mean_temp_ste, main = mean_temp_df$YEAR[i]))
+}
+
+compare_temp_df <- coldpool:::cpa_pre2021 %>%
+  dplyr::select(YEAR, AVG_STRATA_WEIGHTED_BOTTEMP_STD_AREA) %>%
+  dplyr::rename(Historical = AVG_STRATA_WEIGHTED_BOTTEMP_STD_AREA) %>%
+  dplyr::full_join(mean_temp_df)
+
+ggplot(data = compare_temp_df %>%
+         tidyr::pivot_longer(cols = c("Historical", "Mean")),
+       aes(x = YEAR, 
+           y = value,
+           color = name)) +
+  geom_line() +
+  geom_point() +
+  scale_color_colorblind()
+
+ggplot() +
+  geom_point(data = compare_temp_df,
+             aes(x = YEAR, 
+                 y = Mean-Historical)) +
+  scale_color_colorblind()
+```

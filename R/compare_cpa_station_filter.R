@@ -1,10 +1,13 @@
 #' Effect of interpolating with and without RKC resample 
+#' 
+#' Compare old (pre-2021) cold pool area calculations that included red king crab resample to new cold pool area calculations.
 #'
 #' @param sel_year Year for plot
 #' @param sel_old_raster File path to an old raster from a year with RKC resampling
 #' @param sel_idw4_geotiff File path to a geotiff IDW raster with nmax = 4.
 #' @param set_crs Coordinate reference system
 #' @param temp_data_path Filed path to the temperature data .csv
+#' @export
 
 compare_cpa_station_filter <- function(sel_year = 2000,
                                        sel_old_raster = "./data/idw_files/bt00_idw/",
