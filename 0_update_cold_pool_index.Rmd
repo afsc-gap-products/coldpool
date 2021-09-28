@@ -77,7 +77,7 @@ Update sysdata with cold pool area, average temperature estimates, and 5-km reso
 
 if(update_sysdata) {
   
-  temperature_rasters <- coldpool::make_raster_stack(file_path = here::here("output", "raster"),
+  ebs_summer_temperature <- coldpool::make_raster_stack(file_path = here::here("output", "raster"),
                                              file_name_contains = "ste_",
                                              file_type = ".tif")
   cpa_pre2021 <- coldpool:::cpa_pre2021
@@ -91,7 +91,7 @@ if(update_sysdata) {
   save(cpa_pre2021, 
        ebs_proj_crs, 
        cold_pool_index,
-       temperature_rasters,
+      ebs_summer_temperature,
        file = here::here("R", "sysdata.rda"))
 }
 

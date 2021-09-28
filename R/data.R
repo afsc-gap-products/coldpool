@@ -36,3 +36,13 @@
 #' 
 #' @format A 1L character vector
 "ebs_proj_crs"
+
+#' Raster layers of temperature for the eastern Bering Sea
+#' 
+#' 5x5 km resolution raster grid of temperature in the eastern Bering Sea continental shelf survey area, from summer bottom trawl surveys conducted by AFSC/RACE/GAP.
+#' 
+#' @format A rasterLayer with number of layers equal to the number of survey years (1982-2021).
+#' #' \describe{
+#'      \item{ste_(year)_gear_temperature}{Raster layer of temperature for a given year from ordinary kriging interpolation with Stein's Matern variogram.}
+#' }
+"ebs_summer_temperature"
