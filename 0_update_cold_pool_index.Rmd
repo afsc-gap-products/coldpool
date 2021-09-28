@@ -66,14 +66,17 @@ cpa_df <- interpolate_gear_temp(temp_data_path = here::here("data", "2021-09-24_
 
 # 4. Add cold pool index and mean bottom temperature data to R/sysdata ----
 
-Update sysdata.
+Update sysdata with cold pool area estimates.
 
 ```{r cpa_to_sysdata}
 # Write cold pool index and average gear temperature table to R/sysdata.R ----
 # Need to update documentation and build/install after running this code.
 
-
 if(update_sysdata) {
+  
+  temperature_rasters <- coldpool::make_raster_stack(file_path = here::here("output", "raster"),
+                                             file_name_contains = "ste_",
+                                             file_type = ".tif")
   cpa_pre2021 <- coldpool:::cpa_pre2021
   ebs_proj_crs <- coldpool:::ebs_proj_crs
   cold_pool_index <- read.csv(file = here::here("output", "estimated_cpa", "cpa_out_ste.csv")) %>%
@@ -84,7 +87,8 @@ if(update_sysdata) {
     dplyr::mutate(LAST_UPDATE = Sys.Date())
   save(cpa_pre2021, 
        ebs_proj_crs, 
-       cold_pool_index, 
+       cold_pool_index,
+       temperature_rasters,
        file = here::here("R", "sysdata.rda"))
 }
 

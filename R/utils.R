@@ -101,9 +101,9 @@ make_raster_stack <- function(file_path,
   
   for(i in 1:length(file_paths)) {
     if(i == 1) {
-      rstack <- raster::stack(raster::raster(rgdal::readGDAL(file_paths[i])))
+      rstack <- raster::stack(raster::raster(file_paths[i]))
     } else {
-      rstack <- raster::addLayer(rstack, raster(rgdal::readGDAL(file_paths[i])))
+      rstack <- raster::addLayer(rstack, raster(file_paths[i]))
     }
   }
   
