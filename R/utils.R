@@ -50,3 +50,62 @@ get_connected <- function(schema = NA){
                                  pwd = paste(password),
                                  believeNRows = FALSE)
 }
+
+#' Save raster to file
+#' 
+#' Saves a raster to file using a custom name for the value column.
+#' 
+#' @param x A raster object
+#' @param filename A filename where the raster will be written
+#' @param format Format to use to write the raster (see raster::writeRaster)
+#' @param overwrite Logical. Should existing rasters be overwritten
+#' @param layer_name Character or numeric vector indicating the name for the single layer raster. Must be a valid name for a raster layer.
+#' @export
+
+make_raster_file <- function(x,
+                        filename,
+                        format,
+                        overwrite,
+                        layer_name) {
+  
+  names(x) <- layer_name
+  
+  raster::writeRaster(x, 
+                      filename = filename,
+                      format = format, 
+                      overwrite = overwrite)
+  
+}
+
+#' Make a raster stack from multiple rasters
+#' 
+#' Make a raster stack from multiple stackable raster layers (i.e. raster .grd, GeoTIFF, EHDR)
+#' @param file_path Path to the directory containing raster files
+#' @param file_name_contains Character vector to filter on. (e.g., using "ste_" will ignore all filepaths that don't contain the characters sequence)
+#' @param file_type File type. Default = ".tif" for GeoTIFF. Also works with native raster .grd and other stackable raster formats.
+#' @export
+
+make_raster_stack <- function(file_path,
+                              file_name_contains = NULL,
+                              file_type = ".tif") {
+  
+  file_paths <- dir(file_path, full.names = T)[grep(file_type, dir(file_path, full.names = T))]
+  
+  if(length(file_paths[-grep(".xml", file_paths)]) > 0) {
+    file_paths <- file_paths[-grep(".xml", file_paths)]
+  }
+  
+  if(!is.null(file_name_contains)) {
+    file_paths <- file_paths[grep(file_name_contains, file_paths)]
+  }
+  
+  for(i in 1:length(file_paths)) {
+    if(i == 1) {
+      rstack <- raster::stack(raster::raster(rgdal::readGDAL(file_paths[i])))
+    } else {
+      rstack <- raster::addLayer(rstack, raster(rgdal::readGDAL(file_paths[i])))
+    }
+  }
+  
+  return(rstack)
+}

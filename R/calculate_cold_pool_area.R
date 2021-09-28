@@ -69,6 +69,10 @@ calculate_cold_pool_area <- function(dat,
                                     sebs_layers$survey.area) %>% 
     cpa_from_raster(temperature_threshold = 0)
   
+  meantemp_nn <- akgfmaps::rasterize_and_mask(nn.predict, 
+                                              amask = sebs_layers$survey.area)
+  meantemp_nn <- mean(meantemp_nn@data@values, na.rm = TRUE)
+  
   # Inverse distance weighting w/ nmax = 4 (ArcGIS Default) ----
   idw_nmax4_fit <- gstat::gstat(formula = var.col ~ 1, 
                           locations = sp_interp.df,
@@ -83,6 +87,10 @@ calculate_cold_pool_area <- function(dat,
   cpe_lte0_idw_nmax4 <- akgfmaps::rasterize_and_mask(idw_nmax4.predict, 
                                     sebs_layers$survey.area) %>% 
     cpa_from_raster(temperature_threshold = 0)
+  
+  meantemp_idw_nmax4 <- akgfmaps::rasterize_and_mask(idw_nmax4.predict, 
+                                                     amask = sebs_layers$survey.area)
+  meantemp_idw_nmax4 <- mean(meantemp_idw_nmax4@data@values, na.rm = TRUE)
   
   # Inverse distance weighting w/ nmax = Inf
   idw_fit <- gstat::gstat(formula = var.col ~ 1, 
@@ -100,20 +108,14 @@ calculate_cold_pool_area <- function(dat,
                                                sebs_layers$survey.area) %>% 
     cpa_from_raster(temperature_threshold = 0)
   
+  meantemp_idw <- akgfmaps::rasterize_and_mask(idw.predict, 
+                                               amask = sebs_layers$survey.area)
+  meantemp_idw <- mean(meantemp_idw@data@values, na.rm = TRUE)
+  
   # Set up a new IDW for ordinary kriging ----
   idw_vgm_fit <- gstat::gstat(formula = var.col ~ 1, 
                               locations = sp_interp.df, 
                               nmax = Inf)
-  
-  idw_fit.predict <- predict(idw_fit, as(sp_interp.raster, "SpatialGrid"))
-  
-  cpe_lte2_idw <- akgfmaps::rasterize_and_mask(idw.predict, 
-                                               sebs_layers$survey.area) %>% 
-    cpa_from_raster(temperature_threshold = 2)
-  
-  cpe_lte0_idw <- akgfmaps::rasterize_and_mask(idw.predict, 
-                                               sebs_layers$survey.area) %>% 
-    cpa_from_raster(temperature_threshold = 0)
   
   # Ordinary Kriging: Exponential VGM----
   exp.vgfit <- gstat::fit.variogram(variogram(idw_vgm_fit), 
@@ -132,6 +134,10 @@ calculate_cold_pool_area <- function(dat,
                                      sebs_layers$survey.area) %>% 
     cpa_from_raster(temperature_threshold = 0)
   
+  meantemp_exp <- akgfmaps::rasterize_and_mask(exp.predict, 
+                                               amask = sebs_layers$survey.area)
+  meantemp_exp <- mean(meantemp_exp@data@values, na.rm = TRUE)
+  
   # Ordinary Kriging: Spherical VGM----
   sph.vgfit <- gstat::fit.variogram(variogram(idw_vgm_fit), 
                                     vgm(c("Sph")))
@@ -148,6 +154,10 @@ calculate_cold_pool_area <- function(dat,
   cpe_lte0_sph <- akgfmaps::rasterize_and_mask(sph.predict, 
                                      sebs_layers$survey.area) %>% 
     cpa_from_raster(temperature_threshold = 0)
+  
+  meantemp_sph <- akgfmaps::rasterize_and_mask(sph.predict, 
+                                               amask = sebs_layers$survey.area)
+  meantemp_sph <- mean(meantemp_sph@data@values, na.rm = TRUE)
   
   # Ordinary Kriging: Bessel VGM----
   bes.vgfit <- gstat::fit.variogram(variogram(idw_vgm_fit), 
@@ -166,6 +176,10 @@ calculate_cold_pool_area <- function(dat,
                                      sebs_layers$survey.area) %>% 
     cpa_from_raster(temperature_threshold = 0)
   
+  meantemp_bes <- akgfmaps::rasterize_and_mask(bes.predict, 
+                                               amask = sebs_layers$survey.area)
+  meantemp_bes <- mean(meantemp_bes@data@values, na.rm = TRUE)
+  
   # Ordinary Kriging: Bessel VGM----
   gau.vgfit <- gstat::fit.variogram(variogram(idw_vgm_fit), 
                                     vgm(c("Gau")))
@@ -182,6 +196,10 @@ calculate_cold_pool_area <- function(dat,
   cpe_lte0_gau <- akgfmaps::rasterize_and_mask(gau.predict, 
                                      sebs_layers$survey.area) %>% 
     cpa_from_raster(temperature_threshold = 0)
+  
+  meantemp_gau <- akgfmaps::rasterize_and_mask(gau.predict, 
+                                               amask = sebs_layers$survey.area)
+  meantemp_gau <- mean(meantemp_gau@data@values, na.rm = TRUE)
   
   # Ordinary Kriging: Circular VGM----
   cir.vgfit <- gstat::fit.variogram(variogram(idw_vgm_fit), 
@@ -200,6 +218,10 @@ calculate_cold_pool_area <- function(dat,
                                      sebs_layers$survey.area) %>% 
     cpa_from_raster(temperature_threshold = 0)
   
+  meantemp_cir <- akgfmaps::rasterize_and_mask(cir.predict, 
+                                               amask = sebs_layers$survey.area)
+  meantemp_cir <- mean(meantemp_cir@data@values, na.rm = TRUE)
+  
   # Ordinary Kriging: Matern VGM----
   mat.vgfit <- gstat::fit.variogram(variogram(idw_vgm_fit), 
                                     vgm(c("Mat")))
@@ -216,6 +238,10 @@ calculate_cold_pool_area <- function(dat,
   cpe_lte0_mat <- akgfmaps::rasterize_and_mask(mat.predict, 
                                      sebs_layers$survey.area) %>% 
     cpa_from_raster(temperature_threshold = 0)
+  
+  meantemp_mat <- akgfmaps::rasterize_and_mask(mat.predict, 
+                                               amask = sebs_layers$survey.area)
+  meantemp_mat <- mean(meantemp_mat@data@values, na.rm = TRUE)
   
   # Ordinary Kriging: Stein's Matern VGM----
   ste.vgfit <- gstat::fit.variogram(variogram(idw_vgm_fit), 
@@ -234,6 +260,10 @@ calculate_cold_pool_area <- function(dat,
                                      sebs_layers$survey.area) %>% 
     cpa_from_raster(temperature_threshold = 0)
   
+  meantemp_ste <- akgfmaps::rasterize_and_mask(ste.predict, 
+                                               amask = sebs_layers$survey.area)
+  meantemp_ste <- mean(meantemp_ste@data@values, na.rm = TRUE)
+  
   # Thin-plate spline ----
   tps_fit <- fields::Tps(sp::coordinates(sp_interp.df), 
                          sp_interp.df$var.col)
@@ -248,6 +278,10 @@ calculate_cold_pool_area <- function(dat,
                                      sebs_layers$survey.area) %>% 
     cpa_from_raster(temperature_threshold = 0)
   
+  meantemp_tps <- akgfmaps::rasterize_and_mask(tps.predict, 
+                                               amask = sebs_layers$survey.area)
+  meantemp_tps <- mean(meantemp_tps@data@values, na.rm = TRUE)
+  
   cpe_df <- data.frame(year = dat.year,
                        nn_lte2 = cpe_lte2_nn,
                        idw_nmax4_lte2 = cpe_lte2_idw_nmax4,
@@ -261,7 +295,7 @@ calculate_cold_pool_area <- function(dat,
                        ste_lte2 = cpe_lte2_ste,
                        tps_lte2 = cpe_lte2_tps,
                        nn_lte0 = cpe_lte0_nn,
-                       idw_nmax4_lte2 = cpe_lte2_idw_nmax4,
+                       idw_nmax4_lte0 = cpe_lte0_idw_nmax4,
                        idw_lte0 = cpe_lte0_idw, 
                        bes_lte0 = cpe_lte0_bes, 
                        exp_lte0 = cpe_lte0_exp, 
@@ -270,7 +304,18 @@ calculate_cold_pool_area <- function(dat,
                        sph_lte0 = cpe_lte0_sph, 
                        mat_lte0 = cpe_lte0_mat,
                        ste_lte0 = cpe_lte0_ste,
-                       tps_lte0 = cpe_lte0_tps)
+                       tps_lte0 = cpe_lte0_tps,
+                       nn_meantemp = meantemp_nn,
+                       idw_nmax4_meantemp = meantemp_idw_nmax4,
+                       idw_meantemp = meantemp_idw, 
+                       bes_meantemp = meantemp_bes, 
+                       exp_meantemp = meantemp_exp, 
+                       cir_meantemp = meantemp_cir, 
+                       gau_meantemp = meantemp_gau,
+                       sph_meantemp = meantemp_sph, 
+                       mat_meantemp = meantemp_mat,
+                       ste_meantemp = meantemp_ste,
+                       tps_meantemp = meantemp_tps)
   
   if(write.to.file) {
     print("Writing rasters")
@@ -281,50 +326,73 @@ calculate_cold_pool_area <- function(dat,
       dir.create(here::here("output", "raster"))
     }
     # write unmasked surfaces to raster
-    raster::writeRaster(raster::raster(nn.predict), 
+    
+    coldpool::make_raster_file(nn.predict %>% 
+                            akgfmaps::rasterize_and_mask(sebs_layers$survey.area), 
                         filename = here::here("output", "raster", paste0("nn_", dat.year, "_", var.col, ".tif" )),
                         format = "GTiff", 
-                        overwrite = TRUE)
-    raster::writeRaster(raster::raster(idw_nmax4.predict), 
+                        overwrite = TRUE,
+                        layer_name = dat.year)
+    coldpool::make_raster_file(idw_nmax4.predict %>% 
+                            akgfmaps::rasterize_and_mask(sebs_layers$survey.area), 
                         filename = here::here("output", "raster", paste0("idw_nmax4_", dat.year, "_", var.col, ".tif" )),
                         format = "GTiff", 
-                        overwrite = TRUE)
-    raster::writeRaster(raster::raster(idw.predict), 
+                        overwrite = TRUE, 
+                        layer_name = dat.year)
+    coldpool::make_raster_file(idw.predict %>% 
+                            akgfmaps::rasterize_and_mask(sebs_layers$survey.area), 
                         filename = here::here("output", "raster", paste0("idw_", dat.year, "_", var.col, ".tif" )),
                         format = "GTiff", 
-                        overwrite = TRUE)
-    raster::writeRaster(raster::raster(exp.predict), 
+                        overwrite = TRUE, 
+                        layer_name = dat.year)
+    coldpool::make_raster_file(exp.predict %>% 
+                            akgfmaps::rasterize_and_mask(sebs_layers$survey.area), 
                         filename = here::here("output", "raster", paste0("exp_", dat.year, "_", var.col, ".tif" )),
                         format = "GTiff", 
-                        overwrite = TRUE)
-    raster::writeRaster(raster::raster(sph.predict), 
+                        overwrite = TRUE, 
+                        layer_name = dat.year)
+    coldpool::make_raster_file(sph.predict %>% 
+                            akgfmaps::rasterize_and_mask(sebs_layers$survey.area), 
                         filename = here::here("output", "raster", paste0("sph_", dat.year, "_", var.col, ".tif" )),
                         format = "GTiff", 
-                        overwrite = TRUE)
-    raster::writeRaster(raster::raster(bes.predict), 
+                        overwrite = TRUE, 
+                        layer_name = dat.year)
+    coldpool::make_raster_file(bes.predict %>% 
+                            akgfmaps::rasterize_and_mask(sebs_layers$survey.area), 
                         filename = here::here("output", "raster", paste0("bes_", dat.year, "_", var.col, ".tif" )),
                         format = "GTiff", 
-                        overwrite = TRUE)
-    raster::writeRaster(raster::raster(gau.predict),  
+                        overwrite = TRUE, 
+                        layer_name = dat.year)
+    coldpool::make_raster_file(gau.predict %>% 
+                            akgfmaps::rasterize_and_mask(sebs_layers$survey.area),  
                         filename = here::here("output", "raster", paste0("gau_", dat.year, "_", var.col, ".tif" )),
                         format = "GTiff", 
-                        overwrite = TRUE)
-    raster::writeRaster(raster::raster(cir.predict), 
+                        overwrite = TRUE, 
+                        layer_name = dat.year)
+    coldpool::make_raster_file(cir.predict %>% 
+                            akgfmaps::rasterize_and_mask(sebs_layers$survey.area), 
                         filename =here::here("output", "raster", paste0("cir_", dat.year, "_", var.col, ".tif" )),
                         format = "GTiff", 
-                        overwrite = TRUE)
-    raster::writeRaster(raster::raster(mat.predict), 
+                        overwrite = TRUE, 
+                        layer_name = dat.year)
+    coldpool::make_raster_file(mat.predict %>% 
+                            akgfmaps::rasterize_and_mask(sebs_layers$survey.area), 
                         filename = here::here("output", "raster", paste0("mat_", dat.year, "_", var.col, ".tif" )),
                         format = "GTiff", 
-                        overwrite = TRUE)
-    raster::writeRaster(raster::raster(ste.predict), 
+                        overwrite = TRUE, 
+                        layer_name = dat.year)
+    coldpool::make_raster_file(ste.predict %>% 
+                            akgfmaps::rasterize_and_mask(sebs_layers$survey.area), 
                         filename = here::here("output", "raster", paste0("ste_", dat.year, "_", var.col, ".tif" )),
                         format = "GTiff", 
-                        overwrite = TRUE)
-    raster::writeRaster(tps.predict, 
+                        overwrite = TRUE, 
+                        layer_name = dat.year)
+    coldpool::make_raster_file(tps.predict %>% 
+                            akgfmaps::rasterize_and_mask(sebs_layers$survey.area), 
                         filename = here::here("output", "raster", paste0("tps_", dat.year, "_", var.col, ".tif" )),
                         format = "GTiff", 
-                        overwrite = TRUE)
+                        overwrite = TRUE, 
+                        layer_name = dat.year)
     
   }
   

@@ -1,0 +1,109 @@
+---
+title: "How to update the Cold Pool Index"
+author: 
+- affiliation: RACE
+  description: Research Fish Biologist
+  email: Sean.Rohan@noaa.gov
+  name: Sean Rohan
+output: word_document
+fontsize: 12pt
+addr: 
+  l1: 7600 Sand Point Way NE
+  l2: NMFS RACE Division, Groundfish Assessment Program
+  l3: Seattle, WA 98115
+---
+
+# Introduction
+
+This document contains code that updates the annual summer Cold Pool Index and average summer bottom temperature for the eastern Bering Sea continental shelf, based on data collected during AFSC/RACE/GAP bottom trawl surveys. The code herein is used to interpolate bottom temperature (i.e., gear temperature in RACEBASE), calculate cold pool area and average bottom temperature, GeoTIFF rasters of temperature with a 5x5 km resolution, then update data sets included with the coldpool package.
+
+# 1. Setup project options
+
+```{r setup, include=TRUE, message=FALSE, warning=FALSE, echo=FALSE}
+library(coldpool)
+
+# Set global options
+fig_res <- 300
+proj_crs <- coldpool:::ebs_proj_crs
+
+# Should data included in the package be updated with new data (i.e. for annual update)? ----
+update_sysdata <- TRUE
+```
+
+# 2. Retrieve temperature data
+
+Retrieve temperature data and write to:
+- /data/[date]_all_temperature_data.csv: Temperature data from all hauls.
+- /data/[date]_index_hauls_temperature_data.csv: Temperature data for haul type 3 with good performance. This is the data set that is used for cold pool index calculations.
+```{r query_data, include=TRUE, message=FALSE, warning=FALSE}
+# Update system data with new cold pool area estimates 
+
+if(update_sysdata) {
+  # Connect RODBC ----
+  channel <- get_connected()
+  
+  # Get temperature data and write csvs to data directory ----
+  get_data(channel = channel)
+}
+```
+
+
+# 3. Calculate cold pool area using candidate interpolation methods ----
+
+Conduct interpolation using candidate interpolation methods. GeoTIFF rasters of interpolated gear temperature are saved to output/raster for each method and year. Tables containing cold pool area and mean bottom temperature are written to .csv files. The interpolation method used for cold pool calculation is ordinary kriging with Stein's Matern covariance.
+
+Writes:
+- /output/cpa_out_ste.csv: Cold pool area and mean bottom temperature estimated using ordinary kriging with Stein's Matern variogram
+- /output/cpa_out.csv: Cold pool area and mean mean bottom temperature estimated using all candidate interpolation methods.
+- /output/raster/[METHOD]_[YEAR]_gear_temperature.tif: GeoTIFF rasters of gear temperature, by method and year, with 5x5 km grid resolution.
+
+```{r interpolate, include=TRUE, message=FALSE, warning=FALSE, echo = FALSE}
+cpa_df <- interpolate_gear_temp(temp_data_path = here::here("data", "2021-09-24_index_hauls_temperature_data.csv"),
+                                proj_crs = proj_crs,
+                                cell_resolution = 5000, 
+                                select_years = 1982:2021) # 5x5 km grid resolution
+```
+
+# 4. Add cold pool index and mean bottom temperature data to R/sysdata ----
+
+Update sysdata.
+
+```{r cpa_to_sysdata}
+# Write cold pool index and average gear temperature table to R/sysdata.R ----
+# Need to update documentation and build/install after running this code.
+
+
+if(update_sysdata) {
+  cpa_pre2021 <- coldpool:::cpa_pre2021
+  ebs_proj_crs <- coldpool:::ebs_proj_crs
+  cold_pool_index <- read.csv(file = here::here("output", "estimated_cpa", "cpa_out_ste.csv")) %>%
+    dplyr::rename(COLD_POOL_AREA_KM2 = ste_lte2,
+                  LTE0_AREA_KM2 = ste_lte0,
+                  MEAN_TEMPERATURE = ste_meantemp,
+                  YEAR = year) %>%
+    dplyr::mutate(LAST_UPDATE = Sys.Date())
+  save(cpa_pre2021, 
+       ebs_proj_crs, 
+       cold_pool_index, 
+       file = here::here("R", "sysdata.rda"))
+}
+
+```
+
+# 5. Update documentation, install, and restart
+
+Update version number in DESCRIPTION and update documentation using:
+```{r updater, eval=FALSE, include=TRUE}
+devtools::document(roclets = c('rd', 'collate', 'namespace'))
+```
+
+Reinstall coldpool package with the update:
+```{r install, eval=FALSE, include = TRUE}
+Rcmd.exe INSTALL --no-multiarch --with-keep.source cold_pool
+```
+
+#6. Check that data appears
+Check that the updated cold pool index data appears.
+```{r qaqc, eval = TRUE, include = TRUE}
+print(coldpool:::cold_pool_index)
+```

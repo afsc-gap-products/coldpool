@@ -7,29 +7,14 @@ output: word_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-
 library(coldpool)
 
 # Plotting ----
 fig_res <- 300
 
 # CRS
-proj_crs <- "EPSG:3338"
+proj_crs <- coldpool:::ebs_proj_crs
 
-```
-
-
-# Cold pool area comparison
-
-```{r get_data}
-# Connect RODBC ----
-  channel <- get_connected()
-  
-  # Get temperature data and write csvs to data directory ----
-  # Writes: 
-  # -- /data/[date]_all_temperature_data.csv: Temperature data from all hauls
-  # -- /data/[date]_index_hauls_temperature_data.csv: Temperature data for haul types 3 and 13
-  get_data(channel = channel)
 ```
 
 # Conduct cross-validation
@@ -46,7 +31,7 @@ proj_crs <- "EPSG:3338"
   # Writes:
   # -- /output/raster/[method]_[year]_gear_temperature.tif: GeoTIFF raster files for each interpolation method and year
   # -- /output/estimate_cpa/cpa_out.csv: Cold pool areas by year for each interpolation method.
-  interpolate_gear_temp(temp_data_path =  here::here("data", "2021-09-24_index_hauls_temperature_data.csv"),
+cpa_df <- interpolate_gear_temp(temp_data_path =  here::here("data", "2021-09-24_index_hauls_temperature_data.csv"),
                         proj_crs = proj_crs,
                         cell_resolution = 5000)
 ```
@@ -218,4 +203,40 @@ print(ggplot(data = cpa_change_df,
                                    hjust = 1))
 )
 dev.off()
+```
+
+```{r}
+library(coldpool)
+
+mean_temp_df <- data.frame(YEAR = c(1982:2019, 2021),
+                           Mean = numeric(length = 1L))
+
+sebs_layers <- akgfmaps::get_base_layers(select.region = "sebs", set.crs = coldpool:::ebs_proj_crs)
+
+for(i in 1:nrow(mean_temp_df)) {
+  mean_temp_ste <- raster::raster(here::here("output", "raster", paste0("ste_", mean_temp_df$YEAR[i], "_gear_temperature.tif"))) %>%
+    akgfmaps::rasterize_and_mask(amask = sebs_layers$survey.area)
+  mean_temp_df$Mean[i] <- mean(mean_temp_ste@data@values, na.rm = TRUE)
+  print(plot(mean_temp_ste, main = mean_temp_df$YEAR[i]))
+}
+
+compare_temp_df <- coldpool:::cpa_pre2021 %>%
+  dplyr::select(YEAR, AVG_STRATA_WEIGHTED_BOTTEMP_STD_AREA) %>%
+  dplyr::rename(Historical = AVG_STRATA_WEIGHTED_BOTTEMP_STD_AREA) %>%
+  dplyr::full_join(mean_temp_df)
+
+ggplot(data = compare_temp_df %>%
+         tidyr::pivot_longer(cols = c("Historical", "Mean")),
+       aes(x = YEAR, 
+           y = value,
+           color = name)) +
+  geom_line() +
+  geom_point() +
+  scale_color_colorblind()
+
+ggplot() +
+  geom_point(data = compare_temp_df,
+             aes(x = YEAR, 
+                 y = Mean-Historical)) +
+  scale_color_colorblind()
 ```
