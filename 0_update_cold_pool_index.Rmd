@@ -87,7 +87,8 @@ if(update_sysdata) {
                   LTE0_AREA_KM2 = ste_lte0,
                   MEAN_TEMPERATURE = ste_meantemp,
                   YEAR = year) %>%
-    dplyr::mutate(LAST_UPDATE = Sys.Date())
+    dplyr::mutate(LAST_UPDATE = Sys.Date(),
+                  COLDPOOL_VERSION = as.character(utils::packageVersion("coldpool")))
   save(cpa_pre2021, 
        ebs_proj_crs, 
        cold_pool_index,
