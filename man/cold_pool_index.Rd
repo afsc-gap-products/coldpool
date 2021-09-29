@@ -5,11 +5,12 @@
 \alias{cold_pool_index}
 \title{Cold Pool Index (cold_pool_index)}
 \format{
-A data frame with 39 rows and 3 columns.
+A data frame with 39 rows and 4 columns.
 \describe{
      \item{YEAR}{Year}
      \item{COLD_POOL_AREA_KM2}{Cold Pool Index. Total area with bottom temperatures less than or equal to 2 celsius, in square kilometers}
-     \item{LAST_UPDATE}{Date when cold pool index was last updated.}
+     \item{LAST_UPDATE}{Date when cold pool index and temperature rasters were last updated.}
+     \item{COLDPOOL_VERSION}{Version of the coldpool package that was used to calculate the cold pool index and produce temperature rasters}
 }
 }
 \source{

@@ -1,4 +1,4 @@
-#' Calculate cold pool area iusing candidate interpolation methods
+#' Calculate cold pool area using candidate interpolation methods
 #' 
 #' This function runs interpolations, raster masking using akgfmaps::rasterize_and_mask(), and coldpool::cpa_from_raster to calculate cold pool area using 
 #' 
@@ -324,6 +324,9 @@ calculate_cold_pool_area <- function(dat,
     }
     if(!dir.exists(here::here("output", "raster"))) {
       dir.create(here::here("output", "raster"))
+    }
+    if(!dir.exists(here::here("output", "raster", var.col))) {
+      dir.create(here::here("output", "raster", var.col))
     }
     # write unmasked surfaces to raster
     

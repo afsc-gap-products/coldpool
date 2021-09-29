@@ -1,4 +1,4 @@
-#' Interpolate gear temperature 
+#' Wrapper function around interpolate_variable()
 #' 
 #' This function interpolates gear temperature to calculate cold pool area using all candidate interpolation methods and outputs rasters of temperature and estimates of Cold Pool Area. Output includes the best 
 #'
@@ -9,10 +9,11 @@
 #' @return Data frame of estimated cold pool area from multiple candidate interpolation methods.
 #' @export
 
-interpolate_gear_temp <- function(temp_data_path,
+interpolation_wrapper <- function(temp_data_path,
                                   proj_crs, 
                                   cell_resolution,
-                                  select_years = NULL) {
+                                  select_years = NULL,
+                                  interp_variable) {
   
   temperature_df <- read.csv(file = temp_data_path,
                              stringsAsFactors = FALSE)
@@ -26,46 +27,45 @@ interpolate_gear_temp <- function(temp_data_path,
     year_vec <- year_vec[year_vec %in% select_years]
   }
   
-  # Calculate cold pool area and generaterasters
+  # Calculate cold pool area and generate rasters
   for(i in 1:length(year_vec)) {
     
-    cpa_year <- calculate_cold_pool_area(dat = dplyr::filter(temperature_df, year == year_vec[i]),
+    cpa_year <- interpolate_variable(dat = dplyr::filter(temperature_df, year == year_vec[i]),
                                                    dat.year = year_vec[i],
                                                    in.crs = "+proj=longlat",
                                                    interpolation.crs = proj_crs,
                                                    cell.resolution = cell_resolution,
                                                    lon.col = "longitude",
                                                    lat.col = "latitude",
-                                                   var.col = "gear_temperature",
+                                                   var.col = interp_variable,
                                                    nm = Inf,
-                                                   pre = paste0("_GEAR_TEMPERATURE_", year_vec[i]),
-                                                   write.to.file = TRUE)
+                                                   pre = paste0("_", toupper(interp_variable), "_", year_vec[i]))
     
-    if(i == 1) {
-      cpa_out <- cpa_year
-    } else {
-      cpa_out <- dplyr::bind_rows(cpa_out, cpa_year)
-    }
+    # if(i == 1) {
+    #   cpa_out <- cpa_year
+    # } else {
+    #   cpa_out <- dplyr::bind_rows(cpa_out, cpa_year)
+    # }
     
   }
   
-  # Cold pool area for only best method (Stein's Matern)
-  cpa_out_ste <- dplyr::select(cpa_out, year, ste_lte2, ste_lte0, ste_meantemp) 
-
-  # Write cold pool area calculations to csv ----
-  print("Checking for output directory")
-  if(!dir.exists(here::here("output", "estimated_cpa"))) {
-    dir.create(here::here("output", "estimated_cpa"))  
-  }
-  
-  print("Writing cold pool area to output")
-  write.csv(cpa_out, 
-            file = here::here("output", "estimated_cpa", "cpa_out.csv"), 
-            row.names = FALSE)
-  write.csv(cpa_out_ste, 
-            file = here::here("output", "estimated_cpa", "cpa_out_ste.csv"), 
-            row.names = FALSE)
-  
-  return(cpa_out)
+  # # Cold pool area for only best method (Stein's Matern)
+  # cpa_out_ste <- dplyr::select(cpa_out, year, ste_lte2, ste_lte0, ste_meantemp) 
+  # 
+  # # Write cold pool area calculations to csv ----
+  # print("Checking for output directory")
+  # if(!dir.exists(here::here("output", "estimated_cpa"))) {
+  #   dir.create(here::here("output", "estimated_cpa"))  
+  # }
+  # 
+  # print("Writing cold pool area to output")
+  # write.csv(cpa_out, 
+  #           file = here::here("output", "estimated_cpa", "cpa_out.csv"), 
+  #           row.names = FALSE)
+  # write.csv(cpa_out_ste, 
+  #           file = here::here("output", "estimated_cpa", "cpa_out_ste.csv"), 
+  #           row.names = FALSE)
+  # 
+  # return(cpa_out)
   
 }
