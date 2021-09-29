@@ -77,8 +77,7 @@ color_vec <- c("OK-BES" = "#4E79A7",
                "Historical" = "black")
 
 # Load cold pool calculations from Bob Lauth ----
-lauth_cpa_df <- read.csv(file = system.file("extdata", "cpa_areas2019.csv", package = "coldpool"),
-                         stringsAsFactors = FALSE) %>%
+lauth_cpa_df <- coldpool:::cpa_pre2021 %>%
   dplyr::select(YEAR, 
                 AREA_SUM_KM2_LTE2) %>%
   dplyr::rename(year = YEAR,
