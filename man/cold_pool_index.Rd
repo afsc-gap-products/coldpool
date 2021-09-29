@@ -8,9 +8,13 @@
 A data frame with 39 rows and 4 columns.
 \describe{
      \item{YEAR}{Year}
-     \item{COLD_POOL_AREA_KM2}{Cold Pool Index. Total area with bottom temperatures less than or equal to 2 celsius, in square kilometers}
+     \item{AREA_LTE2_KM2}{Cold Pool Index. Total area with bottom temperatures less than or equal to 2 celsius, in square kilometers}
+     \item{AREA_LTE1_KM2}{Total area with bottom temperatures less than or equal to 1 celsius, in square kilometers}
+     \item{AREA_LTE0_KM2}{Total area with bottom temperatures less than or equal to 0 celsius, in square kilometers}
+     \item{AREA_LTEMINUS1_KM2}{Total area with bottom temperatures less than or equal to -1 celsius, in square kilometers}
+     \item{MEAN_GEAR_TEMPERATURE}{Mean gear temperature (i.e. bottom temperature) in the survey area.}
+     \item{MEAN_SURFACE_TEMPERATURE}{Mean sea surface temperature in the survey area.}
      \item{LAST_UPDATE}{Date when cold pool index and temperature rasters were last updated.}
-     \item{COLDPOOL_VERSION}{Version of the coldpool package that was used to calculate the cold pool index and produce temperature rasters}
 }
 }
 \source{

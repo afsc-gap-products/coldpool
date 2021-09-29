@@ -62,25 +62,25 @@ interpolate_variable <- function(dat,
   sp_interp.df <- sp::spTransform(sp_interp.df, sp::CRS(interpolation.crs))
   
   # Nearest-neighbor
-  nn_fit <- gstat::gstat(formula = var.col ~ 1, 
-                         locations = sp_interp.df, 
-                         set = list(idp = 0), 
+  nn_fit <- gstat::gstat(formula = var.col ~ 1,
+                         locations = sp_interp.df,
+                         set = list(idp = 0),
                          nmax = 4)
   nn.predict <- predict(nn_fit, as(sp_interp.raster, "SpatialGrid"))
-  
+
   # Inverse distance weighting w/ nmax = 4 (ArcGIS Default) ----
-  idw_nmax4_fit <- gstat::gstat(formula = var.col ~ 1, 
+  idw_nmax4_fit <- gstat::gstat(formula = var.col ~ 1,
                                 locations = sp_interp.df,
                                 set = list(idp = 2),
                                 nmax = 4)
   idw_nmax4.predict <- predict(idw_nmax4_fit, as(sp_interp.raster, "SpatialGrid"))
-  
+
   # Inverse distance weighting w/ nmax = Inf
-  idw_fit <- gstat::gstat(formula = var.col ~ 1, 
+  idw_fit <- gstat::gstat(formula = var.col ~ 1,
                           locations = sp_interp.df,
                           set = list(idp = 2),
                           nmax = Inf)
-  
+
   idw.predict <- predict(idw_fit, as(sp_interp.raster, "SpatialGrid"))
   
   # Set up a new IDW for ordinary kriging ----
@@ -89,56 +89,56 @@ interpolate_variable <- function(dat,
                               nmax = Inf)
   
   # Ordinary Kriging: Exponential VGM----
-  exp.vgfit <- gstat::fit.variogram(variogram(idw_vgm_fit), 
+  exp.vgfit <- gstat::fit.variogram(variogram(idw_vgm_fit),
                                     vgm(c("Exp")))
-  exp_fit <- gstat(formula = var.col ~ 1, 
+  exp_fit <- gstat(formula = var.col ~ 1,
                    locations = sp_interp.df,
-                   model = exp.vgfit, 
+                   model = exp.vgfit,
                    nmax = nm)
   exp.predict <- predict(exp_fit, as(sp_interp.raster, "SpatialGrid"))
-  
+
   # Ordinary Kriging: Spherical VGM----
-  sph.vgfit <- gstat::fit.variogram(variogram(idw_vgm_fit), 
+  sph.vgfit <- gstat::fit.variogram(variogram(idw_vgm_fit),
                                     vgm(c("Sph")))
   sph_fit <- gstat::gstat(formula = var.col ~ 1,
-                          locations = sp_interp.df, 
-                          model = sph.vgfit, 
+                          locations = sp_interp.df,
+                          model = sph.vgfit,
                           nmax = nm)
   sph.predict <- predict(sph_fit, as(sp_interp.raster, "SpatialGrid"))
-  
+
   # Ordinary Kriging: Bessel VGM----
-  bes.vgfit <- gstat::fit.variogram(variogram(idw_vgm_fit), 
+  bes.vgfit <- gstat::fit.variogram(variogram(idw_vgm_fit),
                                     vgm(c("Bes")))
   bes_fit <- gstat::gstat(formula = var.col ~ 1,
-                          locations = sp_interp.df, 
-                          model = bes.vgfit, 
+                          locations = sp_interp.df,
+                          model = bes.vgfit,
                           nmax = nm)
   bes.predict <- predict(bes_fit, as(sp_interp.raster, "SpatialGrid"))
-  
+
   # Ordinary Kriging: Bessel VGM----
-  gau.vgfit <- gstat::fit.variogram(variogram(idw_vgm_fit), 
+  gau.vgfit <- gstat::fit.variogram(variogram(idw_vgm_fit),
                                     vgm(c("Gau")))
-  gau_fit <- gstat::gstat(formula = var.col ~ 1, 
-                          locations = sp_interp.df, 
-                          model = gau.vgfit, 
+  gau_fit <- gstat::gstat(formula = var.col ~ 1,
+                          locations = sp_interp.df,
+                          model = gau.vgfit,
                           nmax = nm)
   gau.predict <- predict(gau_fit, as(sp_interp.raster, "SpatialGrid"))
-  
+
   # Ordinary Kriging: Circular VGM----
-  cir.vgfit <- gstat::fit.variogram(variogram(idw_vgm_fit), 
+  cir.vgfit <- gstat::fit.variogram(variogram(idw_vgm_fit),
                                     vgm(c("Cir")))
-  cir_fit <- gstat::gstat(formula = var.col ~ 1, 
-                          locations = sp_interp.df, 
-                          model = cir.vgfit, 
+  cir_fit <- gstat::gstat(formula = var.col ~ 1,
+                          locations = sp_interp.df,
+                          model = cir.vgfit,
                           nmax = nm)
   cir.predict <- predict(cir_fit, as(sp_interp.raster, "SpatialGrid"))
-  
+
   # Ordinary Kriging: Matern VGM----
-  mat.vgfit <- gstat::fit.variogram(variogram(idw_vgm_fit), 
+  mat.vgfit <- gstat::fit.variogram(variogram(idw_vgm_fit),
                                     vgm(c("Mat")))
-  mat_fit <- gstat::gstat(formula = var.col ~ 1, 
-                          locations = sp_interp.df, 
-                          model = mat.vgfit, 
+  mat_fit <- gstat::gstat(formula = var.col ~ 1,
+                          locations = sp_interp.df,
+                          model = mat.vgfit,
                           nmax = nm)
   mat.predict <- predict(mat_fit, as(sp_interp.raster, "SpatialGrid"))
   
@@ -152,9 +152,9 @@ interpolate_variable <- function(dat,
   ste.predict <- predict(ste_fit, as(sp_interp.raster, "SpatialGrid"))
 
   # Thin-plate spline ----
-  tps_fit <- fields::Tps(sp::coordinates(sp_interp.df), 
+  tps_fit <- fields::Tps(sp::coordinates(sp_interp.df),
                          sp_interp.df$var.col)
-  tps.predict <- raster::interpolate(sp_interp.raster, 
+  tps.predict <- raster::interpolate(sp_interp.raster,
                                      tps_fit)
   
   print("Writing rasters")
@@ -169,59 +169,59 @@ interpolate_variable <- function(dat,
   }
   
   # write unmasked surfaces to raster
-  coldpool::make_raster_file(nn.predict %>% 
-                               akgfmaps::rasterize_and_mask(sebs_layers$survey.area), 
+  coldpool::make_raster_file(nn.predict %>%
+                               akgfmaps::rasterize_and_mask(sebs_layers$survey.area),
                              filename = here::here("output", "raster", var.col, paste0("nn_", dat.year, "_", var.col, ".tif" )),
-                             format = "GTiff", 
+                             format = "GTiff",
                              overwrite = TRUE,
                              layer_name = dat.year)
-  coldpool::make_raster_file(idw_nmax4.predict %>% 
-                               akgfmaps::rasterize_and_mask(sebs_layers$survey.area), 
+  coldpool::make_raster_file(idw_nmax4.predict %>%
+                               akgfmaps::rasterize_and_mask(sebs_layers$survey.area),
                              filename = here::here("output", "raster", var.col, paste0("idw_nmax4_", dat.year, "_", var.col, ".tif" )),
-                             format = "GTiff", 
-                             overwrite = TRUE, 
+                             format = "GTiff",
+                             overwrite = TRUE,
                              layer_name = dat.year)
-  coldpool::make_raster_file(idw.predict %>% 
-                               akgfmaps::rasterize_and_mask(sebs_layers$survey.area), 
+  coldpool::make_raster_file(idw.predict %>%
+                               akgfmaps::rasterize_and_mask(sebs_layers$survey.area),
                              filename = here::here("output", "raster", var.col, paste0("idw_", dat.year, "_", var.col, ".tif" )),
-                             format = "GTiff", 
-                             overwrite = TRUE, 
+                             format = "GTiff",
+                             overwrite = TRUE,
                              layer_name = dat.year)
-  coldpool::make_raster_file(exp.predict %>% 
-                               akgfmaps::rasterize_and_mask(sebs_layers$survey.area), 
+  coldpool::make_raster_file(exp.predict %>%
+                               akgfmaps::rasterize_and_mask(sebs_layers$survey.area),
                              filename = here::here("output", "raster", var.col, paste0("exp_", dat.year, "_", var.col, ".tif" )),
-                             format = "GTiff", 
-                             overwrite = TRUE, 
+                             format = "GTiff",
+                             overwrite = TRUE,
                              layer_name = dat.year)
-  coldpool::make_raster_file(sph.predict %>% 
-                               akgfmaps::rasterize_and_mask(sebs_layers$survey.area), 
+  coldpool::make_raster_file(sph.predict %>%
+                               akgfmaps::rasterize_and_mask(sebs_layers$survey.area),
                              filename = here::here("output", "raster", var.col, paste0("sph_", dat.year, "_", var.col, ".tif" )),
-                             format = "GTiff", 
-                             overwrite = TRUE, 
+                             format = "GTiff",
+                             overwrite = TRUE,
                              layer_name = dat.year)
-  coldpool::make_raster_file(bes.predict %>% 
-                               akgfmaps::rasterize_and_mask(sebs_layers$survey.area), 
+  coldpool::make_raster_file(bes.predict %>%
+                               akgfmaps::rasterize_and_mask(sebs_layers$survey.area),
                              filename = here::here("output", "raster", var.col, paste0("bes_", dat.year, "_", var.col, ".tif" )),
-                             format = "GTiff", 
-                             overwrite = TRUE, 
+                             format = "GTiff",
+                             overwrite = TRUE,
                              layer_name = dat.year)
-  coldpool::make_raster_file(gau.predict %>% 
-                               akgfmaps::rasterize_and_mask(sebs_layers$survey.area),  
+  coldpool::make_raster_file(gau.predict %>%
+                               akgfmaps::rasterize_and_mask(sebs_layers$survey.area),
                              filename = here::here("output", "raster", var.col, paste0("gau_", dat.year, "_", var.col, ".tif" )),
-                             format = "GTiff", 
-                             overwrite = TRUE, 
+                             format = "GTiff",
+                             overwrite = TRUE,
                              layer_name = dat.year)
-  coldpool::make_raster_file(cir.predict %>% 
-                               akgfmaps::rasterize_and_mask(sebs_layers$survey.area), 
+  coldpool::make_raster_file(cir.predict %>%
+                               akgfmaps::rasterize_and_mask(sebs_layers$survey.area),
                              filename =here::here("output", "raster", var.col, paste0("cir_", dat.year, "_", var.col, ".tif" )),
-                             format = "GTiff", 
-                             overwrite = TRUE, 
+                             format = "GTiff",
+                             overwrite = TRUE,
                              layer_name = dat.year)
-  coldpool::make_raster_file(mat.predict %>% 
-                               akgfmaps::rasterize_and_mask(sebs_layers$survey.area), 
+  coldpool::make_raster_file(mat.predict %>%
+                               akgfmaps::rasterize_and_mask(sebs_layers$survey.area),
                              filename = here::here("output", "raster", var.col, paste0("mat_", dat.year, "_", var.col, ".tif" )),
-                             format = "GTiff", 
-                             overwrite = TRUE, 
+                             format = "GTiff",
+                             overwrite = TRUE,
                              layer_name = dat.year)
   coldpool::make_raster_file(ste.predict %>% 
                                akgfmaps::rasterize_and_mask(sebs_layers$survey.area), 
@@ -229,11 +229,11 @@ interpolate_variable <- function(dat,
                              format = "GTiff", 
                              overwrite = TRUE, 
                              layer_name = dat.year)
-  coldpool::make_raster_file(tps.predict %>% 
-                               akgfmaps::rasterize_and_mask(sebs_layers$survey.area), 
+  coldpool::make_raster_file(tps.predict %>%
+                               akgfmaps::rasterize_and_mask(sebs_layers$survey.area),
                              filename = here::here("output", "raster", var.col, paste0("tps_", dat.year, "_", var.col, ".tif" )),
-                             format = "GTiff", 
-                             overwrite = TRUE, 
+                             format = "GTiff",
+                             overwrite = TRUE,
                              layer_name = dat.year)
   
 }
