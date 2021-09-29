@@ -30,16 +30,16 @@ interpolate_gear_temp <- function(temp_data_path,
   for(i in 1:length(year_vec)) {
     
     cpa_year <- calculate_cold_pool_area(dat = dplyr::filter(temperature_df, year == year_vec[i]),
-                                                   dat.year = year_vec[i],
-                                                   in.crs = "+proj=longlat",
-                                                   interpolation.crs = proj_crs,
-                                                   cell.resolution = cell_resolution,
-                                                   lon.col = "longitude",
-                                                   lat.col = "latitude",
-                                                   var.col = "gear_temperature",
-                                                   nm = Inf,
-                                                   pre = paste0("_GEAR_TEMPERATURE_", year_vec[i]),
-                                                   write.to.file = TRUE)
+                                         dat.year = year_vec[i],
+                                         in.crs = "+proj=longlat",
+                                         interpolation.crs = proj_crs,
+                                         cell.resolution = cell_resolution,
+                                         lon.col = "longitude",
+                                         lat.col = "latitude",
+                                         var.col = "gear_temperature",
+                                         nm = Inf,
+                                         pre = paste0("_GEAR_TEMPERATURE_", year_vec[i]),
+                                         write.to.file = TRUE)
     
     if(i == 1) {
       cpa_out <- cpa_year
@@ -51,7 +51,7 @@ interpolate_gear_temp <- function(temp_data_path,
   
   # Cold pool area for only best method (Stein's Matern)
   cpa_out_ste <- dplyr::select(cpa_out, year, ste_lte2, ste_lte0, ste_meantemp) 
-
+  
   # Write cold pool area calculations to csv ----
   print("Checking for output directory")
   if(!dir.exists(here::here("output", "estimated_cpa"))) {

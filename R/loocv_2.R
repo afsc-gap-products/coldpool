@@ -21,6 +21,15 @@ loocv_2 <- function(dat, var.col, lat.col, lon.col, in.proj = "+proj=longlat +da
   names(dat)[which(names(dat) == lat.col)] <- "lat.col"
   names(dat)[which(names(dat) == lon.col)] <- "lon.col"
   
+  # Remove NAs
+  if(any(is.na(dat$var.col))) {
+    print(paste0("coldpool::loocv_2: Removing ", 
+                 sum(is.na(dat$var.col)), 
+                 " var.col NA values from data set"))
+    dat <- dat %>% 
+      dplyr::filter(!is.na(var.col))
+  }
+  
   # Scale variables
   if(scale.vars) {
     var.col.scaled <- scale(dat$var.col, center = center, scale = scale)
