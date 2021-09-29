@@ -27,14 +27,14 @@ dataset_date <- cpindex_df$LAST_UPDATE[1]
 
 ```{r plot_index}
 cpindex_df <- coldpool:::cold_pool_index
-cpi_sd <- sd(cpindex_df$COLD_POOL_AREA_KM2)
-cpi_mean <- mean(cpindex_df$COLD_POOL_AREA_KM2)
+cpi_sd <- sd(cpindex_df$AREA_LTE2_KM2)
+cpi_mean <- mean(cpindex_df$AREA_LTE2_KM2)
 cpindex_df <- cpindex_df %>%
-  dplyr::mutate(dev = (COLD_POOL_AREA_KM2-cpi_mean)/cpi_sd)
+  dplyr::mutate(dev = (AREA_LTE2_KM2-cpi_mean)/cpi_sd)
 
 ggplot(data = cpindex_df,
              aes(x = YEAR, 
-                 y = COLD_POOL_AREA_KM2)) +
+                 y = AREA_LTE2_KM2)) +
   geom_line() +
   geom_point(aes(fill = cut(dev, c(-3, -2, -1, 1, 2, 3))),
              shape = 21,
