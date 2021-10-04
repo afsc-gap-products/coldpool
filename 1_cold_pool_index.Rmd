@@ -18,33 +18,100 @@ addr:
 
 ```{r calc_index, message=FALSE, warning=FALSE, include=FALSE}
 library(coldpool)
+library(ggrepel)
 
-# Load cold pool index data
-cpindex_df <- coldpool:::cold_pool_index
-dataset_date <- cpindex_df$LAST_UPDATE[1]
-
+fig_res <- 300
 ```
 
 ```{r plot_index}
+dataset_date <- coldpool:::cold_pool_index$LAST_UPDATE[1]
+cpi_sd <- sd(coldpool:::cold_pool_index$AREA_LTE2_KM2)
+cpi_mean <- mean(coldpool:::cold_pool_index$AREA_LTE2_KM2)
+bt_sd <- sd(coldpool:::cold_pool_index$MEAN_GEAR_TEMPERATURE)
+bt_mean <- mean(coldpool:::cold_pool_index$MEAN_GEAR_TEMPERATURE)
+sst_sd <- sd(coldpool:::cold_pool_index$MEAN_SURFACE_TEMPERATURE)
+sst_mean <- mean(coldpool:::cold_pool_index$MEAN_SURFACE_TEMPERATURE)
+
+cpindex_df <- coldpool:::cold_pool_index %>%
+  dplyr::mutate(cpi_dev = (AREA_LTE2_KM2-cpi_mean)/cpi_sd,
+                bt_dev = (MEAN_GEAR_TEMPERATURE-bt_mean)/bt_sd,
+                sst_dev = (MEAN_SURFACE_TEMPERATURE-sst_mean)/sst_sd,
+                cpi_rank = rank(-1*AREA_LTE2_KM2),
+                bt_rank = rank(-1*MEAN_GEAR_TEMPERATURE),
+                sst_rank = rank(-1*MEAN_SURFACE_TEMPERATURE))
+
 cpindex_df <- coldpool:::cold_pool_index
 cpi_sd <- sd(cpindex_df$AREA_LTE2_KM2)
 cpi_mean <- mean(cpindex_df$AREA_LTE2_KM2)
 cpindex_df <- cpindex_df %>%
   dplyr::mutate(dev = (AREA_LTE2_KM2-cpi_mean)/cpi_sd)
 
-ggplot(data = cpindex_df,
+cpa_plot <- ggplot(data = cpindex_df,
              aes(x = YEAR, 
-                 y = AREA_LTE2_KM2)) +
+                 y = AREA_LTE2_KM2,
+                 label = cpi_rank)) +
   geom_line() +
-  geom_point(aes(fill = cut(dev, c(-3, -2, -1, 1, 2, 3))),
+  geom_point(aes(fill = cut(cpi_dev, c(-3, -2, -1, 1, 2, 3))),
              shape = 21,
              size = rel(3)) +
+  ggrepel::geom_text_repel() +
   scale_fill_brewer(name = "Std. dev.", 
                     drop = FALSE, 
-                    palette = "RdYlBu") +
+                    palette = "RdYlBu",
+                    direction = 1) +
   scale_x_continuous(name = "Year") +
   scale_y_continuous(name = expression('Cold Pool Area'~(km^2))) +
   theme_bw()
+
+bt_mean_plot <- ggplot(data = cpindex_df,
+             aes(x = YEAR, 
+                 y = MEAN_GEAR_TEMPERATURE,
+                 label = bt_rank)) +
+  geom_line() +
+  geom_point(aes(fill = cut(bt_dev, c(-3, -2, -1, 1, 2, 3))),
+             shape = 21,
+             size = rel(3)) +
+    ggrepel::geom_text_repel() +
+  scale_fill_brewer(name = "Std. dev.", 
+                    drop = FALSE, 
+                    palette = "RdYlBu",
+                    direction = -1) +
+  scale_x_continuous(name = "Year") +
+  scale_y_continuous(name = expression('Mean Bottom Temperature'~(degree*C))) +
+  theme_bw()
+
+sst_mean_plot <- ggplot(data = cpindex_df,
+             aes(x = YEAR, 
+                 y = MEAN_SURFACE_TEMPERATURE,
+                 label = sst_rank)) +
+  geom_line() +
+  geom_point(aes(fill = cut(sst_dev, c(-3, -2, -1, 1, 2, 3))),
+             shape = 21,
+             size = rel(3)) +
+    ggrepel::geom_text_repel() +
+  scale_fill_brewer(name = "Std. dev.", 
+                    drop = FALSE, 
+                    palette = "RdYlBu",
+                    direction = -1) +
+  scale_x_continuous(name = "Year") +
+  scale_y_continuous(name = expression('Mean Surface Temperature'~(degree*C))) +
+  theme_bw()
+
+png(file = here::here("plots", "cold_pool_area.png"), width = 6, height = 4, res = fig_res, units = "in")
+print(cpa_plot)
+dev.off()
+
+png(file = here::here("plots", "bottom_temperature_mean.png"), width = 6, height = 4, res = fig_res, units = "in")
+print(bt_mean_plot)
+dev.off()
+
+png(file = here::here("plots", "surface_temperature_mean.png"), width = 6, height = 4, res = fig_res, units = "in")
+print(sst_mean_plot)
+dev.off()
+
+coldpool:::cold_pool_index$YEAR[order(coldpool:::cold_pool_index$AREA_LTE2_KM2)]
+coldpool:::cold_pool_index$YEAR[order(-1*coldpool:::cold_pool_index$MEAN_GEAR_TEMPERATURE)]
+coldpool:::cold_pool_index$YEAR[order(-1*coldpool:::cold_pool_index$MEAN_SURFACE_TEMPERATURE)]
 ```
 
 Contributed by Sean Rohan^1^ and Lewis Barnett^1^   

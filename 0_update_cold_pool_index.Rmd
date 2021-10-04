@@ -131,13 +131,13 @@ Update sysdata.rda with cold pool area, mean bottom temperature, mean surface te
 # Need to update documentation and build/install after running this code.
 
 if(update_sysdata) {
-  # Make surface temperature raster stack
-  ebs_surface_temperature <- coldpool::make_raster_stack(file_path = here::here("output", "raster", "surface_temperature"),
+  # Make surface temperature raster stack (multiplying by 1 resets the source)
+  ebs_surface_temperature <- 1*coldpool::make_raster_stack(file_path = here::here("output", "raster", "surface_temperature"),
                                                          file_name_contains = "ste_",
                                                          file_type = ".tif")
   
-  # Make bottom temperature raster stack
-  ebs_bottom_temperature <- coldpool::make_raster_stack(file_path = here::here("output", "raster", "gear_temperature"),
+  # Make bottom temperature raster stack (multiplying by 1 resets the source)
+  ebs_bottom_temperature <- 1*coldpool::make_raster_stack(file_path = here::here("output", "raster", "gear_temperature"),
                                                         file_name_contains = "ste_",
                                                         file_type = ".tif")
   
