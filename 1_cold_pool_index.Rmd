@@ -40,7 +40,6 @@ cpindex_df <- coldpool:::cold_pool_index %>%
                 bt_rank = rank(-1*MEAN_GEAR_TEMPERATURE),
                 sst_rank = rank(-1*MEAN_SURFACE_TEMPERATURE))
 
-cpindex_df <- coldpool:::cold_pool_index
 cpi_sd <- sd(cpindex_df$AREA_LTE2_KM2)
 cpi_mean <- mean(cpindex_df$AREA_LTE2_KM2)
 cpindex_df <- cpindex_df %>%
