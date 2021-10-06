@@ -40,6 +40,12 @@ cpindex_df <- coldpool:::cold_pool_index %>%
                 bt_rank = rank(-1*MEAN_GEAR_TEMPERATURE),
                 sst_rank = rank(-1*MEAN_SURFACE_TEMPERATURE))
 
+cpindex_df <- coldpool:::cold_pool_index
+cpi_sd <- sd(cpindex_df$AREA_LTE2_KM2)
+cpi_mean <- mean(cpindex_df$AREA_LTE2_KM2)
+cpindex_df <- cpindex_df %>%
+  dplyr::mutate(dev = (AREA_LTE2_KM2-cpi_mean)/cpi_sd)
+
 cpa_plot <- ggplot(data = cpindex_df,
              aes(x = YEAR, 
                  y = AREA_LTE2_KM2,
@@ -115,9 +121,9 @@ Contributed by Sean Rohan^1^ and Lewis Barnett^1^
 
 **Description of Indicator**: The cold pool is defined as the area of the southeastern Bering Sea continental shelf with bottom temperature $\leq$ 2&deg;C, in square kilometers.
 
-**Methodological Changes**:
+**Methodological Changes**: In prior years, the cold pool index was calculated based on the area of a polygon defining the threshold of a given temperature derived from an inverse distance weighted interpolation, using a maximum of four observations in the weighting for each prediction. This year, we chose to change the interpolation method. In comparing 10 different interpolation methods with leave-one-out-cross-validation, we found that ordinary kriging with Stein's parameterization of the Matern semivariance structure produced the lowest prediction error in the majority of years. Therefore, this was the method used to estimate cold pool extent for this and all prior years.
 
-**Status and Trends**:
+**Status and Trends**: The cold pool extent has increased since 2018, yet remains between 1-2 standard deviations below the mean of the time series.  Estimates from 2018 and 2019 were record lows, and the 2021 estimate was only slightly higher than in 2003, which was the record low prior to 2018. 
 
 **Implications**:
 
