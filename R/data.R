@@ -63,3 +63,25 @@
 #' }
 #' @source \url{https://www.fisheries.noaa.gov/contact/groundfish-assessment-program}
 "ebs_surface_temperature"
+
+#' Rasters of summer bottom temperature in the eastern and northern Bering Sea at 5-km resolution
+#' 
+#' Summer bottom temperatures in the full eastern Bering Sea survey area, calculated from interpolation of temperature data from summer bottom trawl surveys conducted by AFSC/RACE/GAP. To load this data set, it is necessary to first load the coldpool package or raster and sp packages. Raster layers were interpolated using ordinary kriging with Matern covariance \doi{10.1007/978-1-4612-1494-6}{(Stein, 1999)}.
+#' 
+#' @format A RasterStack class with five layers, one for every year with an NBS survey, including the unplanned 2018 partial northern extention.
+#' #' \describe{
+#'      \item{ste_(year)_gear_temperature}{Raster layer of temperature for a given year}
+#' }
+#' @source \url{https://www.fisheries.noaa.gov/contact/groundfish-assessment-program}
+"nbs_ebs_bottom_temperature"
+
+#' Rasters of summer bottom temperature in the eastern and northern Bering Sea at 5-km resolution
+#' 
+#' Summer bottom temperatures in the full eastern Bering Sea survey area, calculated from interpolation of temperature data from summer bottom trawl surveys conducted by AFSC/RACE/GAP. To load ethis data set, it is necessary to first load the coldpool package or raster and sp packages. Raster layers were interpolated using ordinary kriging with Matern covariance \doi{10.1007/978-1-4612-1494-6}{(Stein, 1999)}.
+#' 
+#' @format A RasterStack class with five layers, one for every year with an NBS survey, including the unplanned 2018 partial northern extention.
+#' #' \describe{
+#'      \item{ste_(year)_gear_temperature}{Raster layer of temperature for a given year}
+#' }
+#' @source \url{https://www.fisheries.noaa.gov/contact/groundfish-assessment-program}
+"nbs_ebs_surface_temperature"
