@@ -24,7 +24,7 @@ get_data <- function(channel) {
   print("Writing temperature data for all hauls to csv")
   ifelse(!dir.exists(file.path(here::here("data"))), dir.create(file.path(here::here("data"))), FALSE)
   write.csv(temperature_all_hauls_df,
-            file = here::here("data", paste0(Sys.Date(), "_all_temperature_data.csv")),
+            file = here::here("data", paste0(Sys.Date(), "_ebs_nbs_temperature_full_area.csv")),
             row.names = FALSE)
   
   # Gear temperature for SEBS index stations

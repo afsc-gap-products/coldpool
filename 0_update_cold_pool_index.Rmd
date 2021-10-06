@@ -30,7 +30,8 @@ proj_crs <- coldpool:::ebs_proj_crs
 update_sysdata <- TRUE
 
 # Filepath to csv containing data to use for temperature interpolation ----
-csv_path <- here::here("data", paste0(Sys.Date(), "_index_hauls_temperature_data.csv"))
+ebs_csv_path <- here::here("data", paste0(Sys.Date(), "_index_hauls_temperature_data.csv"))
+nbs_ebs_csv_path <- here::here("data", paste0(Sys.Date(), "_ebs_nbs_temperature_full_area.csv"))
 
 ### UPDATE!!! ###
 nbs_years <- c(2010, 2017, 2018, 2019, 2021)
@@ -62,38 +63,40 @@ Conduct interpolation using candidate interpolation methods.
 Writes:
 --GeoTIFF rasters of interpolated gear temperature are saved to output/raster/[variable] for each method and year. 
 
-```{r interpolate, include=TRUE, message=FALSE, warning=FALSE, echo = FALSE}
+```{r interpolate_sebs, include=TRUE, message=FALSE, warning=FALSE, echo = FALSE}
 # Interpolate gear temperature and write rasters for SEBS
-interpolation_wrapper(temp_data_path = csv_path,
+interpolation_wrapper(temp_data_path = ebs_csv_path,
                       proj_crs = proj_crs,
                       cell_resolution = 5000, # 5x5 km grid resolution
                       select_years = 1982,year(Sys.Date()), 
                       interp_variable = "gear_temperature",
-                      select.region = "sebs") 
+                      select_region = "sebs") 
 
 # Interpolate surface temperature and write rasters for SEBS
-interpolation_wrapper(temp_data_path = csv_path,
+interpolation_wrapper(temp_data_path = ebs_csv_path,
                       proj_crs = proj_crs,
                       cell_resolution = 5000, # 5x5 km grid resolution
                       select_years = 1982,year(Sys.Date()),
                       interp_variable = "surface_temperature",
-                      select.region = "sebs") 
+                      select_region = "sebs") 
+```
 
+```{r interpolate_full_sebs, include=TRUE, message=FALSE, warning=FALSE, echo = FALSE}
 # Interpolate gear temperature and write rasters for full EBS
-interpolation_wrapper(temp_data_path = csv_path,
+interpolation_wrapper(temp_data_path = nbs_ebs_csv_path,
                       proj_crs = proj_crs,
                       cell_resolution = 5000, # 5x5 km grid resolution
                       select_years = nbs_years, 
                       interp_variable = "gear_temperature",
-                      select.region = "ebs") 
+                      select_region = "ebs") # Full EBS+NBS
 
 # Interpolate surface temperature and write rasters for full EBS
-interpolation_wrapper(temp_data_path = csv_path,
+interpolation_wrapper(temp_data_path = nbs_ebs_csv_path,
                       proj_crs = proj_crs,
                       cell_resolution = 5000, # 5x5 km grid resolution
                       select_years = nbs_years,
                       interp_variable = "surface_temperature",
-                      select.region = "ebs") 
+                      select_region = "ebs") # Full EBS+NBS
 ```
 # 4. Calculate cold pool area, mean bottom temperature, surface temperature
 
