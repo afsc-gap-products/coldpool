@@ -6,6 +6,7 @@
 #' @param proj_crs CRS string to use for interpolation as a character vector (CRS should have units of meters)
 #' @param cell_resolution Interpolation grid cell dimension in meters.
 #' @param select_years Optional. Select years to use for interpolation. Default NULL uses all years.
+#' @param select_region Region for interpolation as a character string. Options = "ebs", "sebs", "nbs"
 #' @return Data frame of estimated cold pool area from multiple candidate interpolation methods.
 #' @export
 
@@ -13,7 +14,8 @@ interpolation_wrapper <- function(temp_data_path,
                                   proj_crs, 
                                   cell_resolution,
                                   select_years = NULL,
-                                  interp_variable) {
+                                  interp_variable,
+                                  select_region = "sebs") {
   
   temperature_df <- read.csv(file = temp_data_path,
                              stringsAsFactors = FALSE)
@@ -31,15 +33,16 @@ interpolation_wrapper <- function(temp_data_path,
   for(i in 1:length(year_vec)) {
     
     cpa_year <- interpolate_variable(dat = dplyr::filter(temperature_df, year == year_vec[i]),
-                                                   dat.year = year_vec[i],
-                                                   in.crs = "+proj=longlat",
-                                                   interpolation.crs = proj_crs,
-                                                   cell.resolution = cell_resolution,
-                                                   lon.col = "longitude",
-                                                   lat.col = "latitude",
-                                                   var.col = interp_variable,
-                                                   nm = Inf,
-                                                   pre = paste0("_", toupper(interp_variable), "_", year_vec[i]))
+                                     dat.year = year_vec[i],
+                                     in.crs = "+proj=longlat",
+                                     interpolation.crs = proj_crs,
+                                     cell.resolution = cell_resolution,
+                                     lon.col = "longitude",
+                                     lat.col = "latitude",
+                                     var.col = interp_variable,
+                                     nm = Inf,
+                                     pre = paste0("_", toupper(interp_variable), "_", year_vec[i]),
+                                     select.region = select_region)
     
     # if(i == 1) {
     #   cpa_out <- cpa_year

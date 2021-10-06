@@ -13,8 +13,10 @@ interpolate_variable(
   in.crs = "+proj=longlat +datum=NAD83",
   interpolation.crs,
   cell.resolution,
+  interpolation.extent = NULL,
   nm = Inf,
-  pre = NA
+  pre = NA,
+  select.region = "sebs"
 )
 }
 \arguments{
@@ -37,6 +39,8 @@ interpolate_variable(
 \item{nm}{Maximum number of cells to use for interpolation.}
 
 \item{pre}{Prefix for file names in output (in development.)}
+
+\item{select.region}{Region for interpolation as a character string. Options = "ebs", "sebs", "nbs"}
 }
 \value{
 Returns a data frame containing cold pool areas estimated by interpolation methods, for cutoffs at zero degrees and two degrees C. If argument write.to.file = TRUE, also writes a GeoTIFF raster to output directory.

@@ -9,7 +9,8 @@ interpolation_wrapper(
   proj_crs,
   cell_resolution,
   select_years = NULL,
-  interp_variable
+  interp_variable,
+  select.region = "sebs"
 )
 }
 \arguments{
