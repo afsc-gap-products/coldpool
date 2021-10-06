@@ -15,6 +15,29 @@ fig_res <- 300
 # CRS
 proj_crs <- coldpool:::ebs_proj_crs
 
+# Retrieve area-weighted surface temperature
+channel <- coldpool:::get_connected()
+
+area_weighted_plusnw_df <- RODBC::sqlQuery(channel = channel,
+                                           query = "select * from HAEHNR.BTTEMP_EBS_PLUSNW_LT200M")
+
+area_weighted_standard_df <- RODBC::sqlQuery(channel = channel,
+                                             query = "select * from HAEHNR.EBS_BTTEMP_LT200M_STANDARD")
+
+temperature_df <- RODBC::sqlQuery(channel = channel,
+                                  coldpool::sql_to_rqry(system.file("sql", 
+                                                                    "ebs_gear_temperature_cold_pool_hauls.sql", 
+                                                                    package = "coldpool"))) %>%
+    dplyr::mutate(LATITUDE = (START_LATITUDE + END_LATITUDE)/2,
+                  LONGITUDE = (START_LONGITUDE + END_LONGITUDE)/2,
+                  YEAR = floor(CRUISE/100)) %>%
+    dplyr::select(-START_LATITUDE, 
+                  -END_LATITUDE, 
+                  -START_LONGITUDE, 
+                  -END_LONGITUDE) %>%
+    dplyr::filter(!is.na(GEAR_TEMPERATURE), 
+                  !is.na(LATITUDE), 
+                  !is.na(LONGITUDE))
 ```
 
 # Conduct cross-validation
@@ -24,14 +47,14 @@ proj_crs <- coldpool:::ebs_proj_crs
   # Writes:
   # -- /plots/RSPE_violin_GEAR_TEMPERATURE_[n].png: Plots of root square prediction error for interpolation methods.
   # -- /output/[date]_rmse_loocv_GEAR_TEMPERATURE_[year].csv: Results of leave-one-out cross validation.
-  loocv_gear_temp(temp_data_path =  here::here("data", "2021-09-24_index_hauls_temperature_data.csv"),
+  loocv_gear_temp(temp_data_path =  here::here("data", "2021-09-28_index_hauls_temperature_data.csv"),
                   proj_crs = proj_crs) # update file name manually if need specific data file date
   
   # Calculate cold pool area using interpolation methods ----
   # Writes:
   # -- /output/raster/[method]_[year]_gear_temperature.tif: GeoTIFF raster files for each interpolation method and year
   # -- /output/estimate_cpa/cpa_out.csv: Cold pool areas by year for each interpolation method.
-cpa_df <- interpolate_gear_temp(temp_data_path =  here::here("data", "2021-09-24_index_hauls_temperature_data.csv"),
+cpa_df <- interpolate_gear_temp(temp_data_path = here::here("data", "2021-09-28_index_hauls_temperature_data.csv"),
                         proj_crs = proj_crs,
                         cell_resolution = 5000)
 ```
@@ -238,4 +261,74 @@ ggplot() +
              aes(x = YEAR, 
                  y = Mean-Historical)) +
   scale_color_colorblind()
+```
+
+# Mean bottom and surface temperature from interpolation versus stratum-weighted method
+
+Historically, mean bottom and surface temperatures were calculated using a mean stratum-weighting approach, where temperature data from survey stations were averaged within strata then weighted in proportion to stratum area within the survey domain. However, this approach does not account for the spatial structure of samples within strata and leads to variation in spatial coverage of samples within strata among years due to instances where equipment malfunctions led to spatially autocorrelated gaps in coverage.
+
+Calculating mean temperature from spatially interpolated rasters of bottom and surface temperatures better accounts for the spatial structure of samples and helps account for temperature at locations where data are missing.
+
+```{r}
+
+area_vs_interp_bt_df <- area_weighted_standard_df %>% 
+  dplyr::select(YEAR, AVGBSBT) %>%
+  dplyr::rename(`BT Standard`  = AVGBSBT) %>%
+  dplyr::full_join(area_weighted_plusnw_df %>%
+                       dplyr::select(YEAR, AVGBSBT) %>%
+  dplyr::rename(`BT PlusNW`  = AVGBSBT)) %>%
+  dplyr::mutate(method = "Area Weighted") %>%
+  dplyr::full_join(coldpool:::cold_pool_index %>%
+                     dplyr::select(YEAR, 
+                                   MEAN_GEAR_TEMPERATURE) %>%
+                     dplyr::rename(`BT PlusNW` = MEAN_GEAR_TEMPERATURE) %>%
+                     dplyr::mutate(method = "Interpolated")) %>%
+  reshape2::melt(id.vars = c("YEAR", "method"))
+
+area_vs_interp_sst_df <- area_weighted_standard_df %>% 
+  dplyr::select(YEAR, AVGBSST) %>%
+  dplyr::rename(`SST Standard`  = AVGBSST) %>%
+  dplyr::full_join(area_weighted_plusnw_df %>%
+                       dplyr::select(YEAR, AVGBSST) %>%
+  dplyr::rename(`SST PlusNW`  = AVGBSST)) %>%
+  dplyr::mutate(method = "Area Weighted") %>%
+  dplyr::full_join(coldpool:::cold_pool_index %>%
+                     dplyr::select(YEAR, 
+                                   MEAN_SURFACE_TEMPERATURE) %>%
+                     dplyr::rename(`SST PlusNW` = MEAN_SURFACE_TEMPERATURE) %>%
+                     dplyr::mutate(method = "Interpolated")) %>%
+  reshape2::melt(id.vars = c("YEAR", "method"))
+
+ggplot() +
+  geom_histogram(data = temperature_df,
+             aes(x = YEAR)) +
+  scale_x_continuous(name = "Year") +
+  scale_y_continuous(name = "Frequency")
+
+ggplot(data = area_vs_interp_bt_df,
+       aes(x = YEAR, 
+           y = value,
+           shape = variable,
+           color = method)) +
+  geom_point() +
+  geom_line() +
+  scale_color_colorblind(name = "Method") +
+  scale_shape(name = "Area") +
+  scale_x_continuous(name = "Year") +
+  scale_y_continuous(name = expression("Mean Bottom Temperature"~(degree*C)))
+  theme(legend.title = element_blank())
+  
+ggplot(data = area_vs_interp_sst_df,
+       aes(x = YEAR, 
+           y = value,
+           shape = variable,
+           color = method)) +
+  geom_point() +
+  geom_line() +
+  scale_color_colorblind(name = "Method") +
+  scale_shape(name = "Area") +
+  scale_x_continuous(name = "Year") +
+  scale_y_continuous(name = expression("Mean Surface Temperature"~(degree*C)))
+  theme()
+
 ```

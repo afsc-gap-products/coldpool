@@ -30,7 +30,11 @@ proj_crs <- coldpool:::ebs_proj_crs
 update_sysdata <- TRUE
 
 # Filepath to csv containing data to use for temperature interpolation ----
-csv_path <- here::here("data", paste0(Sys.Date(), "_index_hauls_temperature_data.csv"))
+ebs_csv_path <- here::here("data", paste0(Sys.Date(), "_index_hauls_temperature_data.csv"))
+nbs_ebs_csv_path <- here::here("data", paste0(Sys.Date(), "_ebs_nbs_temperature_full_area.csv"))
+
+### UPDATE!!! ###
+nbs_years <- c(2010, 2017, 2018, 2019, 2021)
 ```
 
 # 2. Retrieve temperature data
@@ -59,20 +63,40 @@ Conduct interpolation using candidate interpolation methods.
 Writes:
 --GeoTIFF rasters of interpolated gear temperature are saved to output/raster/[variable] for each method and year. 
 
-```{r interpolate, include=TRUE, message=FALSE, warning=FALSE, echo = FALSE}
-# Interpolate gear temperature and write rasters
-interpolation_wrapper(temp_data_path = csv_path,
+```{r interpolate_sebs, include=TRUE, message=FALSE, warning=FALSE, echo = FALSE}
+# Interpolate gear temperature and write rasters for SEBS
+interpolation_wrapper(temp_data_path = ebs_csv_path,
                       proj_crs = proj_crs,
                       cell_resolution = 5000, # 5x5 km grid resolution
-                      select_years = 1982:2021, 
-                      interp_variable = "gear_temperature") 
+                      select_years = 1982,year(Sys.Date()), 
+                      interp_variable = "gear_temperature",
+                      select_region = "sebs") 
 
-# Interpolate surface temperature and write rasters
-interpolation_wrapper(temp_data_path = csv_path,
+# Interpolate surface temperature and write rasters for SEBS
+interpolation_wrapper(temp_data_path = ebs_csv_path,
                       proj_crs = proj_crs,
                       cell_resolution = 5000, # 5x5 km grid resolution
-                      select_years = 1982:2021,
-                      interp_variable = "surface_temperature") 
+                      select_years = 1982,year(Sys.Date()),
+                      interp_variable = "surface_temperature",
+                      select_region = "sebs") 
+```
+
+```{r interpolate_full_sebs, include=TRUE, message=FALSE, warning=FALSE, echo = FALSE}
+# Interpolate gear temperature and write rasters for full EBS
+interpolation_wrapper(temp_data_path = nbs_ebs_csv_path,
+                      proj_crs = proj_crs,
+                      cell_resolution = 5000, # 5x5 km grid resolution
+                      select_years = nbs_years, 
+                      interp_variable = "gear_temperature",
+                      select_region = "ebs") # Full EBS+NBS
+
+# Interpolate surface temperature and write rasters for full EBS
+interpolation_wrapper(temp_data_path = nbs_ebs_csv_path,
+                      proj_crs = proj_crs,
+                      cell_resolution = 5000, # 5x5 km grid resolution
+                      select_years = nbs_years,
+                      interp_variable = "surface_temperature",
+                      select_region = "ebs") # Full EBS+NBS
 ```
 # 4. Calculate cold pool area, mean bottom temperature, surface temperature
 
@@ -82,8 +106,8 @@ Writes:
 - /output/raster/[METHOD]_[YEAR]_gear_temperature.tif: GeoTIFF rasters of gear temperature, by method and year, with 5x5 km grid resolution.
 
 ```{r}
-# Calculate cold pool area and mean bottom temperature from rasters
-bottom_temp_files <- list.files(here::here("output", "raster", "gear_temperature"), 
+# Calculate cold pool area and mean bottom temperature from SEBS rasters
+bottom_temp_files <- list.files(here::here("output", "raster", "sebs", "gear_temperature"), 
                                 full.names = TRUE)
 bottom_temp_files <- bottom_temp_files[grep(pattern = "ste_", x = bottom_temp_files)]
 bt_df <- data.frame(YEAR = numeric(length = length(bottom_temp_files)),
@@ -96,16 +120,21 @@ bt_df <- data.frame(YEAR = numeric(length = length(bottom_temp_files)),
 for(i in 1:length(bottom_temp_files)) {
   bt_raster <- raster::raster(bottom_temp_files[i], values = TRUE)
   bt_df$YEAR[i] <- as.numeric(gsub("[^0-9.-]", "", names(bt_raster))) # Extract year
-  bt_df$AREA_LTE2_KM2[i] <- bt_raster %>% cpa_from_raster(raster_units = "m", temperature_threshold = 2)
-  bt_df$AREA_LTE1_KM2[i] <- bt_raster %>% cpa_from_raster(raster_units = "m", temperature_threshold = 1)
-  bt_df$AREA_LTE0_KM2[i] <- bt_raster %>% cpa_from_raster(raster_units = "m", temperature_threshold = 0)
-  bt_df$AREA_LTEMINUS1_KM2[i] <- bt_raster %>% cpa_from_raster(raster_units = "m", temperature_threshold = -1)
-  bt_df$MEAN_GEAR_TEMPERATURE[i] <- raster::values(bt_raster) %>% mean(na.rm = TRUE)
+  bt_df$AREA_LTE2_KM2[i] <- bt_raster %>% 
+    cpa_from_raster(raster_units = "m", temperature_threshold = 2)
+  bt_df$AREA_LTE1_KM2[i] <- bt_raster %>% 
+    cpa_from_raster(raster_units = "m", temperature_threshold = 1)
+  bt_df$AREA_LTE0_KM2[i] <- bt_raster %>% 
+    cpa_from_raster(raster_units = "m", temperature_threshold = 0)
+  bt_df$AREA_LTEMINUS1_KM2[i] <- bt_raster %>% 
+    cpa_from_raster(raster_units = "m", temperature_threshold = -1)
+  bt_df$MEAN_GEAR_TEMPERATURE[i] <- raster::values(bt_raster) %>% 
+    mean(na.rm = TRUE)
   
 }
 
 # Calculate mean surface temperature
-surface_temp_files <- list.files(here::here("output", "raster", "surface_temperature"), 
+surface_temp_files <- list.files(here::here("output", "raster", "sebs", "surface_temperature"), 
                                 full.names = TRUE)
 surface_temp_files <- surface_temp_files[grep(pattern = "ste_", x = surface_temp_files)]
 sst_df <- data.frame(YEAR = numeric(length = length(bottom_temp_files)),
@@ -132,15 +161,24 @@ Update sysdata.rda with cold pool area, mean bottom temperature, mean surface te
 
 if(update_sysdata) {
   # Make surface temperature raster stack (multiplying by 1 resets the source)
-  ebs_surface_temperature <- 1*coldpool::make_raster_stack(file_path = here::here("output", "raster", "surface_temperature"),
+  ebs_surface_temperature <- 1*coldpool::make_raster_stack(file_path = here::here("output", "raster", "sebs", "surface_temperature"),
                                                          file_name_contains = "ste_",
                                                          file_type = ".tif")
   
   # Make bottom temperature raster stack (multiplying by 1 resets the source)
-  ebs_bottom_temperature <- 1*coldpool::make_raster_stack(file_path = here::here("output", "raster", "gear_temperature"),
+  ebs_bottom_temperature <- 1*coldpool::make_raster_stack(file_path = here::here("output", "raster", "sebs", "gear_temperature"),
                                                         file_name_contains = "ste_",
                                                         file_type = ".tif")
   
+    # Make surface temperature raster stack (multiplying by 1 resets the source)
+  nbs_ebs_surface_temperature <- 1*coldpool::make_raster_stack(file_path = here::here("output", "raster", "ebs", "surface_temperature"),
+                                                         file_name_contains = "ste_",
+                                                         file_type = ".tif")
+  
+  # Make bottom temperature raster stack (multiplying by 1 resets the source)
+  nbs_ebs_bottom_temperature <- 1*coldpool::make_raster_stack(file_path = here::here("output", "raster", "ebs", "gear_temperature"),
+                                                        file_name_contains = "ste_",
+                                                        file_type = ".tif")
   
   cpa_pre2021 <- coldpool:::cpa_pre2021
   ebs_proj_crs <- coldpool:::ebs_proj_crs
@@ -151,6 +189,8 @@ if(update_sysdata) {
        cold_pool_index,
        ebs_bottom_temperature,
        ebs_surface_temperature,
+       nbs_ebs_bottom_temperature,
+       nbs_ebs_surface_temperature,
        file = here::here("R", "sysdata.rda"))
 }
 ```

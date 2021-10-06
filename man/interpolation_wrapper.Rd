@@ -9,7 +9,8 @@ interpolation_wrapper(
   proj_crs,
   cell_resolution,
   select_years = NULL,
-  interp_variable
+  interp_variable,
+  select_region = "sebs"
 )
 }
 \arguments{
@@ -20,6 +21,8 @@ interpolation_wrapper(
 \item{cell_resolution}{Interpolation grid cell dimension in meters.}
 
 \item{select_years}{Optional. Select years to use for interpolation. Default NULL uses all years.}
+
+\item{select_region}{Region for interpolation as a character string. Options = "ebs", "sebs", "nbs"}
 }
 \value{
 Data frame of estimated cold pool area from multiple candidate interpolation methods.
