@@ -26,7 +26,7 @@ interpolate_gear_temp <- function(temp_data_path,
     year_vec <- year_vec[year_vec %in% select_years]
   }
   
-  # Calculate cold pool area and generaterasters
+  # Calculate cold pool area and generate rasters
   for(i in 1:length(year_vec)) {
     
     cpa_year <- calculate_cold_pool_area(dat = dplyr::filter(temperature_df, year == year_vec[i]),

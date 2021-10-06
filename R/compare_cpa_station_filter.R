@@ -42,7 +42,7 @@ compare_cpa_station_filter <- function(sel_year = 2000,
   # Set up temperature legend ----
   temp_breaks <- c(-Inf,-1,0,1,2,4,6,8,Inf)
   
-  temp_legend <- seantools::plot_discrete_cbar(breaks = temp_breaks,
+  temp_legend <- coldpool::plot_discrete_cbar(breaks = temp_breaks,
                                                colors = viridis_pal(option = "B", direction = 1)(length(temp_breaks)-1),
                                                legend_direction = "vertical",
                                                font_size = 3,

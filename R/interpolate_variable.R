@@ -12,6 +12,7 @@
 #' @param cell.resolution Dimensions of interpolation grid cell in meters.
 #' @param nm Maximum number of cells to use for interpolation. 
 #' @param pre Prefix for file names in output (in development.)
+#' @param select.region Region for interpolation as a character string. Options = "ebs", "sebs", "nbs"
 #' @return Returns a data frame containing cold pool areas estimated by interpolation methods, for cutoffs at zero degrees and two degrees C. If argument write.to.file = TRUE, also writes a GeoTIFF raster to output directory.
 #' @export
 
@@ -23,8 +24,10 @@ interpolate_variable <- function(dat,
                                      in.crs = "+proj=longlat +datum=NAD83",
                                      interpolation.crs,
                                      cell.resolution,
+                                 interpolation.extent = NULL,
                                      nm = Inf,
-                                     pre = NA)
+                                     pre = NA,
+                                 select.region = "sebs")
 {
   names(dat)[which(names(dat) == var.col)] <- "var.col"
   names(dat)[which(names(dat) == lat.col)] <- "lat.col"
@@ -40,19 +43,40 @@ interpolate_variable <- function(dat,
   }
   
   # Load EBS survey exent for masking ----
-  sebs_layers <- akgfmaps::get_base_layers(select.region = "sebs", 
+  region_layers <- akgfmaps::get_base_layers(select.region = select.region, 
                                            set.crs = interpolation.crs)
   
   # Set dimensions for raster cells ----
-  n_dim <- floor(abs(-1625000 - -35000))/cell.resolution
+
   
+  if(select.region %in% c("sebs", "bs.south")) {
   # Make raster for interpolation ----
+    n_dim <- floor(abs(-1625000 - -35000))/cell.resolution
   sp_interp.raster <- raster::raster(xmn = -1625000, 
                                      xmx = -35000, 
                                      ymn = 379500, 
                                      ymx = 1969500, 
                                      nrow = n_dim, 
                                      ncol = n_dim)
+  } else {
+    if(select.region %in% c("bs.north", "nbs")) {extrap.box = c(xmn = -179.5, xmx = -157, ymn = 50, ymx = 68)}
+    if(select.region %in% c("bs.all", "ebs")) {extrap.box = c(xmn = -179.5, xmx = -157, ymn = 50, ymx = 68)}
+
+    plot.boundary <- akgfmaps::transform_data_frame_crs(data.frame(x = c(extrap.box['xmn'], extrap.box['xmx']), 
+                                                                   y = c(extrap.box['ymn'], extrap.box['ymx'])), 
+                                                        out.crs = interpolation.crs)
+    
+
+    
+    n_dim <- floor(abs(plot.boundary$x[1] - plot.boundary$x[2]))/cell.resolution
+    sp_interp.raster <- raster::raster(xmn = plot.boundary$x[1], 
+                                       xmx = plot.boundary$x[2], 
+                                       ymn = plot.boundary$y[1], 
+                                       ymx = plot.boundary$y[2], 
+                                       nrow = n_dim, 
+                                       ncol = n_dim)
+  }
+  
   raster::projection(sp_interp.raster) <- interpolation.crs
   
   # Transform data for interpolation ----
@@ -164,76 +188,120 @@ interpolate_variable <- function(dat,
   if(!dir.exists(here::here("output", "raster"))) {
     dir.create(here::here("output", "raster"))
   }
-  if(!dir.exists(here::here("output", "raster", var.col))) {
-    dir.create(here::here("output", "raster", var.col))
+  if(!dir.exists(here::here("output", "raster", select.region))) {
+    dir.create(here::here("output", "raster", select.region))
   }
+  if(!dir.exists(here::here("output", "raster", select.region, var.col))) {
+    dir.create(here::here("output", "raster", select.region, var.col))
+  }
+
   
   # write unmasked surfaces to raster
   coldpool::make_raster_file(nn.predict %>%
-                               akgfmaps::rasterize_and_mask(sebs_layers$survey.area),
-                             filename = here::here("output", "raster", var.col, paste0("nn_", dat.year, "_", var.col, ".tif" )),
+                               akgfmaps::rasterize_and_mask(region_layers$survey.area),
+                             filename = here::here("output", 
+                                                   "raster", 
+                                                   select.region,
+                                                   var.col, paste0(select.region, "_nn_", dat.year, "_", var.col, ".tif" )),
                              format = "GTiff",
                              overwrite = TRUE,
                              layer_name = dat.year)
   coldpool::make_raster_file(idw_nmax4.predict %>%
-                               akgfmaps::rasterize_and_mask(sebs_layers$survey.area),
-                             filename = here::here("output", "raster", var.col, paste0("idw_nmax4_", dat.year, "_", var.col, ".tif" )),
+                               akgfmaps::rasterize_and_mask(region_layers$survey.area),
+                             filename = here::here("output", 
+                                                   "raster", 
+                                                   select.region, 
+                                                   var.col, paste0(select.region, "_idw_nmax4_", dat.year, "_", var.col, ".tif" )),
                              format = "GTiff",
                              overwrite = TRUE,
                              layer_name = dat.year)
   coldpool::make_raster_file(idw.predict %>%
-                               akgfmaps::rasterize_and_mask(sebs_layers$survey.area),
-                             filename = here::here("output", "raster", var.col, paste0("idw_", dat.year, "_", var.col, ".tif" )),
+                               akgfmaps::rasterize_and_mask(region_layers$survey.area),
+                             filename = here::here("output", 
+                                                   "raster", 
+                                                   select.region, 
+                                                   var.col, 
+                                                   paste0(select.region, "_idw_", dat.year, "_", var.col, ".tif" )),
                              format = "GTiff",
                              overwrite = TRUE,
                              layer_name = dat.year)
   coldpool::make_raster_file(exp.predict %>%
-                               akgfmaps::rasterize_and_mask(sebs_layers$survey.area),
-                             filename = here::here("output", "raster", var.col, paste0("exp_", dat.year, "_", var.col, ".tif" )),
+                               akgfmaps::rasterize_and_mask(region_layers$survey.area),
+                             filename = here::here("output", 
+                                                   "raster", 
+                                                   select.region, 
+                                                   var.col, 
+                                                   paste0(select.region, "_exp_", dat.year, "_", var.col, ".tif" )),
                              format = "GTiff",
                              overwrite = TRUE,
                              layer_name = dat.year)
   coldpool::make_raster_file(sph.predict %>%
-                               akgfmaps::rasterize_and_mask(sebs_layers$survey.area),
-                             filename = here::here("output", "raster", var.col, paste0("sph_", dat.year, "_", var.col, ".tif" )),
+                               akgfmaps::rasterize_and_mask(region_layers$survey.area),
+                             filename = here::here("output", 
+                                                   "raster", 
+                                                   select.region, 
+                                                   var.col, 
+                                                   paste0(select.region, "_sph_", dat.year, "_", var.col, ".tif" )),
                              format = "GTiff",
                              overwrite = TRUE,
                              layer_name = dat.year)
   coldpool::make_raster_file(bes.predict %>%
-                               akgfmaps::rasterize_and_mask(sebs_layers$survey.area),
-                             filename = here::here("output", "raster", var.col, paste0("bes_", dat.year, "_", var.col, ".tif" )),
+                               akgfmaps::rasterize_and_mask(region_layers$survey.area),
+                             filename = here::here("output", 
+                                                   "raster", 
+                                                   select.region, 
+                                                   var.col, 
+                                                   paste0(select.region, "_bes_", dat.year, "_", var.col, ".tif" )),
                              format = "GTiff",
                              overwrite = TRUE,
                              layer_name = dat.year)
   coldpool::make_raster_file(gau.predict %>%
-                               akgfmaps::rasterize_and_mask(sebs_layers$survey.area),
-                             filename = here::here("output", "raster", var.col, paste0("gau_", dat.year, "_", var.col, ".tif" )),
+                               akgfmaps::rasterize_and_mask(region_layers$survey.area),
+                             filename = here::here("output", 
+                                                   "raster", 
+                                                   select.region, 
+                                                   var.col, 
+                                                   paste0(select.region, "_gau_", dat.year, "_", var.col, ".tif" )),
                              format = "GTiff",
                              overwrite = TRUE,
                              layer_name = dat.year)
   coldpool::make_raster_file(cir.predict %>%
-                               akgfmaps::rasterize_and_mask(sebs_layers$survey.area),
-                             filename =here::here("output", "raster", var.col, paste0("cir_", dat.year, "_", var.col, ".tif" )),
+                               akgfmaps::rasterize_and_mask(region_layers$survey.area),
+                             filename =here::here("output", 
+                                                  "raster", 
+                                                  select.region, 
+                                                  var.col, 
+                                                  paste0(select.region, "_cir_", dat.year, "_", var.col, ".tif" )),
                              format = "GTiff",
                              overwrite = TRUE,
                              layer_name = dat.year)
   coldpool::make_raster_file(mat.predict %>%
-                               akgfmaps::rasterize_and_mask(sebs_layers$survey.area),
-                             filename = here::here("output", "raster", var.col, paste0("mat_", dat.year, "_", var.col, ".tif" )),
+                               akgfmaps::rasterize_and_mask(region_layers$survey.area),
+                             filename = here::here("output", 
+                                                   "raster", 
+                                                   select.region, 
+                                                   var.col, 
+                                                   paste0(select.region, "_mat_", dat.year, "_", var.col, ".tif" )),
                              format = "GTiff",
                              overwrite = TRUE,
                              layer_name = dat.year)
   coldpool::make_raster_file(ste.predict %>% 
-                               akgfmaps::rasterize_and_mask(sebs_layers$survey.area), 
-                             filename = here::here("output", "raster", var.col, paste0("ste_", dat.year, "_", var.col, ".tif" )),
+                               akgfmaps::rasterize_and_mask(region_layers$survey.area), 
+                             filename = here::here("output", 
+                                                   "raster", 
+                                                   select.region, 
+                                                   var.col, paste0(select.region, "_ste_", dat.year, "_", var.col, ".tif" )),
                              format = "GTiff", 
                              overwrite = TRUE, 
                              layer_name = dat.year)
   coldpool::make_raster_file(tps.predict %>%
-                               akgfmaps::rasterize_and_mask(sebs_layers$survey.area),
-                             filename = here::here("output", "raster", var.col, paste0("tps_", dat.year, "_", var.col, ".tif" )),
+                               akgfmaps::rasterize_and_mask(region_layers$survey.area),
+                             filename = here::here("output", 
+                                                   "raster", 
+                                                   select.region, 
+                                                   var.col, 
+                                                   paste0(select.region, "_tps_", dat.year, "_", var.col, ".tif" )),
                              format = "GTiff",
                              overwrite = TRUE,
                              layer_name = dat.year)
-  
 }
