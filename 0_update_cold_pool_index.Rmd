@@ -135,11 +135,10 @@ for(i in 1:length(bottom_temp_files)) {
 
 # Calculate mean surface temperature
 surface_temp_files <- list.files(here::here("output", "raster", "sebs", "surface_temperature"), 
-                                full.names = TRUE)
+                                 full.names = TRUE)
 surface_temp_files <- surface_temp_files[grep(pattern = "ste_", x = surface_temp_files)]
 sst_df <- data.frame(YEAR = numeric(length = length(bottom_temp_files)),
-MEAN_SURFACE_TEMPERATURE = numeric(length = length(surface_temp_files)))
-
+                     MEAN_SURFACE_TEMPERATURE = numeric(length = length(surface_temp_files)))
 
 for(i in 1:length(surface_temp_files)) {
   sst_raster <- raster::raster(surface_temp_files[i], values = TRUE)
@@ -149,6 +148,46 @@ for(i in 1:length(surface_temp_files)) {
 
 output_df <- dplyr::inner_join(bt_df, sst_df)
 output_df$LAST_UPDATE <- Sys.Date()
+```
+
+```{r nbs_mean_temp}
+nbs_area <- akgfmaps::get_base_layers(select.region = "ebs", 
+                                      set.crs = coldpool:::ebs_proj_crs)$survey.area %>%
+  dplyr::filter(SURVEY == "NBS_SHELF")
+
+nbs_ebs_bt_files <- list.files(here::here("output", "raster", "ebs", "gear_temperature"), 
+                                full.names = TRUE)
+
+# Select Stein's Matern and remove 2018 unplanned extension (didn't have full spatial coverage)
+nbs_ebs_bt_files <- nbs_ebs_bt_files[grep(pattern = "ste_", x = nbs_ebs_bt_files)]
+nbs_ebs_bt_files <- nbs_ebs_bt_files[-grep(pattern = 2018, x = nbs_ebs_bt_files)]
+
+nbs_ebs_sst_files <- list.files(here::here("output", "raster", "ebs", "surface_temperature"), 
+                                full.names = TRUE)
+nbs_ebs_sst_files <- nbs_ebs_sst_files[grep(pattern = "ste_", x = nbs_ebs_sst_files)]
+nbs_ebs_sst_files <- nbs_ebs_sst_files[-grep(pattern = 2018, x = nbs_ebs_sst_files)]
+
+nbs_mean_temperature <- data.frame(YEAR = numeric(length = length(nbs_ebs_bt_files)),
+                    MEAN_GEAR_TEMPERATURE = numeric(length = length(nbs_ebs_bt_files)),
+                    MEAN_SURFACE_TEMPERATURE = numeric(length = length(nbs_ebs_bt_files)))
+
+for(i in 1:length(nbs_ebs_bt_files)) {
+  nbs_bt_raster <- raster::raster(nbs_ebs_bt_files[i], values = TRUE) %>%
+    raster::mask(nbs_area)
+  nbs_sst_raster <- raster::raster(nbs_ebs_sst_files[i], values = TRUE) %>%
+    raster::mask(nbs_area)
+  
+  nbs_mean_temperature$YEAR[i] <- as.numeric(gsub("[^0-9.-]", "", names(nbs_bt_raster))) # Extract year
+
+  nbs_mean_temperature$MEAN_GEAR_TEMPERATURE[i] <- raster::values(nbs_bt_raster) %>% 
+    mean(na.rm = TRUE)
+  nbs_mean_temperature$MEAN_SURFACE_TEMPERATURE[i] <- raster::values(nbs_sst_raster) %>% 
+    mean(na.rm = TRUE)
+  
+}
+
+nbs_mean_temperature$LAST_UPDATE <- Sys.Date()
+
 ```
 
 # 5. Add data to R/sysdata.rda ----
@@ -187,6 +226,7 @@ if(update_sysdata) {
   save(cpa_pre2021, 
        ebs_proj_crs, 
        cold_pool_index,
+       nbs_mean_temperature,
        ebs_bottom_temperature,
        ebs_surface_temperature,
        nbs_ebs_bottom_temperature,
