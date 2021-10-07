@@ -458,8 +458,50 @@ plot_average_temperature <- ggplot(data = all_temperatures,
         strip.background = element_rect(fill = "#0055a4",
                                         color = NA))
 
+plot_sebs_average_temperature <- ggplot(data = all_temperatures %>%
+               dplyr::filter(region == "Eastern Bering Sea (summer BT survey)"),
+                                   mapping = aes(x = YEAR,
+                                                 y = value,
+                                                 color = variable,
+                                                 shape = variable, 
+                                                 group = paste0(group, variable))) +
+  geom_point(size = rel(2)) +
+  geom_line() +
+  geom_hline(data = ebs_mean_temp_df %>%
+               dplyr::filter(region == "Eastern Bering Sea (summer BT survey)"),
+             aes(yintercept = value,
+             color = variable),
+             linetype = 2) +
+  scale_color_manual(values = c(color_bt, color_sst)) +
+  scale_y_continuous(name = expression(bold("Average Temperature"~(degree*C))), 
+                     limits = c(0,11.2),
+                     breaks = seq(0,12,2),
+                     expand = c(0,0)) +
+  scale_x_continuous(name = "Year",
+                     breaks = seq(1980,2020,10)) +
+  facet_wrap(~region, scales = "free") +
+  theme_bw() +
+  theme(axis.title = element_text(color = "black", face = "bold"),
+        axis.text = element_text(color = "black"),
+        axis.ticks = element_line(color = "black"),
+        panel.border = element_rect(color = "black", fill = NA),
+        panel.background = element_rect(color = "black", fill = NA),
+        panel.grid = element_blank(),
+        legend.title = element_blank(),
+        legend.position = "bottom",
+        strip.text = element_text(size = 9,
+                                  color = "white",
+                                  face = "bold",
+                                  margin = margin(0.5, 0, 0.5, 0, "mm")),
+        strip.background = element_rect(fill = "#0055a4",
+                                        color = NA))
+
 png(file = here::here("plots", "average_temperature.png"), width = 6, height = 3, units = "in", res = fig_res)
 print(plot_average_temperature)
+dev.off()
+
+png(file = here::here("plots", "plot_sebs_average_temperature.png"), width = 6, height = 3, units = "in", res = fig_res)
+print(plot_sebs_average_temperature)
 dev.off()
 ```
 
@@ -490,8 +532,8 @@ Mean surface and bottom temperatures were cooler than the prior sampled year (20
 print(ebs_nbs_map)
 ```
 
-```{r fig.height=3,fig.width=6,fig.cap="\\label{fig:figs}Figure 4. Average summer surface (green triangles) and bottom (blue circles) temperatures (&deg;C) of the eastern Bering Sea (EBS) shelf and northern Bering Sea (NBS) shelf based on data collected during standardized summer bottom trawl surveys from 1982–2021. Dashed lines represent the time series mean for the EBS (1982–2021, except 2020) and NBS (2010, 2017, 2019, 2021).", message=FALSE, warning=FALSE, echo=FALSE}
-print(plot_average_temperature)
+```{r fig.height=3,fig.width=6,fig.cap="\\label{fig:figs}Figure 4. Average summer surface (green triangles) and bottom (blue circles) temperatures (&deg;C) on the eastern Bering Sea (EBS) shelf based on data collected during standardized summer bottom trawl surveys from 1982–2021. Dashed lines represent the time series mean.", message=FALSE, warning=FALSE, echo=FALSE}
+print(plot_sebs_average_temperature)
 ```
 
 **Factors Influencing Observed Trends**: Fluctuations in the cold pool extent and temperatures at the bottom and surface are the result of interannual variability in climatic conditions influencing the formation and retreat of sea ice on the eastern Bering Sea shelf during the prior winter. Less sea ice, persisting for less time, results in a smaller cold pool extent and warmer temperatures.
