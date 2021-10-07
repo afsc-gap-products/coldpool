@@ -1,7 +1,7 @@
 Package: coldpool
 Type: Package
 Title: Calculate eastern Bering Sea cold pool index
-Version: 0.3
+Version: 0.4
 Authors@R: c(person("Sean", "Rohan", email = "sean.rohan@noaa.gov", role = c("aut", "cre")),
     person("Lewis", "Barnett", email = "lewis.barnett@noaa.gov", role = c("aut", "ctb")))
 Maintainer: Sean Rohan <sean.rohan@noaa.gov>
@@ -30,4 +30,4 @@ LazyData: false
 RoxygenNote: 7.1.1
 Imports: colorspace,
     viridis
-Suggests: knitr, rmarkdown, RODBC, getPass, readr, testthat
+Suggests: knitr, rmarkdown, RODBC, getPass, readr, testthat, cowplot
