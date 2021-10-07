@@ -1,8 +1,8 @@
-#' Cold Pool Index (cold_pool_index)
+#' Cold Pool Index and SEBS Mean Temperature (cold_pool_index)
 #' 
-#' Data frame containing the cold pool index, defined as the area of the eastern Bering Sea continental shelf bottom trawl survey area with bottom temperatures less than or equal to two (2) degrees celsius during AFSC/RACE/GAP summer bottom trawl surveys.
+#' Data frame containing mean gear temperature (i.e., bottom temperature), mean surface temperatures, and areas of temperatures less than or equal to 2, 1, 0, and -1 degree celcius. The Cold Pool Index (i.e., cold pool area) is the area of the eastern Bering Sea continental shelf bottom trawl survey area with bottom temperatures less than or equal to two (2) degrees celsius during AFSC/RACE/GAP summer bottom trawl surveys. In this data set, the Cold Pool Index has the column name AREA_LTE2_KM2.
 #' 
-#' @format A data frame with 39 rows and 4 columns.
+#' @format A data frame with 39 rows and 8 columns.
 #' \describe{
 #'      \item{YEAR}{Year}
 #'      \item{AREA_LTE2_KM2}{Cold Pool Index. Total area with bottom temperatures less than or equal to 2 celsius, in square kilometers}
@@ -15,6 +15,20 @@
 #' }
 #' @source \url{https://www.fisheries.noaa.gov/contact/groundfish-assessment-program}
 "cold_pool_index"
+
+#' Northern Bering Sea Mean Temperature (nbs_mean_temperature)
+#' 
+#' Data frame containing average bottom temperature and surface temperature for the NBS survey area. Does not include the unplanned 2018 northern extension because the entire survey area was not sampled.
+#' 
+#' @format A data frame with 4 rows and 4 columns.
+#' \describe{
+#'      \item{YEAR}{Year}
+#'      \item{MEAN_GEAR_TEMPERATURE}{Mean gear temperature (i.e. bottom temperature) in the survey area.}
+#'      \item{MEAN_SURFACE_TEMPERATURE}{Mean sea surface temperature in the survey area.}
+#'      \item{LAST_UPDATE}{Date when cold pool index and temperature rasters were last updated.}
+#' }
+#' @source \url{https://www.fisheries.noaa.gov/contact/groundfish-assessment-program}
+"nbs_mean_temperature"
 
 #' Historical cold pool area calculations (cpa_pre2021)
 #' 

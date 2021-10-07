@@ -3,9 +3,9 @@
 \docType{data}
 \name{cold_pool_index}
 \alias{cold_pool_index}
-\title{Cold Pool Index (cold_pool_index)}
+\title{Cold Pool Index and SEBS Mean Temperature (cold_pool_index)}
 \format{
-A data frame with 39 rows and 4 columns.
+A data frame with 39 rows and 8 columns.
 \describe{
      \item{YEAR}{Year}
      \item{AREA_LTE2_KM2}{Cold Pool Index. Total area with bottom temperatures less than or equal to 2 celsius, in square kilometers}
@@ -24,6 +24,6 @@ A data frame with 39 rows and 4 columns.
 cold_pool_index
 }
 \description{
-Data frame containing the cold pool index, defined as the area of the eastern Bering Sea continental shelf bottom trawl survey area with bottom temperatures less than or equal to two (2) degrees celsius during AFSC/RACE/GAP summer bottom trawl surveys.
+Data frame containing mean gear temperature (i.e., bottom temperature), mean surface temperatures, and areas of temperatures less than or equal to 2, 1, 0, and -1 degree celcius. The Cold Pool Index (i.e., cold pool area) is the area of the eastern Bering Sea continental shelf bottom trawl survey area with bottom temperatures less than or equal to two (2) degrees celsius during AFSC/RACE/GAP summer bottom trawl surveys. In this data set, the Cold Pool Index has the column name AREA_LTE2_KM2.
 }
 \keyword{datasets}
