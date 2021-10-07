@@ -46,7 +46,6 @@ vignettes/*.pdf
 
 # Manuscript and presentations
 /paper/
-*.docx
 *.pptx
 /Presentation/
 /plots/
