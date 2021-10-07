@@ -13,9 +13,6 @@ addr:
   l3: Seattle, WA 98115
 ---
 
-# Cold Pool Index
-
-
 ```{r setup, message=FALSE, warning=FALSE, include=FALSE}
 library(coldpool)
 
