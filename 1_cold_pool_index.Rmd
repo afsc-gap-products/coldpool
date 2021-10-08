@@ -246,7 +246,54 @@ ebs_nbs_temperature_map <- ggplot2::ggplot() +
                        dplyr::filter(year == 2021),
                      aes(x = x, 
                          y = y,
-                         fill = cut(temperature, breaks = length(nbs_ebs_temp_breaks)))) +
+                         fill = cut(temperature, breaks = nbs_ebs_temp_breaks))) +
+  ggplot2::geom_sf(data = nbs_ebs_agg_strata, 
+                   fill = NA,
+                   color = "black") +
+  ggplot2::geom_text(data = data.frame(x = -158.5, 
+                                       y = 62.4, 
+                                       lab = "Alaska") %>%
+                       akgfmaps::transform_data_frame_crs(out.crs = coldpool:::ebs_proj_crs),
+                     mapping = aes(x = x,
+                                   y = y,
+                                   label = lab),
+                     size = rel(8)) +
+  ggplot2::coord_sf(xlim = panel_extent$x, 
+                    ylim = panel_extent$y) +
+  ggplot2::scale_x_continuous(name = "Longitude", 
+                              breaks = nbs_ebs_layers$lon.breaks) + 
+  ggplot2::scale_y_continuous(name = "Latitude", 
+                              breaks = nbs_ebs_layers$lat.breaks) +
+  ggplot2::scale_fill_manual(values = viridis_pal(option = nbs_ebs_viridis_option)(length(nbs_ebs_temp_breaks))) +
+  theme_bw() +
+  ggplot2::theme(axis.title = element_blank(),
+                 axis.text = element_text(color = "black"),
+                 axis.ticks = element_line(color = "black"),
+                 panel.border = element_rect(color = "black", fill = NA),
+                 panel.background = element_rect(color = "black", fill = NA),
+                 legend.key.width = unit(12, "mm"),
+                 legend.position = "none",
+                 legend.direction = "horizontal", 
+                 plot.margin = unit(c(5.5, 5.5,-25,5.5), units = "pt"))
+
+ebs_nbs_temperature_contour_map <- ggplot2::ggplot() +
+  ggplot2::geom_sf(data = nbs_ebs_layers$akland, 
+                   fill = "grey70", 
+                   color = "black") +
+  ggplot2::geom_sf(data = nbs_ebs_layers$survey.area, fill = "grey65") +
+  ggplot2::geom_tile(data = bt_year_df %>%
+                       dplyr::filter(year == 2021),
+                     aes(x = x, 
+                         y = y,
+                         fill = cut(temperature, breaks = nbs_ebs_temp_breaks))) +
+  ggplot2::geom_contour(data = bt_year_df %>%
+                       dplyr::filter(year == 2021),
+                     aes(x = x, 
+                         y = y,
+                         z = temperature),
+                     breaks = 2,
+                     color = "white",
+                     size = rel(1.1)) +
   ggplot2::geom_sf(data = nbs_ebs_agg_strata, 
                    fill = NA,
                    color = "black") +
@@ -301,8 +348,17 @@ ebs_nbs_map <- cowplot::plot_grid(ebs_nbs_temperature_map,
                    nrow = 2,
                    rel_heights = c(0.8,0.2))
 
+ebs_nbs_contour_map <- cowplot::plot_grid(ebs_nbs_temperature_contour_map,
+                   temp_map_cbar,
+                   nrow = 2,
+                   rel_heights = c(0.8,0.2))
+
 png(filename = here::here("plots", "nbs_ebs_temperature_map.png"), width = 6, height = 6, units = "in", res = fig_res)
 print(ebs_nbs_map)
+dev.off()
+
+png(filename = here::here("plots", "nbs_ebs_temperature_contour_map.png"), width = 6, height = 6, units = "in", res = fig_res)
+print(ebs_nbs_contour_map)
 dev.off()
 ```
 
