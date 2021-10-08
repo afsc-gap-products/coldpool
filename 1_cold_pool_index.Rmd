@@ -326,7 +326,8 @@ ebs_nbs_temperature_map <- ggplot2::ggplot() +
                        dplyr::filter(year == 2021),
                      aes(x = x, 
                          y = y,
-                         fill = cut(temperature, breaks = length(nbs_ebs_temp_breaks)))) +
+                         fill = cut(temperature, 
+                                    breaks = nbs_ebs_temp_breaks))) +
   ggplot2::geom_sf(data = nbs_ebs_agg_strata, 
                    fill = NA,
                    color = "black") +
