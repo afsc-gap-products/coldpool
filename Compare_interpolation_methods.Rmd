@@ -53,10 +53,12 @@ temperature_df <- RODBC::sqlQuery(channel = channel,
   # Calculate cold pool area using interpolation methods ----
   # Writes:
   # -- /output/raster/[method]_[year]_gear_temperature.tif: GeoTIFF raster files for each interpolation method and year
-  # -- /output/estimate_cpa/cpa_out.csv: Cold pool areas by year for each interpolation method.
-cpa_df <- interpolate_gear_temp(temp_data_path = here::here("data", "2021-09-28_index_hauls_temperature_data.csv"),
-                        proj_crs = proj_crs,
-                        cell_resolution = 5000)
+cpa_df <- interpolation_wrapper(temp_data_path = here::here("data", "2021-09-28_index_hauls_temperature_data.csv"),
+                                proj_crs = coldpool:::ebs_proj_crs,
+                                cell_resolution = 5000,
+                                select_years = 1982,year(Sys.Date()), 
+                                interp_variable = "gear_temperature",
+                                select_region = "sebs")
 ```
 
 # Comparison of interpolation methods
