@@ -264,7 +264,7 @@ ebs_nbs_temperature_map <- ggplot2::ggplot() +
                               breaks = nbs_ebs_layers$lon.breaks) + 
   ggplot2::scale_y_continuous(name = "Latitude", 
                               breaks = nbs_ebs_layers$lat.breaks) +
-  ggplot2::scale_fill_manual(values = viridis_pal(option = nbs_ebs_viridis_option)(length(nbs_ebs_temp_breaks))) +
+  ggplot2::scale_fill_manual(values = viridis_pal(option = nbs_ebs_viridis_option)(length(nbs_ebs_temp_breaks)-1)) +
   theme_bw() +
   ggplot2::theme(axis.title = element_blank(),
                  axis.text = element_text(color = "black"),
@@ -311,7 +311,7 @@ ebs_nbs_temperature_contour_map <- ggplot2::ggplot() +
                               breaks = nbs_ebs_layers$lon.breaks) + 
   ggplot2::scale_y_continuous(name = "Latitude", 
                               breaks = nbs_ebs_layers$lat.breaks) +
-  ggplot2::scale_fill_manual(values = viridis_pal(option = nbs_ebs_viridis_option)(length(nbs_ebs_temp_breaks))) +
+  ggplot2::scale_fill_manual(values = viridis_pal(option = nbs_ebs_viridis_option)(length(nbs_ebs_temp_breaks)-1)) +
   theme_bw() +
   ggplot2::theme(axis.title = element_blank(),
                  axis.text = element_text(color = "black"),
@@ -324,7 +324,7 @@ ebs_nbs_temperature_contour_map <- ggplot2::ggplot() +
                  plot.margin = unit(c(5.5, 5.5,-25,5.5), units = "pt"))
 
 temp_map_cbar <- coldpool::legend_discrete_cbar(breaks = nbs_ebs_temp_breaks,
-                                                 colors = viridis::viridis_pal(option = "H"),
+                                                 colors = viridis::viridis_pal(option = "H")(length(nbs_ebs_temp_breaks)-1),
                                                  legend_direction = "horizontal",
                                                  font_size = 3,
                                                  width = 0.1,
