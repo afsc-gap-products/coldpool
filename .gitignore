@@ -48,5 +48,5 @@ vignettes/*.pdf
 /paper/
 *.pptx
 /Presentation/
-/plots/
 /output/
+*.tiff
