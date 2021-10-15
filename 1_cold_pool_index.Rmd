@@ -15,19 +15,74 @@ addr:
 
 ```{r setup, message=FALSE, warning=FALSE, include=FALSE}
 library(coldpool)
+library(akgfmaps)
 
 if(!dir.exists("plots")) {dir.create("plots")}
 
 fig_res <- 600
 cpa_palette <- c("#21dae7", "#0071ff", "#0000e3", "#000040")
-sebs_layers <- akgfmaps::get_base_layers(select.region = "sebs")
 
 coldpool:::cold_pool_index$YEAR[order(coldpool:::cold_pool_index$AREA_LTE2_KM2)]
 coldpool:::cold_pool_index$YEAR[order(-1*coldpool:::cold_pool_index$MEAN_GEAR_TEMPERATURE)]
 coldpool:::cold_pool_index$YEAR[order(-1*coldpool:::cold_pool_index$MEAN_SURFACE_TEMPERATURE)]
 ```
 
-```{r fig1_stacked_area_plot, message=FALSE, warning=FALSE, include=FALSE}
+```{r fig1_cold_pool_index, message=FALSE, warning=FALSE, include=FALSE}
+
+cpi_df <- coldpool:::cold_pool_index %>%
+  dplyr::mutate(group = YEAR < 2020,
+                var = "Cold Pool Index",
+                cpi_rank = rank(AREA_LTE2_KM2))
+
+cpi_sd <- sd(cpi_df$AREA_LTE2_KM2/1000)
+cpi_mean <- mean(cpi_df$AREA_LTE2_KM2/1000)
+
+plot_cpi_timeseries <- ggplot(data = cpi_df,
+                              mapping = aes(x = YEAR,
+                                            y = AREA_LTE2_KM2/1000,
+                                            group = group,
+                                            label = cpi_rank)) +
+  geom_point(size = rel(2),
+             color = "#000040") +
+  geom_line(color = "#000040") +
+  geom_hline(yintercept = cpi_mean,
+             linetype = 2,
+             color = "#000040") +
+  geom_hline(yintercept = cpi_mean + c(cpi_sd, -1*cpi_sd),
+             linetype = 3,
+             color = "#000040") +
+  scale_y_continuous(name = expression(bold("Cold Pool Area"~("thousand"~km^2)))) +
+  scale_x_continuous(name = "Year",
+                     breaks = seq(1980,2020,4)) +
+  facet_wrap(~var) +
+  theme_bw() +
+  theme(axis.title = element_text(color = "black", face = "bold"),
+        axis.text = element_text(color = "black"),
+        axis.ticks = element_line(color = "black"),
+        panel.grid = element_blank(),
+        legend.title = element_blank(),
+        legend.position = "bottom",
+        strip.text = element_text(size = 9,
+                                  color = "white",
+                                  face = "bold",
+                                  margin = margin(0.5, 0, 0.5, 0, "mm")),
+        strip.background = element_rect(fill = "#0055a4",
+                                        color = NA))
+
+png(filename = here::here("plots", "cold_pool_index.png"), 
+    width = 6,
+    height = 3, 
+    units = "in",
+    res = 300)
+print(plot_cpi_timeseries)
+dev.off()
+```
+
+
+```{r fig2_cpa_stacked_area, message=FALSE, warning=FALSE, include=FALSE}
+sebs_layers <- akgfmaps::get_base_layers(select.region = "sebs",
+                                         set.crs = coldpool:::ebs_proj_crs)
+
 area_df <- coldpool:::cold_pool_index %>%
   dplyr::mutate(lteminus1 = AREA_LTEMINUS1_KM2,
                 lte0 = AREA_LTE0_KM2 - AREA_LTEMINUS1_KM2,
@@ -44,15 +99,15 @@ stacked_area_plot <- ggplot() +
   geom_area(data = area_df %>%
               dplyr::filter(YEAR < 2020),
             mapping = aes(x = YEAR,
-                  y = proportion,
-                fill = variable)) +
+                          y = proportion,
+                          fill = variable)) +
   geom_point(data = area_df %>%
-              dplyr::filter(YEAR == 2021),
-            mapping = aes(x = YEAR,
-                y = proportion,
-                fill = variable),
-            shape = 21,
-            size = rel(3)) +
+               dplyr::filter(YEAR == 2021),
+             mapping = aes(x = YEAR,
+                           y = proportion,
+                           fill = variable),
+             shape = 21,
+             size = rel(3)) +
   scale_fill_manual(name = "Temperature", 
                     values = cpa_palette) +
   scale_y_continuous(name = "Proportion of EBS Shelf (Plus NW) Survey Area",
@@ -75,11 +130,6 @@ stacked_area_plot <- ggplot() +
 png(file = here::here("plots", "stacked_temperature.png"), height = 4, width = 6, units = "in", res = 600)
 print(stacked_area_plot)
 dev.off()
-```
-
-```{r fig2_cold_pool_grid, message=FALSE, warning=FALSE, include=FALSE}
-sebs_layers <- get_base_layers(select.region = "sebs",
-                              set.crs = coldpool:::ebs_proj_crs)
 
 year_vec <- as.numeric(gsub("[^0-9.-]", "", names(coldpool:::ebs_bottom_temperature)))
 start_year <- which(year_vec == 2002)
@@ -94,7 +144,7 @@ for(i in start_year:length(year_vec)) {
   sel_layer_df <- sel_layer_df %>%
     dplyr::filter(temperature <= 2)
   sel_layer_df$year <- year_vec[i]
-
+  
   if(i == start_year) {
     bt_year_df <- sel_layer_df
   } else{
@@ -117,21 +167,21 @@ label_2020 <- data.frame(x = mean(panel_extent$x),
                          year = 2020)
 
 cold_pool_cbar <- coldpool::legend_discrete_cbar(breaks = c(-Inf, -1, 0, 1, 2),
-                               colors = rev(c("#21dae7", "#0071ff", "#0000e3", "#000040")),
-                               legend_direction = "vertical",
-                               font_size = 3,
-                               width = 0.1,
-                               expand_size.x = 0.3,
-                               expand_size.y = 0.3,
-                               expand.x = 0.2,
-                               expand.y = 0.9,
-                               spacing_scaling = 1,
-                               text.hjust = 0,
-                               font.family = "sans",
-                               neat.labels = FALSE) + 
+                                                 colors = rev(c("#21dae7", "#0071ff", "#0000e3", "#000040")),
+                                                 legend_direction = "vertical",
+                                                 font_size = 3.5,
+                                                 width = 0.1,
+                                                 expand_size.x = 0.3,
+                                                 expand_size.y = 0.3,
+                                                 expand.x = 0.2,
+                                                 expand.y = 0.9,
+                                                 spacing_scaling = 1,
+                                                 text.hjust = 0,
+                                                 font.family = "sans",
+                                                 neat.labels = FALSE) + 
   annotate("text", 
            x = 1.1, 
-           y = 2.2, 
+           y = 2.05, 
            label =  expression(bold("Bottom\nTemperature"~(degree*C))), 
            size = rel(3.2)) + 
   theme(plot.margin = unit(c(-25, 0,0,-10), units = "pt"))
@@ -193,7 +243,37 @@ cold_pool_grid <- cowplot::plot_grid(
   rel_widths = c(0.9,0.2)
 )
 
-# Need to write output
+coldpool_with_area <-
+  cowplot::plot_grid(
+    cowplot::plot_grid(
+      cold_pool_panels,
+      stacked_area_plot +
+        facet_wrap(~"Proportion of EBS Shelf Survey Area") +
+        scale_y_continuous(name = "Proportion",
+                           limits = c(0, 1),
+                           expand = c(0, 0),
+                           breaks = seq(0,1,0.1)) +
+        theme(legend.position = "none", 
+              plot.margin = unit(c(-5,5,5,5), units = "pt"),
+              strip.text = element_text(size = 9,
+                                        color = "white",
+                                        face = "bold",
+                                        margin = margin(0.5, 0, 0.5, 0, "mm")),
+              strip.background = element_rect(fill = "#0055a4",
+                                              color = NA)),
+      rel_heights = c(0.75, 0.25),
+      align = "h",
+      nrow = 2),
+    cowplot::plot_grid(NA, cold_pool_cbar, NA,
+                       nrow = 3,
+                       rel_heights = c(0.2, 0.6, 0.2)),
+    rel_widths = c(0.9,0.2)
+  )
+
+png(file = here::here("plots", "coldpool_with_area.png"), height = 8, width = 6, units = "in", res = fig_res)
+print(coldpool_with_area)
+dev.off()
+
 png(file = here::here("plots", "coldpool.png"), height = 6, width = 6, units = "in", res = fig_res)
 print(cold_pool_grid)
 graphics.off()
@@ -236,6 +316,7 @@ panel_extent <- data.frame(y = c(53, 67),
 
 nbs_ebs_temp_breaks <- c(-Inf, seq(-1,8,1), Inf)
 nbs_ebs_viridis_option <- "H" # viridis turbo palette
+n_temp_breaks <- length(nbs_ebs_temp_breaks)-1
 
 ebs_nbs_temperature_map <- ggplot2::ggplot() +
   ggplot2::geom_sf(data = nbs_ebs_layers$akland, 
@@ -246,7 +327,8 @@ ebs_nbs_temperature_map <- ggplot2::ggplot() +
                        dplyr::filter(year == 2021),
                      aes(x = x, 
                          y = y,
-                         fill = cut(temperature, breaks = nbs_ebs_temp_breaks))) +
+                         fill = cut(temperature, 
+                                    breaks = nbs_ebs_temp_breaks))) +
   ggplot2::geom_sf(data = nbs_ebs_agg_strata, 
                    fill = NA,
                    color = "black") +
@@ -264,7 +346,7 @@ ebs_nbs_temperature_map <- ggplot2::ggplot() +
                               breaks = nbs_ebs_layers$lon.breaks) + 
   ggplot2::scale_y_continuous(name = "Latitude", 
                               breaks = nbs_ebs_layers$lat.breaks) +
-  ggplot2::scale_fill_manual(values = viridis_pal(option = nbs_ebs_viridis_option)(length(nbs_ebs_temp_breaks)-1)) +
+  ggplot2::scale_fill_manual(values = viridis_pal(option = nbs_ebs_viridis_option)(n_temp_breaks)) +
   theme_bw() +
   ggplot2::theme(axis.title = element_blank(),
                  axis.text = element_text(color = "black"),
@@ -275,6 +357,7 @@ ebs_nbs_temperature_map <- ggplot2::ggplot() +
                  legend.position = "none",
                  legend.direction = "horizontal", 
                  plot.margin = unit(c(5.5, 5.5,-25,5.5), units = "pt"))
+
 
 ebs_nbs_temperature_contour_map <- ggplot2::ggplot() +
   ggplot2::geom_sf(data = nbs_ebs_layers$akland, 
@@ -311,7 +394,7 @@ ebs_nbs_temperature_contour_map <- ggplot2::ggplot() +
                               breaks = nbs_ebs_layers$lon.breaks) + 
   ggplot2::scale_y_continuous(name = "Latitude", 
                               breaks = nbs_ebs_layers$lat.breaks) +
-  ggplot2::scale_fill_manual(values = viridis_pal(option = nbs_ebs_viridis_option)(length(nbs_ebs_temp_breaks)-1)) +
+  ggplot2::scale_fill_manual(values = viridis_pal(option = nbs_ebs_viridis_option)(n_temp_breaks)) +
   theme_bw() +
   ggplot2::theme(axis.title = element_blank(),
                  axis.text = element_text(color = "black"),
@@ -324,7 +407,7 @@ ebs_nbs_temperature_contour_map <- ggplot2::ggplot() +
                  plot.margin = unit(c(5.5, 5.5,-25,5.5), units = "pt"))
 
 temp_map_cbar <- coldpool::legend_discrete_cbar(breaks = nbs_ebs_temp_breaks,
-                                                 colors = viridis::viridis_pal(option = "H")(length(nbs_ebs_temp_breaks)-1),
+                                                 colors = viridis::viridis_pal(option = "H")(n_temp_breaks),
                                                  legend_direction = "horizontal",
                                                  font_size = 3,
                                                  width = 0.1,
@@ -434,8 +517,50 @@ plot_average_temperature <- ggplot(data = all_temperatures,
         strip.background = element_rect(fill = "#0055a4",
                                         color = NA))
 
+plot_sebs_average_temperature <- ggplot(data = all_temperatures %>%
+               dplyr::filter(region == "Eastern Bering Sea (summer BT survey)"),
+                                   mapping = aes(x = YEAR,
+                                                 y = value,
+                                                 color = variable,
+                                                 shape = variable, 
+                                                 group = paste0(group, variable))) +
+  geom_point(size = rel(2)) +
+  geom_line() +
+  geom_hline(data = ebs_mean_temp_df %>%
+               dplyr::filter(region == "Eastern Bering Sea (summer BT survey)"),
+             aes(yintercept = value,
+             color = variable),
+             linetype = 2) +
+  scale_color_manual(values = c(color_bt, color_sst)) +
+  scale_y_continuous(name = expression(bold("Average Temperature"~(degree*C))), 
+                     limits = c(0,11.2),
+                     breaks = seq(0,12,2),
+                     expand = c(0,0)) +
+  scale_x_continuous(name = "Year",
+                     breaks = seq(1980,2020,10)) +
+  facet_wrap(~region, scales = "free") +
+  theme_bw() +
+  theme(axis.title = element_text(color = "black", face = "bold"),
+        axis.text = element_text(color = "black"),
+        axis.ticks = element_line(color = "black"),
+        panel.border = element_rect(color = "black", fill = NA),
+        panel.background = element_rect(color = "black", fill = NA),
+        panel.grid = element_blank(),
+        legend.title = element_blank(),
+        legend.position = "bottom",
+        strip.text = element_text(size = 9,
+                                  color = "white",
+                                  face = "bold",
+                                  margin = margin(0.5, 0, 0.5, 0, "mm")),
+        strip.background = element_rect(fill = "#0055a4",
+                                        color = NA))
+
 png(file = here::here("plots", "average_temperature.png"), width = 6, height = 3, units = "in", res = fig_res)
 print(plot_average_temperature)
+dev.off()
+
+png(file = here::here("plots", "plot_sebs_average_temperature.png"), width = 6, height = 3, units = "in", res = fig_res)
+print(plot_sebs_average_temperature)
 dev.off()
 ```
 
@@ -444,36 +569,36 @@ Contributed by Sean Rohan^1^ and Lewis Barnett^1^
 **Contact**: sean.rohan@noaa.gov
 **Last updated**:  October 2021
 
-```{r fig.height=4,fig.width=6,fig.cap="\\label{fig:figs}Figure 1. Proportion of the eastern Bering Sea shelf survey area (including northwest strata 82 and 90) where bottom temperatures were $\\leq$ 2&deg;C, $\\leq$ 1&deg;C, $\\leq$ 0&deg;C, and $\\leq$ -1&deg;C for the 39-year bottom trawl survey time series (1982–2021).", message=FALSE, warning=FALSE, echo=FALSE}
-print(stacked_area_plot)
+```{r fig.height=3,fig.width=6,fig.cap="\\label{fig:figs}Figure 1. Area of the cold pool in the eastern Bering Sea (EBS) shelf bottom trawl survey area, as measured using observations from the EBS bottom trawl survey (including northwest strata 82 and 90) from 1982–2021. Dashed line denotes the grand mean of the time series and dotted lines show ±1 standard deviation.", message=FALSE, warning=FALSE, echo=FALSE}
+print(plot_cpi_timeseries)
 ```
 
-**Description of Indicator**: Here, we provide mean surface and bottom temperature time series, bottom temperature distribution for the current year, and the cold pool extent index time series and maps. The cold pool is defined as the area of the southeastern Bering Sea continental shelf with bottom temperature $\leq$ 2&deg;C, in square kilometers (km^2^). All products are derived from observations from standard survey stations of the AFSC eastern Bering Sea shelf bottom trawl survey (conducted in 2021 from date X to Y). 
+**Description of Indicator**: Here, we provide mean surface and bottom temperature time series, bottom temperature distribution for the current year, and the cold pool extent index time series and maps. The cold pool is defined as the area of the southeastern Bering Sea continental shelf with bottom temperature $\leq$ 2&deg;C, in square kilometers (km^2^). All products are derived from observations from standard survey stations of the AFSC eastern Bering Sea shelf bottom trawl survey (conducted in 2021 from May 30 to August 22). 
 
-**Methodological Changes**: In prior years, the cold pool index was calculated based on the area within the 2&deg;C bottom temperature isotherm derived from an inverse distance weighted interpolation, using a maximum of four observations in the weighting for each prediction. This year, we chose to change the interpolation method used to estimate this area. In comparing 10 different interpolation methods with leave-one-out-cross-validation, we found that ordinary kriging with Stein's parameterization of the Matern semivariance structure produced the lowest prediction error in the majority of years. Therefore, this was the method used to estimate cold pool extent for this and all prior years. 
+**Methodological Changes**: In prior years, the cold pool index was calculated based on the area within the 2&deg;C bottom temperature isotherm derived from an inverse distance weighted interpolation, using a maximum of four observations in the weighting for each prediction. This year, we changed the interpolation method used to estimate this area. In comparing 10 different interpolation methods with leave-one-out-cross-validation, we found that ordinary kriging with Stein's parameterization of the Matérn semivariogram model produced the lowest prediction error in the majority of years. Therefore, this was the method used to estimate cold pool extent for this and all prior years. 
 
 Similar changes have been made to mean surface and bottom temperature calculations. In prior years the mean temperature was calculated as the mean of observed temperatures weighted by stratum area, however this method can be sensitive to missing data. Therefore, in this and future years we calculate mean temperature from surfaces interpolated using ordinary kriging, as described above in the methodological changes of the cold pool index.
 
-```{r fig.cap="\\label{fig:figs}Figure 2. Cold pool extent in the eastern Bering Sea from 2002–2021, showing areas with bottom temperatures $\\leq$ 2&deg;C, $\\leq$ 1&deg;C, $\\leq$ 0&deg;C, and $\\leq$ -1&deg;C", fig.height=6, fig.width=6, message=FALSE, warning=FALSE, echo=FALSE}
-print(cold_pool_grid)
+```{r fig.cap="\\label{fig:figs}Figure 2. Cold pool extent in the eastern Bering Sea (EBS), as measured using observations from the EBS bottom trawl survey. Upper panels: Maps of cold pool extent in the EBS shelf survey area from 2002–2021. Lower panel: Extent of the cold pool in proportion to the total EBS shelf survey area from 1982–2021. Fill colors denote bottom temperatures $\\leq$ 2&deg;C, $\\leq$ 1&deg;C, $\\leq$ 0&deg;C, and $\\leq$ -1&deg;C.", fig.height=8, fig.width=6, message=FALSE, warning=FALSE, echo=FALSE}
+print(coldpool_with_area)
 ```
 
-**Status and Trends**: The cold pool extent has increased since 2018, yet the 2021 extent (58,975 km^2^) was the fourth lowest on record and remains one to two standard deviations below the grand mean of the time series (Figure 1).  Estimates from 2018 and 2019 were the lowest on record, followed by 2003, which was only slightly lower than the 2021 estimate. In general, the extent of isotherms at all thresholds $\leq$ 1&deg;C were similar, if slightly greater than prior record lows (Figure 1). As is typical when the extent is small, the cold pool was restricted to the northern edge of the eastern Bering Sea shelf (Figure 2). The coldest waters at the seafloor were restricted to the far northeast corner of the eastern Bering Sea shelf survey area, where temperatures were greater than -1&deg;C, with an extremely small extent of waters $\leq$ 1&deg;C (14,925 km^2^) and $\leq$ 0&deg;C (4,800 km^2^). However, cooler bottom temperatures were observed in the northern Bering Sea, including a substantial area of waters $\leq$ -1&deg;C located west-southwest of St. Lawrence Island, while extremely warm bottom temperatures were observed from Norton Sound to Nunivak Island (Figure 3).
+**Status and Trends**: The cold pool extent has increased since 2018, yet the 2021 extent (58,975 km^2^) was the fourth lowest on record and remains more than one standard deviation below the grand mean of the time series (Figure 1). Estimates of cold pool area from 2018 and 2019 were the smallest on record, followed by 2003, which was only slightly small than in 2021. As is typical when the extent is small, the cold pool was restricted to the northern edge of the eastern Bering Sea shelf bottom trawl survey area (Figure 2). In general, the spatial extents of isotherms at all thresholds $\leq$ 1&deg;C were similar, if slightly greater than prior record lows (Figure 2).  The coldest bottom temperatures were restricted to the far northwest corner of the eastern Bering Sea shelf survey area, where temperatures were greater than -1&deg;C, with an extremely small extent of waters $\leq$ 1&deg;C (14,925 km^2^) and $\leq$ 0&deg;C (4,800 km^2^). However, cooler bottom temperatures were observed in the northern Bering Sea, including a substantial area with bottom temperatures $\leq$ -1&deg;C along the U.S.-Russia convention line to the west-southwest of St. Lawrence Island, while extremely warm bottom temperatures were observed on the northern inner shelf from Norton Sound to Nunivak Island (Figure 3). The temperature difference between the inner shelf in the NBS and inner shelf in the EBS is partially due to seasonal thermal heating owing to the the NBS inner shelf being the last area sampled by the survey.
 
-Mean surface and bottom temperatures were cooler than the prior sampled year (2019), yet remained within one standard deviation above the grand mean of the time series (Figure 4). In 2021, mean bottom temperature was 3.3&deg;C, the fifth highest on record after 2019, 2018, and 2017, and 0.9&deg;C above the grand mean of the time series (2.5&deg;C). The 2021 mean surface temperature was 7.2&deg;C, which was 2.0&deg;C lower than in 2019 yet 0.5&deg;C higher than the grand mean of the time series (6.7&deg;C).
+Mean surface and bottom temperatures were cooler than in the prior survey year (2019) on the shelf of the eastern and northern Bering Sea  (Figure 4). In 2021, the mean bottom temperature in the eastern Bering Sea was 3.3&deg;C, the fifth highest on record after 2019, 2018, and 2017, and 0.9&deg;C above the grand mean of the time series (2.5&deg;C). The 2021 mean surface temperature was 7.2&deg;C, which was 2.0&deg;C lower than in 2019 yet 0.5&deg;C higher than the grand mean of the time series (6.7&deg;C).
 
-```{r fig.height=6,fig.width=6,fig.cap="\\label{fig:figs}Figure 3. Contour map of bottom temperatures from the 2021 eastern and northern Bering Sea shelf bottom trawl survey.", message=FALSE, warning=FALSE, echo=FALSE}
+```{r fig.height=6,fig.width=6,fig.cap="\\label{fig:figs}Figure 3. Contour map of bottom temperatures from the 2021 eastern and northern Bering Sea shelf bottom trawl surveys.", message=FALSE, warning=FALSE, echo=FALSE}
 print(ebs_nbs_map)
 ```
 
-```{r fig.height=3,fig.width=6,fig.cap="\\label{fig:figs}Figure 4. Average summer surface (green triangles) and bottom (blue circles) temperatures (&deg;C) of the eastern Bering Sea (EBS) shelf and northern Bering Sea (NBS) shelf based on data collected during standardized summer bottom trawl surveys from 1982–2021. Dashed lines represent the time series mean for the EBS (1982–2021, except 2020) and NBS (2010, 2017, 2019, 2021).", message=FALSE, warning=FALSE, echo=FALSE}
-print(plot_average_temperature)
+```{r fig.height=3,fig.width=6,fig.cap="\\label{fig:figs}Figure 4. Average summer surface (green triangles) and bottom (blue circles) temperatures (&deg;C) on the eastern Bering Sea (EBS) shelf based on data collected during standardized summer bottom trawl surveys from 1982–2021. Dashed lines represent the time series mean.", message=FALSE, warning=FALSE, echo=FALSE}
+print(plot_sebs_average_temperature)
 ```
 
-**Factors Influencing Observed Trends**: Fluctuations in the cold pool extent and temperatures at the bottom and surface are the result of interannual variability in climatic conditions influencing the formation and retreat of sea ice on the eastern Bering Sea shelf during the prior winter. Less sea ice, persisting for less time, results in a smaller cold pool extent and warmer temperatures.
+**Factors Influencing Observed Trends**: Fluctuations in the cold pool extent and temperatures at the bottom and surface are the result of interannual variability in climatic conditions influencing the formation and retreat of sea ice on the eastern Bering Sea shelf during the prior winter (Stabeno et al., 2012; Stabeno and Bell, 2019). Less sea ice, persisting for less time, results in a smaller cold pool extent and warmer temperatures.
 
-**Implications**: The distribution and extent of the cold pool directly influence thermal stratification, and overall, changes in surface and bottom temperature influence the spatial distribution of demersal community composition and benthic trophic structure (Mueter and Litzow, 2008; Spencer, 2008; Kotwicki and Lauth, 2013). When the cold pool is small, thermal stratification is weak and subarctic demersal fishes and invertebrates with warm-water affinity (e.g., arrowtooth flounder *Atheresthes stomias*) are often more diffusely distributed over the eastern Bering Sea shelf as there is no thermal barrier to their advance from the outer to inner shelf. In contrast, the majority of the subarctic fish and invertebrate community is comprised of species with cool-water affinity (e.g., flathead sole *Hippoglossoides elassodon* and northern rock sole *Lepidopsetta polyxystra*), and these species often contract in their area occupied and shift in mean distribution to the north or northwest when the cold pool is reduced. 
+**Implications**: The cold pool has a strong influence on the thermal stratification, and overall, changes in surface and bottom temperature influence the spatial structure of the demersal community (Spencer, 2008; Kotwicki and Lauth, 2013; Thorson et al., 2020), trophic structure of the eastern Bering Sea food web (Mueter and Litzow, 2008; Spencer et al., 2016), and demographic processes of fish populations (Gr&uuml;ss et al., 2021). When the cold pool is small, species with warm-water affinity (e.g., arrowtooth flounder *Atheresthes stomias*) are distributed more widely over the eastern Bering Sea shelf and expand across the shelf and to the north because there is no thermal barrier to migration. In contrast, the distribution of species with cold water affinity (e.g., Arctic cod *Boreogadus saida* Bering flounder *Hippoglossoides robustus*) contracts to the north when the cold pool is small. 
 
-Although the definition of the cold pool boundary is the 2&deg;C isotherm, recent studies indicate that the better predictor of spatial distribution for many fishes and crabs could be the 1&deg;C isotherm (Kotwicki and Lauth, 2013) or the 0&deg;C isotherm for pollock *Gadus chalcogrammus* and Pacific cod *Gadus macrocephalus* (Baker 2021; Eisner et al. 2020). Given that waters cooler than 1&deg;C and 0&deg;C were much less extensive than those defined by the 2&deg;C isotherm, it would appear that the cold pool produced very little spatial structure in the benthic thermal habitat of the southeastern Bering Sea in 2021, although cooler bottom temperatures in the northern Bering Sea likely provided some spatial structure in the far north-central eastern Bering Sea shelf. 
+While the cold pool area is defined based on the 2&deg;C isotherm, recent studies suggest that a more ecologically relevant temperature for several subarctic fishes and crabs is the 1&deg;C isotherm (Kotwicki and Lauth, 2013) or the 0&deg;C isotherm for walleye pollock *Gadus chalcogrammus* and Pacific cod *Gadus macrocephalus* (Baker, 2021; Eisner et al., 2020). Considering the small extent of bottom temperatures cooler than 0&deg;C and 1&deg;C, it is likely that the bottom temperatures on the eastern Bering Sea shelf did not impose a major thermal barrier to migration for subarctic species in 2021. However, cooler bottom temperatures in the northern Bering Sea (Fig. 3) may have imposed some barrier to migration. 
 
-Although the mean surface temperature was closer to its long-term mean than was mean bottom temperature, 2021 conditions represent a continuation of the warm phase of surface temperature that has persisted since 2014. These warm conditions, in concert with seasonal sea ice dynamics, affect energy flux through the ecosystem by modifying the phenology and community structure of phytoplankton and zooplankton, which influences horizontal and vertical distribution, condition, survival and recruitment in larval and juvenile fishes (Hunt et al., 2002; Coyle et al., 2011; Hunt et al., 2011; Duffy-Anderson et al. 2017). 
+Although the mean surface temperature was closer to its long-term mean than mean bottom temperature in the eastern Bering Sea in 2019, conditions in 2021 are a continuation of above average surface temperatures that has persisted since 2014. These warm conditions, in concert with seasonal sea ice dynamics, affect energy flux through the ecosystem by modifying the phenology and community structure of phytoplankton and zooplankton, which influences horizontal and vertical distribution, condition, survival and recruitment in larval and juvenile fishes (Hunt et al., 2002; Coyle et al., 2011; Hunt et al., 2011; Duffy-Anderson et al., 2017). 
