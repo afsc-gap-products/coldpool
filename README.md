@@ -22,4 +22,4 @@ devtools::install_github("sean-rohan-noaa/coldpool")
 ```
 # Cold pool area and mean bottom temperature
 
-![Cold pool area from 1982-2021, based on interpolated survey bottom temperatures](./main/plots/coldpool_with_area.png)
+![Cold pool area from 1982-2021, based on interpolated survey bottom temperatures](./plots/coldpool_with_area.png)
