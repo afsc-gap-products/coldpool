@@ -21,7 +21,8 @@ devtools::install_github("sean-rohan-noaa/coldpool")
 
 # Usage
 
-This package is used to calculate temperature products and users can access the temperature products using the package can be accessed directly from datasets that are built into the package. For example, after installing the package cold pool area (area with temperature less than or equal to 2°C), area of other isotherms (less than or equal to 1,0,-1 °C), mean bottom temperature for the EBS, and mean surface temperature during the EBS survey from 1982 onward can be accessed in a data frame as:
+## Accessing datasets
+Users can access temperature products using directly from datasets that are built into the package. For example, after installing the package, users can access a data frame containing cold pool area (area with temperature less than or equal to 2°C), area of other isotherms (less than or equal to 1,0,-1 °C), mean bottom temperature for the EBS, and mean surface temperature, using:
 ```{r}
 coldpool:::cold_pool_index
 ```
@@ -31,18 +32,22 @@ Documentation for the dataset can be accessed using:
 ?coldpool:::cold_pool_index
 ```
 
-The datasets included in the package are:
-**cold_pool_index*: Data frame containing areas with temperatures less than or equal to 2, 1,0, and -1 °C, mean bottom temperatures for the EBS, and mean surface temperature during the EBS survey for 1982-2021 (excluding 2020 due to cancelled survey).
-**nbs_mean_bottom_temperature*: Data frame of mean bottom temperature in the NBS during years with a full EBS+NBS standardized survey (2010, 2017, 2019, 2021).
-**ebs_bottom_temperature*: Interpolated rasters of bottom temperature for the EBS survey area from 1982-2021 (excluding 2020 due to cancelled survey).
-**ebs_surface_temperature*: Interpolated rasters of sea surface temperature for the EBS survey area from 1982-2021 (excluding 2020 due to cancelled survey).
-**nbs_ebs_bottom_temperature*: Interpolated rasters of bottom temperature for the full EBS and NBS survey area for years with a full EBS+NBS standardized survey (2010, 2017, 2019, 2021).
-**nbs_ebs_surface_temperature*: Interpolated rasters of sea surface temperature for the full EBS and NBS survey area for years with a full EBS+NBS standardized survey (2010, 2017, 2019, 2021).
-**cpa_pre2021*: Data frame of cold pool area and mean temperatures calculated using the interpolation method used prior to 2021.
+## Datasets in the package
+
+Datasets included in the package are:
+<li>*cold_pool_index*: Data frame containing areas with temperatures less than or equal to 2, 1,0, and -1 °C, mean bottom temperatures for the EBS, and mean surface temperature during the EBS survey for 1982-2021 (excluding 2020 due to cancelled survey).</li>
+<li>*nbs_mean_bottom_temperature*: Data frame of mean bottom temperature in the NBS during years with a full EBS+NBS standardized survey (2010, 2017, 2019, 2021).</li>
+<li>*ebs_bottom_temperature*: Interpolated rasters of bottom temperature for the EBS survey area from 1982-2021 (excluding 2020 due to cancelled survey).</li>
+<li>*ebs_surface_temperature*: Interpolated rasters of sea surface temperature for the EBS survey area from 1982-2021 (excluding 2020 due to cancelled survey).</li>
+<li>*nbs_ebs_bottom_temperature*: Interpolated rasters of bottom temperature for the full EBS and NBS survey area for years with a full EBS+NBS standardized survey (2010, 2017, 2019, 2021).</li>
+<li>*nbs_ebs_surface_temperature*: Interpolated rasters of sea surface temperature for the full EBS and NBS survey area for years with a full EBS+NBS standardized survey (2010, 2017, 2019, 2021).</li>
+<li>*cpa_pre2021*: Data frame of cold pool area and mean temperatures calculated using the interpolation method used prior to 2021.</li>
 
 
-# Cold pool area and mean bottom temperature
+# Cold pool area and temperature trends
 *Updated: November 2021*
+
+Cold pool area and temperature trends are reported in the annual [Ecosystem Status Reports](https://www.fisheries.noaa.gov/alaska/ecosystems/ecosystem-status-reports-gulf-alaska-bering-sea-and-aleutian-islands) for the eastern Bering Sea and ecosystem and socioeconomic profiles for EBS stocks. Temperature products are also used as covariates in some [stock assessment](https://www.fisheries.noaa.gov/alaska/population-assessments/north-pacific-groundfish-stock-assessments-and-fishery-evaluation) models.
 
 ![Cold pool area from 1982-2021, based on interpolated survey bottom temperatures](./plots/coldpool_with_area.png)
  <font size="3"> _Figure 1. Cold pool extent in the eastern Bering Sea from 2002–2021, showing areas with bottom temperatures ≤ 2°C, ≤ 1°C, ≤ 0°C, and ≤ -1°C (upper panels), and proportion of the southeastern Bering Sea survey area with bottom temperatures ≤ 2°C, ≤ 1°C, ≤ 0°C, and ≤ -1°C (lower panel)._</font>
