@@ -20,3 +20,6 @@ If you encounter problems installing the akgfmaps package, please refer to the a
 ```{r}
 devtools::install_github("sean-rohan-noaa/coldpool")
 ```
+# Cold pool area and mean bottom temperature
+
+![Cold pool area from 1982-2021, based on interpolated survey bottom temperatures](./blob/main/plots/coldpool_with_area.png)
