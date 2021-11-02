@@ -1,9 +1,7 @@
 # Eastern Bering Sea Cold Pool Index
 _Sean Rohan and Lewis Barnett_
 
-This repository contains a package that is used to calculate the Cold Pool Index for the eastern Bering Sea using bottom temperature data collected during AFSC bottom trawl surveys, where the cold pool index is defined as the area of the NOAA/AFSC/RACE eastern Bering Sea bottom trawl survey footprint with bottom temperatures less than or equal to 2° Celsius, in square kilometers.
-
-This repository also includes an analysis to compare interpolation methods for calculating the cold pool index.
+This repository contains a package that is used to calculate the *cold pool index*, mean sea surface temperature, and mean bottom temperature using temperature data collected during bottom trawl surveys of the eastern Bering Sea conducted by NOAA/AFSC/RACE's Groundfish Assessment Program. The cold pool index is defined as the area of the NOAA/AFSC/RACE eastern Bering Sea bottom trawl survey footprint with bottom temperatures less than or equal to 2° Celsius, in square kilometers. This package includes temperature products (mean temperatures cold pool area, interpolated temperature raster) that are updated on an annual basis following the eastern Bering Sea shelf bottom trawl survey. 
 
 The most recent version of this package was developed and tested using R 4.1.1.
 
@@ -20,6 +18,29 @@ If you encounter problems installing the akgfmaps package, please refer to the a
 ```{r}
 devtools::install_github("sean-rohan-noaa/coldpool")
 ```
+
+# Usage
+
+This package is used to calculate temperature products and users can access the temperature products using the package can be accessed directly from datasets that are built into the package. For example, after installing the package cold pool area (area with temperature less than or equal to 2°C), area of other isotherms (less than or equal to 1,0,-1 °C), mean bottom temperature for the EBS, and mean surface temperature during the EBS survey from 1982 onward can be accessed in a data frame as:
+```{r}
+coldpool:::cold_pool_index
+```
+
+Documentation for the dataset can be accessed using:
+```{r}
+?coldpool:::cold_pool_index
+```
+
+The datasets included in the package are:
+**cold_pool_index*: Data frame containing areas with temperatures less than or equal to 2, 1,0, and -1 °C, mean bottom temperatures for the EBS, and mean surface temperature during the EBS survey for 1982-2021 (excluding 2020 due to cancelled survey).
+**nbs_mean_bottom_temperature*: Data frame of mean bottom temperature in the NBS during years with a full EBS+NBS standardized survey (2010, 2017, 2019, 2021).
+**ebs_bottom_temperature*: Interpolated rasters of bottom temperature for the EBS survey area from 1982-2021 (excluding 2020 due to cancelled survey).
+**ebs_surface_temperature*: Interpolated rasters of sea surface temperature for the EBS survey area from 1982-2021 (excluding 2020 due to cancelled survey).
+**nbs_ebs_bottom_temperature*: Interpolated rasters of bottom temperature for the full EBS and NBS survey area for years with a full EBS+NBS standardized survey (2010, 2017, 2019, 2021).
+**nbs_ebs_surface_temperature*: Interpolated rasters of sea surface temperature for the full EBS and NBS survey area for years with a full EBS+NBS standardized survey (2010, 2017, 2019, 2021).
+**cpa_pre2021*: Data frame of cold pool area and mean temperatures calculated using the interpolation method used prior to 2021.
+
+
 # Cold pool area and mean bottom temperature
 *Updated: November 2021*
 
