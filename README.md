@@ -64,6 +64,10 @@ cold_pool_index
 <dd><p>Data frame of cold pool area and mean temperatures calculated using the interpolation method used prior to 2021.</p></dd>
 </dl>
 
+## Caveat emptor
+
+The temperature data products in this package are an annual snapshot of temperatures during bottom trawl surveys. Combined with biological data collected during bottom trawl surveys, these temperature data can provide a simultaneous characterization of thermal habitat and demersal fauna distribution and abundance in the eastern Bering Sea. However, these temperature data products are not adjusted to account for seasonal heating so they do not provide a snapshot of temperature at a specific point in time. Users who are interested in spatially integrated or spatially resolved estimates of temperature at specific points in time that do account for seasonal heating, may with to consider consider using temperature predictions from the [https://github.com/beringnpz/roms-bering-sea](Bering10K BEST-NPZ model) [http://www.doi.org/10.5194/gmd-13-597-2020]((Kearney et al., 2020)), [https://github.com/jordanwatson/aksst](satellite-derived sea surface temperature) products, or alternative oceanographic sampling data, such as those collected by NOAA's [https://www.ecofoci.noaa.gov/](EcoFOCI) program.
+
 # Methods
 
 ## Data collection
@@ -79,7 +83,7 @@ Temperature data are collected at every survey station using temperature sensors
 
 Raster surfaces and temperature products are produced by interpolating temperature data collected during surveys using ordinary kriging with Stein’s parameterization of the Matérn semivariogram. Only data from hauls with 'good' performance are included in temperature calculations. Statistics that summarize temperature patterns are produced from raster surfaces: areas of isotherms in the EBS shelf survey area (2°C, 1°C, 0°C, -1°C), mean bottom temperature over the EBS shelf and NBS (i.e., gear temperature), and sea surface temperature over the EBS shelf and NBS. For EBS shelf survey area, temperature data used to calculate summary statistics do not include NBS data because of a warm bias in NBS survey years that is caused by the southern portion of the nearshore domain of the NBS being sampled last. The interpolation region for the EBS shelf includes both the standard area (sampled from 1982-present) and the NW strata (sampled from 1987-present) for all years (Figure 1). The NBS interpolation only includes data from years with a full NBS survey and uses data from the EBS Standard, EBS NW, and NBS survey areas.
 
-# Data product and package updates
+## Data product and package updates
 
 Temperature data products in the coldpool package are updated on an annual basis after the conclusion of summer bottom trawl surveys.
 
