@@ -21,12 +21,20 @@ If you encounter problems installing the akgfmaps package, please refer to the a
 devtools::install_github("sean-rohan-noaa/coldpool")
 ```
 # Cold pool area and mean bottom temperature
+*Updated: November 2021*
 
 ![Cold pool area from 1982-2021, based on interpolated survey bottom temperatures](./plots/coldpool_with_area.png)
-_Figure 1. Cold pool extent in the eastern Bering Sea from 2002–2021, showing areas with bottom temperatures ≤ 2°C, ≤ 1°C, ≤ 0°C, and ≤ -1°C (upper panels), and proportion of the southeastern Bering Sea survey area with bottom temperatures ≤ 2°C, ≤ 1°C, ≤ 0°C, and ≤ -1°C (lower panel)._
+ <font size="3"> _Figure 1. Cold pool extent in the eastern Bering Sea from 2002–2021, showing areas with bottom temperatures ≤ 2°C, ≤ 1°C, ≤ 0°C, and ≤ -1°C (upper panels), and proportion of the southeastern Bering Sea survey area with bottom temperatures ≤ 2°C, ≤ 1°C, ≤ 0°C, and ≤ -1°C (lower panel)._</font>
+
+The cold pool extent has increased since 2018, yet the 2021 extent (58,975 km2) was the fourth lowest on record and remains one to two standard deviations below the grand mean of the time series (Figure 1). Estimates from 2018 and 2019 were the lowest on record, followed by 2003, which was only slightly lower than the 2021 estimate. In general, the extent of isotherms at all thresholds ≤ 1°C were similar, if slightly greater than prior record lows (Figure 1). As is typical when the extent is small, the cold pool was restricted to the northern edge of the eastern Bering Sea shelf (Figure 1). 
 
 ![Mean bottom temperature in the eastern Bering Sea during 2021, based on interpolated survey bottom temperatures](./plots/nbs_ebs_temperature_map.png)
-_Figure 2. Contour map of bottom temperatures from the 2021 eastern and northern Bering Sea shelf bottom trawl survey._
+ <font size="3"> _Figure 2. Contour map of bottom temperatures from the 2021 eastern and northern Bering Sea shelf bottom trawl survey._</font>
+
+The coldest waters at the seafloor were restricted to the far northeast corner of the eastern Bering Sea shelf survey area, where temperatures were greater than -1°C, with an extremely small extent of waters ≤ 1°C (14,925 km2) and ≤ 0°C (4,800 km2). However, cooler bottom temperatures were observed in the northern Bering Sea, including a substantial area of waters ≤ -1°C located west-southwest of St. Lawrence Island, while extremely warm bottom temperatures were observed from Norton Sound to Nunivak Island (Figure 2).
 
 ![Mean bottom and sea surface temperatures in the eastern Bering Sea from 1982-2021, based on interpolated survey temperatures](./plots/average_temperature.png)
-_Figure 3. Average summer surface (green triangles) and bottom (blue circles) temperatures (°C) of the eastern Bering Sea (EBS) shelf and northern Bering Sea (NBS) shelf based on data collected during standardized summer bottom trawl surveys from 1982–2021. Dashed lines represent the time series mean for the EBS (1982–2021, except 2020) and NBS (2010, 2017, 2019, 2021)._
+ <font size="3"> _Figure 3. Average summer surface (green triangles) and bottom (blue circles) temperatures (°C) of the eastern Bering Sea (EBS) shelf and northern Bering Sea (NBS) shelf based on data collected during standardized summer bottom trawl surveys from 1982–2021. Dashed lines represent the time series mean for the EBS (1982–2021, except 2020) and NBS (2010, 2017, 2019, 2021)._</font>
+
+Mean surface and bottom temperatures were cooler than the prior sampled year (2019), yet remained within one standard deviation above the grand mean of the time series (Figure 3). In 2021, mean bottom temperature was 3.3°C, the fifth highest on record after 2019, 2018, and 2017, and 0.9°C above the grand mean of the time series (2.5°C). The 2021 mean surface temperature was 7.2°C, which was 2.0°C lower than in 2019 yet 0.5°C higher than the grand mean of the time series (6.7°C).
+
