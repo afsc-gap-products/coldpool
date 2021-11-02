@@ -21,7 +21,7 @@ devtools::install_github("sean-rohan-noaa/coldpool")
 
 # Usage
 
-## Accessing datasets
+## Accessing datasets using the package
 Users can access temperature products using directly from datasets that are built into the package. For example, after installing the package, users can access a data frame containing cold pool area (area with temperature less than or equal to 2°C), area of other isotherms (less than or equal to 1,0,-1 °C), mean bottom temperature for the EBS, and mean surface temperature, using:
 ```{r}
 coldpool:::cold_pool_index
@@ -30,6 +30,18 @@ coldpool:::cold_pool_index
 Documentation for the dataset can be accessed using:
 ```{r}
 ?coldpool:::cold_pool_index
+```
+
+## Accessing datasets without installing the package
+Users can access temperature products in an R data format (.rda) without installing the package. To do so, download the [sysdata.rda](./R/sysdata.rda) file in the R directory of the coldpool repository. The data set can then be loaded in R after installing and loading the [raster](https://cran.r-project.org/web/packages/raster/index.html) package (version >= 3.2-1), as follows:
+
+```{r}
+# Load raster package and data
+library(raster)
+load("[local_path]\\sysdata.rda")
+
+# View loaded cold pool index data frame
+cold_pool_index
 ```
 
 ## Datasets in the package
