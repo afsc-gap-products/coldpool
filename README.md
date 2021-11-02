@@ -35,13 +35,23 @@ Documentation for the dataset can be accessed using:
 ## Datasets in the package
 
 Datasets included in the package are:
-<li><b>cold_pool_index</b>: Data frame containing areas with temperatures less than or equal to 2, 1,0, and -1 °C, mean bottom temperatures for the EBS, and mean surface temperature during the EBS survey for 1982-2021 (excluding 2020 due to cancelled survey).</li>
-<li><b>nbs_mean_bottom_temperature</b>: Data frame of mean bottom temperature in the NBS during years with a full EBS+NBS standardized survey (2010, 2017, 2019, 2021).</li>
-<li><b>ebs_bottom_temperature</b>: Interpolated rasters of bottom temperature for the EBS survey area from 1982-2021 (excluding 2020 due to cancelled survey).</li>
-<li><b>ebs_surface_temperature</b>: Interpolated rasters of sea surface temperature for the EBS survey area from 1982-2021 (excluding 2020 due to cancelled survey).</li>
-<li><b>nbs_ebs_bottom_temperature</b>: Interpolated rasters of bottom temperature for the full EBS and NBS survey area for years with a full EBS+NBS standardized survey (2010, 2017, 2019, 2021).</li>
-<li><b>nbs_ebs_surface_temperature</b>: Interpolated rasters of sea surface temperature for the full EBS and NBS survey area for years with a full EBS+NBS standardized survey (2010, 2017, 2019, 2021).</li>
-<li><b>cpa_pre2021</b>: Data frame of cold pool area and mean temperatures calculated using the interpolation method used prior to 2021.</li>
+
+<dl>
+<dt><b>cold_pool_index</b></dt>
+<dd><p>Data frame containing areas with temperatures less than or equal to 2, 1,0, and -1 °C, mean bottom temperatures for the EBS, and mean surface temperature during the EBS survey for 1982-2021 (excluding 2020 due to cancelled survey).</p></dd>
+<dt><b>nbs_mean_bottom_temperature</b></dt>
+<dd><p>Data frame of mean bottom temperature in the NBS during years with a full EBS+NBS standardized survey (2010, 2017, 2019, 2021).</p></dd>
+<dt><b>ebs_bottom_temperature</b></dt>
+<dd><p>Interpolated rasters of bottom temperature for the EBS survey area from 1982-2021 (excluding 2020 due to cancelled survey).</p></dd>
+<dt><b>ebs_surface_temperature</b></dt> 
+<dd><p>Interpolated rasters of sea surface temperature for the EBS survey area from 1982-2021 (excluding 2020 due to cancelled survey).</p></dd>
+<dt><b>nbs_ebs_bottom_temperature</b></dt> 
+<dd><p>Interpolated rasters of bottom temperature for the full EBS and NBS survey area for years with a full EBS+NBS standardized survey (2010, 2017, 2019, 2021).</p></dd>
+<dt><b>nbs_ebs_surface_temperature</b></dt> 
+<dd><p>Interpolated rasters of sea surface temperature for the full EBS and NBS survey area for years with a full EBS+NBS standardized survey (2010, 2017, 2019, 2021).</p></dd>
+<dt><b>cpa_pre2021</b></dt>
+<dd><p>Data frame of cold pool area and mean temperatures calculated using the interpolation method used prior to 2021.</p></dd>
+</dl>
 
 
 # Cold pool area and temperature trends
