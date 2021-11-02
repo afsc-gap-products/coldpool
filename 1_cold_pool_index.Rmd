@@ -131,6 +131,42 @@ png(file = here::here("plots", "stacked_temperature.png"), height = 4, width = 6
 print(stacked_area_plot)
 dev.off()
 
+stacked_area_simple_label_plot <- ggplot() +
+  geom_area(data = area_df %>%
+              dplyr::filter(YEAR < 2020),
+            mapping = aes(x = YEAR,
+                  y = proportion,
+                fill = variable)) +
+  geom_point(data = area_df %>%
+              dplyr::filter(YEAR == 2021),
+            mapping = aes(x = YEAR,
+                y = proportion,
+                fill = variable),
+            shape = 21,
+            size = rel(3)) +
+  scale_fill_manual(name = "Temperature", 
+                    values = cpa_palette) +
+  scale_y_continuous(name = "Proportion of EBS Shelf Survey Area",
+                     limits = c(0, 1),
+                     expand = c(0, 0),
+                     breaks = seq(0,1,0.1)) +
+  scale_x_continuous(name = "Year", 
+                     limits = c(1982, 2021.25),
+                     expand = c(0, 0),
+                     breaks = seq(1982,2021,4)) +
+  theme_bw() +
+  theme(panel.grid.minor = element_blank(),
+        axis.title = element_text(face = "bold"),
+        axis.ticks = element_line(color = "black"),
+        panel.border = element_rect(color = "black", fill = NA),
+        panel.background = element_rect(color = "black", fill = NA),
+        legend.position = c(0.2, 0.8),
+        legend.title = element_blank())
+
+png(file = here::here("plots", "stacked_temperature_simple_label.png"), height = 4, width = 6, units = "in", res = 600)
+print(stacked_area_simple_label_plot)
+dev.off()
+
 year_vec <- as.numeric(gsub("[^0-9.-]", "", names(coldpool:::ebs_bottom_temperature)))
 start_year <- which(year_vec == 2002)
 
