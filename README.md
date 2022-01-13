@@ -2,7 +2,7 @@
 _Sean Rohan and Lewis Barnett_
 <br>Groundfish Assessment Program, Resource Assessment and Conservation Engineering Division, Alaska Fisheries Science Center, National Marine Fisheries Service, NOAA
 
-This repository contains an R package that is used to calculate the *cold pool index*, mean sea surface temperature, and mean bottom temperature using temperature data collected during bottom trawl surveys of the eastern Bering Sea conducted by NOAA/AFSC/RACE's Groundfish Assessment Program. The cold pool index is defined as the area of the NOAA/AFSC/RACE eastern Bering Sea bottom trawl survey footprint with bottom temperatures less than or equal to 2° Celsius, in square kilometers. This package includes temperature products (mean temperatures, cold pool area, interpolated temperature raster) that are updated on an annual basis following the eastern Bering Sea shelf bottom trawl survey. Temperature trends are described below in the section titled [Cold pool area and temperature trends](https://github.com/sean-rohan-NOAA/coldpool#cold-pool-area-and-temperature-trends). 
+This repository contains an R package that is used to calculate the *cold pool index*, mean sea surface temperature, and mean bottom temperature using temperature data collected during bottom trawl surveys of the eastern Bering Sea conducted by NOAA/AFSC/RACE's Groundfish Assessment Program. The cold pool index is defined as the area of the NOAA/AFSC/RACE eastern Bering Sea bottom trawl survey footprint with bottom temperatures less than or equal to 2° Celsius, in square kilometers. This package includes temperature products (mean temperatures, cold pool area, interpolated temperature raster) that are updated on an annual basis following the eastern Bering Sea shelf bottom trawl survey. Temperature trends are described below in the section titled [Cold pool area and temperature trends](https://github.com/afsc-gap-products/coldpool#cold-pool-area-and-temperature-trends). 
 
 The most recent version of this package was developed and tested using R 4.1.1.
 
@@ -17,7 +17,7 @@ If you encounter problems installing the akgfmaps package, please refer to the a
 
 2. Install the coldpool package using the following code:
 ```{r}
-devtools::install_github("sean-rohan-noaa/coldpool")
+devtools::install_github("afsc-gap-products/coldpool")
 ```
 
 # Usage
