@@ -21,6 +21,8 @@ if(!dir.exists("plots")) {dir.create("plots")}
 
 fig_res <- 600
 cpa_palette <- c("#21dae7", "#0071ff", "#0000e3", "#000040")
+max_year <- 2021
+min_year <- max_year - 19 # Default for 20 panel cold pool maps
 
 coldpool:::cold_pool_index$YEAR[order(coldpool:::cold_pool_index$AREA_LTE2_KM2)]
 coldpool:::cold_pool_index$YEAR[order(-1*coldpool:::cold_pool_index$MEAN_GEAR_TEMPERATURE)]
@@ -30,6 +32,7 @@ coldpool:::cold_pool_index$YEAR[order(-1*coldpool:::cold_pool_index$MEAN_SURFACE
 ```{r fig1_cold_pool_index, message=FALSE, warning=FALSE, include=FALSE}
 
 cpi_df <- coldpool:::cold_pool_index %>%
+  dplyr::filter(YEAR <= max_year) %>%
   dplyr::mutate(group = YEAR < 2020,
                 var = "Cold Pool Index",
                 cpi_rank = rank(AREA_LTE2_KM2))
@@ -69,7 +72,7 @@ plot_cpi_timeseries <- ggplot(data = cpi_df,
         strip.background = element_rect(fill = "#0055a4",
                                         color = NA))
 
-png(filename = here::here("plots", "cold_pool_index.png"), 
+png(filename = here::here("plots", paste0(max_year, "_cold_pool_index.png")), 
     width = 6,
     height = 3, 
     units = "in",
@@ -84,6 +87,7 @@ sebs_layers <- akgfmaps::get_base_layers(select.region = "sebs",
                                          set.crs = coldpool:::ebs_proj_crs)
 
 area_df <- coldpool:::cold_pool_index %>%
+  dplyr::filter(YEAR <= max_year) %>%
   dplyr::mutate(lteminus1 = AREA_LTEMINUS1_KM2,
                 lte0 = AREA_LTE0_KM2 - AREA_LTEMINUS1_KM2,
                 lte1 = AREA_LTE1_KM2 - AREA_LTE0_KM2,
@@ -163,16 +167,17 @@ stacked_area_simple_label_plot <- ggplot() +
         legend.position = c(0.2, 0.8),
         legend.title = element_blank())
 
-png(file = here::here("plots", "stacked_temperature_simple_label.png"), height = 4, width = 6, units = "in", res = 600)
+png(file = here::here("plots", paste0(max_year, "_stacked_temperature_simple_label.png")), height = 4, width = 6, units = "in", res = 600)
 print(stacked_area_simple_label_plot)
 dev.off()
 
 year_vec <- as.numeric(gsub("[^0-9.-]", "", names(coldpool:::ebs_bottom_temperature)))
-start_year <- which(year_vec == 2002)
+start_year <- which(year_vec == min_year)
+end_year <- which(year_vec == max_year)
 
 coords <- raster::coordinates(coldpool:::ebs_bottom_temperature)
 
-for(i in start_year:length(year_vec)) {
+for(i in start_year:end_year) {
   sel_layer_df <- data.frame(x = coords[,1],
                              y = coords[,2],
                              temperature = coldpool:::ebs_bottom_temperature@data@values[,i])
@@ -200,7 +205,8 @@ panel_extent <- data.frame(y = c(52, 64),
 label_2020 <- data.frame(x = mean(panel_extent$x),
                          y = mean(panel_extent$y),
                          label = "No\nSurvey",
-                         year = 2020)
+                         year = 2020) %>% 
+  dplyr::filter(year <= max_year)
 
 cold_pool_cbar <- coldpool::legend_discrete_cbar(breaks = c(-Inf, -1, 0, 1, 2),
                                                  colors = rev(c("#21dae7", "#0071ff", "#0000e3", "#000040")),
@@ -237,7 +243,7 @@ cold_pool_panels <- ggplot() +
   geom_sf(data = sebs_layers$bathymetry) +
   geom_polygon(data = data.frame(x = panel_extent$x[c(1,2,2,1,1)],
                                  y = panel_extent$y[c(1,1,2,2,1)],
-                                 year = 2020),
+                                 year = 2020) %>% dplyr::filter(year <= max_year),
                aes(x = x,
                    y = y),
                fill = "white") +
@@ -306,11 +312,11 @@ coldpool_with_area <-
     rel_widths = c(0.9,0.2)
   )
 
-png(file = here::here("plots", "coldpool_with_area.png"), height = 8, width = 6, units = "in", res = fig_res)
+png(file = here::here("plots", paste0(max_year, "_coldpool_with_area.png")), height = 8, width = 6, units = "in", res = fig_res)
 print(coldpool_with_area)
 dev.off()
 
-png(file = here::here("plots", "coldpool.png"), height = 6, width = 6, units = "in", res = fig_res)
+png(file = here::here("plots", paste0(max_year, "_coldpool.png")), height = 6, width = 6, units = "in", res = fig_res)
 print(cold_pool_grid)
 graphics.off()
 ```
@@ -320,10 +326,11 @@ nbs_ebs_layers <- akgfmaps::get_base_layers(select.region = "ebs",
                                set.crs = coldpool:::ebs_proj_crs)
 
 year_vec <- as.numeric(gsub("[^0-9.-]", "", names(coldpool:::nbs_ebs_bottom_temperature)))
+end_year <- which(year_vec == max_year)
 
 coords <- raster::coordinates(coldpool:::nbs_ebs_bottom_temperature)
 
-for(i in 1:length(year_vec)) {
+for(i in 1:end_year) {
   sel_layer_df <- data.frame(x = coords[,1],
                              y = coords[,2],
                              temperature = coldpool:::nbs_ebs_bottom_temperature@data@values[,i])
@@ -360,7 +367,7 @@ ebs_nbs_temperature_map <- ggplot2::ggplot() +
                    color = "black") +
   ggplot2::geom_sf(data = nbs_ebs_layers$survey.area, fill = "grey65") +
   ggplot2::geom_tile(data = bt_year_df %>%
-                       dplyr::filter(year == 2021),
+                       dplyr::filter(year == max_year),
                      aes(x = x, 
                          y = y,
                          fill = cut(temperature, 
@@ -401,12 +408,12 @@ ebs_nbs_temperature_contour_map <- ggplot2::ggplot() +
                    color = "black") +
   ggplot2::geom_sf(data = nbs_ebs_layers$survey.area, fill = "grey65") +
   ggplot2::geom_tile(data = bt_year_df %>%
-                       dplyr::filter(year == 2021),
+                       dplyr::filter(year == max_year),
                      aes(x = x, 
                          y = y,
                          fill = cut(temperature, breaks = nbs_ebs_temp_breaks))) +
   ggplot2::geom_contour(data = bt_year_df %>%
-                       dplyr::filter(year == 2021),
+                       dplyr::filter(year == max_year),
                      aes(x = x, 
                          y = y,
                          z = temperature),
@@ -472,17 +479,18 @@ ebs_nbs_contour_map <- cowplot::plot_grid(ebs_nbs_temperature_contour_map,
                    nrow = 2,
                    rel_heights = c(0.8,0.2))
 
-png(filename = here::here("plots", "nbs_ebs_temperature_map.png"), width = 6, height = 6, units = "in", res = fig_res)
+png(filename = here::here("plots", paste0(max_year, "_nbs_ebs_temperature_map.png")), width = 6, height = 6, units = "in", res = fig_res)
 print(ebs_nbs_map)
 dev.off()
 
-png(filename = here::here("plots", "nbs_ebs_temperature_contour_map.png"), width = 6, height = 6, units = "in", res = fig_res)
+png(filename = here::here("plots", paste0(max_year, "_nbs_ebs_temperature_contour_map.png")), width = 6, height = 6, units = "in", res = fig_res)
 print(ebs_nbs_contour_map)
 dev.off()
 ```
 
 ```{r fig4_mean_temperature, message=FALSE, warning=FALSE, include=FALSE}
 sebs_temperatures <- coldpool:::cold_pool_index %>%
+    dplyr::filter(YEAR <= max_year) %>%
   dplyr::select(YEAR, MEAN_GEAR_TEMPERATURE, MEAN_SURFACE_TEMPERATURE) %>%
   dplyr::rename(Bottom = MEAN_GEAR_TEMPERATURE, 
                 Surface = MEAN_SURFACE_TEMPERATURE) %>%
@@ -491,6 +499,7 @@ sebs_temperatures <- coldpool:::cold_pool_index %>%
   reshape2::melt(id.vars = c("YEAR", "group", "region"))
 
 nbs_temperatures <- coldpool:::nbs_mean_temperature %>%
+    dplyr::filter(YEAR <= max_year) %>%
   dplyr::select(YEAR, MEAN_GEAR_TEMPERATURE, MEAN_SURFACE_TEMPERATURE) %>%
   dplyr::rename(Bottom = MEAN_GEAR_TEMPERATURE, 
                 Surface = MEAN_SURFACE_TEMPERATURE) %>%
@@ -591,11 +600,11 @@ plot_sebs_average_temperature <- ggplot(data = all_temperatures %>%
         strip.background = element_rect(fill = "#0055a4",
                                         color = NA))
 
-png(file = here::here("plots", "average_temperature.png"), width = 6, height = 3, units = "in", res = fig_res)
+png(file = here::here("plots", paste0(max_year, "_average_temperature.png")), width = 6, height = 3, units = "in", res = fig_res)
 print(plot_average_temperature)
 dev.off()
 
-png(file = here::here("plots", "plot_sebs_average_temperature.png"), width = 6, height = 3, units = "in", res = fig_res)
+png(file = here::here("plots", paste0(max_year, "_plot_sebs_average_temperature.png")), width = 6, height = 3, units = "in", res = fig_res)
 print(plot_sebs_average_temperature)
 dev.off()
 ```
