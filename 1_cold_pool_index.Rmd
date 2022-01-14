@@ -131,7 +131,7 @@ stacked_area_plot <- ggplot() +
         legend.position = c(0.2, 0.8),
         legend.title = element_blank())
 
-png(file = here::here("plots", "stacked_temperature.png"), height = 4, width = 6, units = "in", res = 600)
+png(file = here::here("plots", paste0(max_year, "stacked_temperature.png")), height = 4, width = 6, units = "in", res = 600)
 print(stacked_area_plot)
 dev.off()
 
