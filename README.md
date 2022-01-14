@@ -10,7 +10,7 @@ The most recent version of this package was developed and tested using R 4.1.1.
 
 1. Install the [akgfmaps package](https://github.com/sean-rohan-NOAA/akgfmaps) from GitHub prior to installing coldpool, as follows:
 ```{r}
-devtools::install_github("afsc-gap-products/akgfmaps", build_vignettes = TRUE)
+devtools::install_github("sean-rohan-NOAA/akgfmaps", build_vignettes = TRUE)
 ```
 
 If you encounter problems installing the akgfmaps package, please refer to the akgfmaps GitHub repository.
