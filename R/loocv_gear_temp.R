@@ -11,9 +11,11 @@ loocv_gear_temp <- function(temp_data_path,
                        proj_crs,
                        interp_variable = "gear_temperature") {
   
-  temperature_df <- read.csv(file = temp_data_path,
-                             stringsAsFactors = FALSE)
-  
+  if(!(class(temp_data_path) == "data.frame")) {
+    temperature_df <- read.csv(file = temp_data_path,
+                               stringsAsFactors = FALSE)
+  }
+
   names(temperature_df) <- tolower(names(temperature_df))
   
   # Vector of years ----
@@ -27,7 +29,7 @@ loocv_gear_temp <- function(temp_data_path,
   
   print("Starting cross validation using loocv_2()")
   for(i in 1:length(year_vec)) {
-    gear_temp_raster <- loocv_2(dat = filter(temperature_df, year == year_vec[i]),
+    gear_temp_raster <- coldpool::loocv_2(dat = filter(temperature_df, year == year_vec[i]),
                                              in.proj = "+proj=longlat",
                                              interp.proj = proj_crs,
                                              lon.col = "longitude",
