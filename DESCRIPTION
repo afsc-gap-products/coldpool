@@ -27,7 +27,7 @@ Description: This package calculates the area of the cold pool in the eastern Be
 License: GPL (>=2)
 Encoding: UTF-8
 LazyData: false
-RoxygenNote: 7.1.1
+RoxygenNote: 7.1.2
 Imports: colorspace,
     viridis
 Suggests: knitr, rmarkdown, RODBC, getPass, readr, testthat, cowplot
