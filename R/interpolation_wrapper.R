@@ -17,10 +17,14 @@ interpolation_wrapper <- function(temp_data_path,
                                   interp_variable,
                                   select_region = "sebs") {
 
-  temperature_df <- read.csv(file = temp_data_path,
-                             stringsAsFactors = FALSE)
-
-  names(temperature_df) <- tolower(names(temperature_df))
+  if(!(class(temp_data_path) == "data.frame")) {
+    
+    temperature_df <- read.csv(file = temp_data_path,
+                               stringsAsFactors = FALSE)
+    
+    names(temperature_df) <- tolower(names(temperature_df))
+    
+  }
 
   # Vector of years ----
   year_vec <- sort(unique(temperature_df$year))
