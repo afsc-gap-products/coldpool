@@ -51,7 +51,7 @@ if(update_sysdata) {
   channel <- get_connected()
   
   # Get temperature data and write csvs to data directory ----
-  get_data(channel = channel)
+  coldpool::get_data(channel = channel)
 }
 ```
 
