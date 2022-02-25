@@ -35,7 +35,7 @@ loocv_gear_temp <- function(temp_data_path,
                                              lon.col = "longitude",
                                              lat.col = "latitude",
                                              var.col = interp_variable,
-                                             pre = paste0("_", interp_variable, "_", year_vec[i]),
+                                             pre = paste0(interp_variable, "_", year_vec[i]),
                                              scale.vars = FALSE,
                                              center = FALSE,
                                              scale = FALSE)

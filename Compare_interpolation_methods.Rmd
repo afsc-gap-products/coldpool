@@ -5,6 +5,10 @@ date: "9/24/2021"
 output: word_document
 ---
 
+# Get data
+
+Get temperature data from racebase and survey tables.
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(coldpool)
@@ -35,28 +39,37 @@ area_weighted_standard_df <- RODBC::sqlQuery(channel = channel,
 coldpool::get_data(channel = channel)
 ```
 
-# Conduct cross-validation
+# Conduct cross-validation on gear temperature
 
-```{r loocv}
-  # Leave one out cross-validation to compare interpolation methods ----
-  # Writes:
-  # -- /plots/RSPE_violin_GEAR_TEMPERATURE_[n].png: Plots of root square prediction error for interpolation methods.
-  # -- /output/[date]_rmse_loocv_GEAR_TEMPERATURE_[year].csv: Results of leave-one-out cross validation.
-  coldpool::loocv_gear_temp(temp_data_path =  here::here("data", "index_hauls_temperature_data.csv"),
-                  proj_crs = proj_crs) # update file name to specify data file 
+Perform leave-one-out cross validation (LOOCV) on gear temperature (i.e., bottom temperature) and write results to csv files.
 
-  # Calculate cold pool area using interpolation methods ----
-  # Writes:
-  # -- /output/raster/[method]_[year]_gear_temperature.tif: GeoTIFF raster files for each interpolation method and year
+```{r loocv, warning=FALSE, message=FALSE, results='hide'}
+# Leave one out cross-validation to compare interpolation methods ----
+# Writes:
+# -- /plots/RSPE_violin_GEAR_TEMPERATURE_[n].png: Plots of root square prediction error for interpolation methods.
+# -- /output/[date]_rmse_loocv_GEAR_TEMPERATURE_[year].csv: Results of leave-one-out cross validation.
+coldpool::loocv_gear_temp(temp_data_path =  here::here("data", "index_hauls_temperature_data.csv"),  # update file name to specify data file 
+                          proj_crs = proj_crs,
+                          interp_variable = "surface_temperature")
+
+coldpool::loocv_gear_temp(temp_data_path =  here::here("data", "index_hauls_temperature_data.csv"),  # update file name to specify data file 
+                          proj_crs = proj_crs,
+                          interp_variable = "gear_temperature")
+
+# Calculate cold pool area using interpolation methods ----
+# Writes:
+# -- /output/raster/[method]_[year]_gear_temperature.tif: GeoTIFF raster files for each interpolation method and year
 cpa_df <- interpolation_wrapper(temp_data_path = here::here("data", "index_hauls_temperature_data.csv"),
                                 proj_crs = coldpool:::ebs_proj_crs,
                                 cell_resolution = 5000,
-                                select_years = c(1982:year(Sys.Date())), 
+                                select_years = 1982:2021, 
                                 interp_variable = "gear_temperature",
                                 select_region = "sebs")
 ```
 
-# Comparison of interpolation methods
+# Compare interpolation methods
+
+Create plots and table output showing results of LOOCV.
 
 ```{r}
 # Set up method labels 
@@ -224,10 +237,11 @@ print(ggplot(data = cpa_change_df,
 dev.off()
 ```
 
-# Calculate mean 
+# Compare mean bottom and surface temperatures
+
+
 
 ```{r meantemp}
-library(coldpool)
 
 # mean_temp_df <- data.frame(YEAR = c(1982:2019, 2021),
 #                            Mean = numeric(length = 1L))

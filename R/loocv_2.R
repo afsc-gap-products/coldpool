@@ -152,7 +152,7 @@ loocv_2 <- function(dat, var.col, lat.col, lon.col, in.proj = "+proj=longlat +da
     pre <- var.col
   }
   
-  write.csv(sp_compare.rmse, file = paste0("./output/", Sys.Date(), "_rmse_loocv_", pre, ".csv"), row.names = F)
+  write.csv(sp_compare.rmse, file = paste0("./output/", "_rmse_loocv_", pre, ".csv"), row.names = F)
   print(colMeans(sp_compare.rmse[,c(1:10)]))
   
   # Calulate RMSE from cross validation
