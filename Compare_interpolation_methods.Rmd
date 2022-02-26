@@ -9,7 +9,7 @@ output: word_document
 
 Get temperature data from racebase and survey tables.
 
-```{r setup, include=FALSE}
+```{r setup, warning=FALSE, message=FALSE, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(coldpool)
 
@@ -61,7 +61,7 @@ coldpool::loocv_gear_temp(temp_data_path =  here::here("data", "index_hauls_temp
 # -- /output/raster/[method]_[year]_gear_temperature.tif: GeoTIFF raster files for each interpolation method and year
 cpa_df <- interpolation_wrapper(temp_data_path = here::here("data", "index_hauls_temperature_data.csv"),
                                 proj_crs = coldpool:::ebs_proj_crs,
-                                cell_resolution = 5000,
+                                cell_resolution = 5000, # In meters
                                 select_years = 1982:2021, 
                                 interp_variable = "gear_temperature",
                                 select_region = "sebs")
@@ -71,7 +71,13 @@ cpa_df <- interpolation_wrapper(temp_data_path = here::here("data", "index_hauls
 
 Create plots and table output showing results of LOOCV.
 
-```{r}
+```{r compare_cpa}
+# Make summary tables
+make_loocv_summary(sel_paths = list.files("./output/loocv", full.names = TRUE),
+                   interp_variable = "surface_temperature")
+make_loocv_summary(sel_paths = list.files("./output/loocv", full.names = TRUE),
+                   interp_variable = "gear_temperature")
+
 # Set up method labels 
 method_labels_df <- data.frame(method = c("BES",
                                           "CIR",
@@ -257,22 +263,29 @@ dev.off()
 
 compare_temp_df <- readRDS(file = here::here("data", "ebs_bttemp_plus_nw_lt200m.rds")) %>%
   dplyr::select(YEAR, AVGBSBT, AVGBSST) %>%
-  dplyr::rename(AREA_WEIGHTED_BT = AVGBSBT,
-                AREA_WEIGHTED_SST = AVGBSST) %>%
+  dplyr::rename(`BT[aw]` = AVGBSBT,
+                `SST[aw]` = AVGBSST) %>%
   dplyr::full_join(coldpool:::cold_pool_index) |>
-  dplyr::rename(INTERPOLATED_SST = MEAN_SURFACE_TEMPERATURE,
-                INTERPOLATED_BT = MEAN_GEAR_TEMPERATURE)
+  dplyr::select(-AREA_LTE2_KM2, -AREA_LTE1_KM2, -AREA_LTE0_KM2, -AREA_LTEMINUS1_KM2) %>%
+  dplyr::rename(`SST[int]` = MEAN_SURFACE_TEMPERATURE,
+                `BT[int]` = MEAN_GEAR_TEMPERATURE)
+
 
 ggplot(data = compare_temp_df %>%
-         tidyr::pivot_longer(cols = c("AREA_WEIGHTED_BT", "AREA_WEIGHTED_SST", "INTERPOLATED_SST", "INTERPOLATED_BT")),
+         tidyr::pivot_longer(cols = c(`BT[aw]`, `SST[aw]`, `SST[int]`, `BT[int]`)),
        aes(x = YEAR, 
            y = value,
            color = name,
            shape = name)) +
   geom_line() +
   geom_point() +
-  scale_color_tableau() +
-  theme_bw()
+  scale_color_colorblind(labels = scales::parse_format()) +
+  scale_shape(labels = scales::parse_format()) +
+  scale_y_continuous(name = expression(Temperature~(degree*C))) +
+  scale_x_continuous(name = "Year") +
+  theme_bw() +
+  theme(legend.title = element_blank(),
+        legend.text = element_text(hjust = 0))
 
 
 
