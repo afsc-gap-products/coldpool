@@ -42,7 +42,6 @@ loocv_gear_temp <- function(temp_data_path,
   }
   
   # Generate vector of loocv files with "GEAR_TEMPERATURE" in the title.
-  # I'd suggest using a loop here if you only want a subset of years on each plot.
   ifelse(!dir.exists(file.path(here::here("output"))), dir.create(file.path(here::here("output"))), FALSE)
   ifelse(!dir.exists(file.path(here::here("output", "loocv"))), dir.create(file.path(here::here("output", "loocv"))), FALSE)
   ifelse(!dir.exists(file.path(here::here("plots"))), dir.create(file.path(here::here("plots"))), FALSE)

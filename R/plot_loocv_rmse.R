@@ -18,7 +18,6 @@ plot_loocv_rmse <- function(sel_paths = dir("./output/loocv", full.names = TRUE)
                             by_cruise = FALSE,
                             suffix = "",
                             fig_res = 600) {
-  library(ggthemes)
   
   for(i in 1:length(sel_paths)) {
     if(i == 1) {
