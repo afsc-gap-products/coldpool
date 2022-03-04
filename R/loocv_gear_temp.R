@@ -45,7 +45,7 @@ loocv_gear_temp <- function(temp_data_path,
   ifelse(!dir.exists(file.path(here::here("output"))), dir.create(file.path(here::here("output"))), FALSE)
   ifelse(!dir.exists(file.path(here::here("output", "loocv"))), dir.create(file.path(here::here("output", "loocv"))), FALSE)
   ifelse(!dir.exists(file.path(here::here("plots"))), dir.create(file.path(here::here("plots"))), FALSE)
-  temp_dir <- dir(here::here("output"), full.names = TRUE)
+  temp_dir <- dir(here::here("output", "loocv"), full.names = TRUE)
   temp_dir <- temp_dir[grep(interp_variable, temp_dir)]
   
   # Prediction error plots ----
