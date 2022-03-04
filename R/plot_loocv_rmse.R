@@ -82,9 +82,17 @@ plot_loocv_rmse <- function(sel_paths = dir("./output/loocv", full.names = TRUE)
                                        vjust = 0.5))
   
   if(make_plot) {
+    if(length(unique(all_rmse$CRUISE)) > 6) {
+      fig_height <- 120
+    } else if(length(unique(all_rmse$CRUISE)) <= 6 & length(unique(all_rmse$CRUISE)) > 3) {
+      fig_height <- 90
+    } else {
+      fig_height <- 50
+    }
+    
     png(file = paste0("./plots/RSPE_violin_", sel_var, suffix, ".png"), 
         width = 190, 
-        height = 120, 
+        height = fig_height, 
         units = "mm", 
         res = fig_res)
     print(out_plot)
