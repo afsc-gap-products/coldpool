@@ -79,7 +79,8 @@ plot_loocv_rmse <- function(sel_paths = dir("./output/loocv", full.names = TRUE)
       ggthemes::theme_few() +
       theme(legend.position = "none",
             axis.text.x = element_text(angle = 90, 
-                                       vjust = 0.5))
+                                       vjust = 0.5, 
+                                       hjust = 1))
   
   if(make_plot) {
     if(length(unique(all_rmse$CRUISE)) > 6) {
