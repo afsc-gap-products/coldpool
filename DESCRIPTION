@@ -12,7 +12,6 @@ Depends: R (>= 3.5),
     here,
     fields,
     lubridate,
-    metR,
     raster (>= 3.2-1),
     rgdal (>= 1.5-8),
     reshape2,
@@ -23,6 +22,8 @@ Depends: R (>= 3.5),
     sf,
     viridis,
     utils
+Suggests: metR,
+    cowplot
 Description: This package calculates the area of the cold pool in the eastern Bering Sea (cold pool index), mean bottom temperature, and mean sea surface temperature. The cold pool is defined as the estimated area of the eastern Bering Sea continental shelf survey area with bottom temperatures less than or equal to 2 degrees C.
 License: GPL (>=2)
 Encoding: UTF-8
