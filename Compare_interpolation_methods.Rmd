@@ -492,3 +492,11 @@ Make a map of sampling day of year, by station.
 # Make a map showing the average day of year stations were sampled.
 coldpool:::plot_stn_doy()
 ```
+
+# Data product figures for TM
+
+Data product figures with ESR-style formatting.
+
+```{r}
+coldpool:::make_tm_product_figs(fig_res = 600)
+```
