@@ -184,8 +184,7 @@ plot_cpa_by_year <- ggplot() +
         scale_color_manual(name = "Method", 
                            values = color_vec[names(color_vec) %in% unique(combined_cpa_df$label)]) +
   scale_y_continuous(name = expression("Cold Pool Area"~(km^2))) +
-  theme_bw() +
-    theme(legend.title = element_blank())
+        theme_tm_no_legend()
 
 plot_cpa_rel_diff <- ggplot(data = cpa_change_df,
        aes(x = year,
@@ -197,8 +196,7 @@ plot_cpa_rel_diff <- ggplot(data = cpa_change_df,
   scale_x_continuous(name = "Year", limits = c(1982, 2021)) +
         scale_color_manual(name = "Method", 
                            values = color_vec[names(color_vec) %in% unique(cpa_change_df$label)]) +
-  theme_bw() +
-  theme()
+        theme_tm_no_legend()
 
 plot_cpa_abs_diff <- ggplot(data = cpa_change_df,
                             aes(x = year,
@@ -210,8 +208,7 @@ plot_cpa_abs_diff <- ggplot(data = cpa_change_df,
   scale_x_continuous(name = "Year", limits = c(1982, 2021)) +
   scale_color_manual(name = "Method", 
                      values = color_vec[names(color_vec) %in% unique(cpa_change_df$label)]) +
-  theme_bw() +
-  theme()
+        theme_tm_no_legend()
 
 png(file = here::here("plots", "cpa_by_year.png"), width = 169, height = 81, units = "mm", res = fig_res)
 print(plot_cpa_by_year)
@@ -288,8 +285,7 @@ plot_bt_by_year <- ggplot() +
         scale_color_manual(name = "Method", 
                            values = color_vec[names(color_vec) %in% unique(combined_bt_df$label)]) +
         scale_y_continuous(name = expression("Mean bottom temperature"~(degree*C))) +
-        theme_bw() +
-        theme(legend.title = element_blank())
+        theme_tm_no_legend()
 
 plot_bt_rel_diff <- ggplot(data = bt_change_df,
              aes(x = year,
@@ -301,8 +297,7 @@ plot_bt_rel_diff <- ggplot(data = bt_change_df,
         scale_x_continuous(name = "Year", limits = c(1982, 2021)) +
         scale_color_manual(name = "Method",
                            values = color_vec[names(color_vec) %in% unique(bt_change_df$label)]) +
-        theme_bw() +
-        theme()
+        theme_tm_no_legend()
 
 plot_bt_abs_diff <- ggplot(data = bt_change_df,
              aes(x = year,
@@ -314,8 +309,7 @@ plot_bt_abs_diff <- ggplot(data = bt_change_df,
         scale_x_continuous(name = "Year", limits = c(1982, 2021)) +
         scale_color_manual(name = "Method",
                            values = color_vec[names(color_vec) %in% unique(bt_change_df$label)]) +
-        theme_bw() +
-        theme()
+        theme_tm_no_legend()
 
 png(file = here::here("plots", "bt_by_year.png"), width = 169, height = 81, units = "mm", res = fig_res)
 print(plot_bt_by_year)
@@ -374,7 +368,7 @@ plot_sst_by_year <- ggplot() +
   scale_color_manual(name = "Method",
                      values = color_vec[names(color_vec) %in% unique(combined_sst_df$label)]) +
   scale_y_continuous(name = expression("Mean surface temperature"~(degree*C))) +
-  theme_bw()
+        theme_tm_no_legend()
 
 plot_sst_rel_diff <- ggplot(data = sst_change_df,
                             aes(x = year,
@@ -386,8 +380,7 @@ plot_sst_rel_diff <- ggplot(data = sst_change_df,
   scale_x_continuous(name = "Year", limits = c(1982, 2021)) +
   scale_color_manual(name = "Method",
                      values = color_vec[names(color_vec) %in% unique(sst_change_df$label)]) +
-  theme_bw() +
-  theme()
+        theme_tm_no_legend()
 
 plot_sst_abs_diff <- ggplot(data = sst_change_df,
                             aes(x = year,
@@ -399,8 +392,7 @@ plot_sst_abs_diff <- ggplot(data = sst_change_df,
   scale_x_continuous(name = "Year", limits = c(1982, 2021)) +
   scale_color_manual(name = "Method",
                      values = color_vec[names(color_vec) %in% unique(sst_change_df$label)]) +
-  theme_bw() +
-  theme()
+        theme_tm_no_legend()
 
 png(file = here::here("plots", "sst_by_year.png"), width = 169, height = 81, units = "mm", res = fig_res)
 print(plot_sst_by_year)
