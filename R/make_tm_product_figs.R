@@ -344,7 +344,7 @@ make_tm_product_figs <- function(fig_res = 600) {
                      color = "black") +
     ggplot2::geom_sf(data = nbs_ebs_layers$survey.area, fill = "grey65") +
     ggplot2::geom_tile(data = bt_year_df %>%
-                         dplyr::filter(year == max_year),
+                         dplyr::filter(year == 2021),
                        aes(x = x, 
                            y = y,
                            fill = cut(temperature, 
@@ -386,12 +386,12 @@ make_tm_product_figs <- function(fig_res = 600) {
                      color = "black") +
     ggplot2::geom_sf(data = nbs_ebs_layers$survey.area, fill = "grey65") +
     ggplot2::geom_tile(data = bt_year_df %>%
-                         dplyr::filter(year == max_year),
+                         dplyr::filter(year == 2021),
                        aes(x = x, 
                            y = y,
                            fill = cut(temperature, breaks = nbs_ebs_temp_breaks))) +
     ggplot2::geom_contour(data = bt_year_df %>%
-                            dplyr::filter(year == max_year),
+                            dplyr::filter(year == 2021),
                           aes(x = x, 
                               y = y,
                               z = temperature),
@@ -460,7 +460,6 @@ make_tm_product_figs <- function(fig_res = 600) {
   # tm_average_temperature.png ----
   
   sebs_temperatures <- coldpool:::cold_pool_index %>%
-    dplyr::filter(YEAR <= max_year) %>%
     dplyr::select(YEAR, MEAN_GEAR_TEMPERATURE, MEAN_SURFACE_TEMPERATURE) %>%
     dplyr::rename(Bottom = MEAN_GEAR_TEMPERATURE, 
                   Surface = MEAN_SURFACE_TEMPERATURE) %>%
@@ -469,7 +468,6 @@ make_tm_product_figs <- function(fig_res = 600) {
     reshape2::melt(id.vars = c("YEAR", "group", "region"))
   
   nbs_temperatures <- coldpool:::nbs_mean_temperature %>%
-    dplyr::filter(YEAR <= max_year) %>%
     dplyr::select(YEAR, MEAN_GEAR_TEMPERATURE, MEAN_SURFACE_TEMPERATURE) %>%
     dplyr::rename(Bottom = MEAN_GEAR_TEMPERATURE, 
                   Surface = MEAN_SURFACE_TEMPERATURE) %>%

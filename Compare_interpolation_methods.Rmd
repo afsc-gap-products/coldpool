@@ -497,6 +497,6 @@ coldpool:::plot_stn_doy()
 
 Data product figures with ESR-style formatting.
 
-```{r}
+```{r data_product_figs}
 coldpool:::make_tm_product_figs(fig_res = 600)
 ```
