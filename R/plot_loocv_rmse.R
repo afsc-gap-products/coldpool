@@ -18,7 +18,6 @@ plot_loocv_rmse <- function(sel_paths = dir("./output/loocv", full.names = TRUE)
                             by_cruise = FALSE,
                             suffix = "",
                             fig_res = 600) {
-  library(ggthemes)
   
   for(i in 1:length(sel_paths)) {
     if(i == 1) {
@@ -80,12 +79,21 @@ plot_loocv_rmse <- function(sel_paths = dir("./output/loocv", full.names = TRUE)
       ggthemes::theme_few() +
       theme(legend.position = "none",
             axis.text.x = element_text(angle = 90, 
-                                       vjust = 0.5))
+                                       vjust = 0.5, 
+                                       hjust = 1))
   
   if(make_plot) {
+    if(length(unique(all_rmse$CRUISE)) > 6) {
+      fig_height <- 120
+    } else if(length(unique(all_rmse$CRUISE)) <= 6 & length(unique(all_rmse$CRUISE)) > 3) {
+      fig_height <- 90
+    } else {
+      fig_height <- 50
+    }
+    
     png(file = paste0("./plots/RSPE_violin_", sel_var, suffix, ".png"), 
         width = 190, 
-        height = 120, 
+        height = fig_height, 
         units = "mm", 
         res = fig_res)
     print(out_plot)

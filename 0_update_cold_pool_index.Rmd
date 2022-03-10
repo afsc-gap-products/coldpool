@@ -30,8 +30,8 @@ proj_crs <- coldpool:::ebs_proj_crs
 update_sysdata <- TRUE
 
 # Filepath to csv containing data to use for temperature interpolation ----
-ebs_csv_path <- here::here("data", paste0(Sys.Date(), "_index_hauls_temperature_data.csv"))
-nbs_ebs_csv_path <- here::here("data", paste0(Sys.Date(), "_ebs_nbs_temperature_full_area.csv"))
+ebs_csv_path <- here::here("data", paste0("index_hauls_temperature_data.csv"))
+nbs_ebs_csv_path <- here::here("data", paste0("ebs_nbs_temperature_full_area.csv"))
 
 ### UPDATE!!! ###
 nbs_years <- c(2010, 2017, 2018, 2019, 2021)
@@ -68,7 +68,7 @@ Writes:
 interpolation_wrapper(temp_data_path = ebs_csv_path,
                       proj_crs = proj_crs,
                       cell_resolution = 5000, # 5x5 km grid resolution
-                      select_years = 1982:year(Sys.Date()), 
+                      select_years = 1982:2021, 
                       interp_variable = "gear_temperature",
                       select_region = "sebs") 
 
@@ -76,7 +76,7 @@ interpolation_wrapper(temp_data_path = ebs_csv_path,
 interpolation_wrapper(temp_data_path = ebs_csv_path,
                       proj_crs = proj_crs,
                       cell_resolution = 5000, # 5x5 km grid resolution
-                      select_years = 1982:year(Sys.Date()),
+                      select_years = 1982:2021,
                       interp_variable = "surface_temperature",
                       select_region = "sebs") 
 ```
@@ -105,7 +105,7 @@ Use surface and bottom temperature rasters to calculate cold pool area, mean bot
 Writes:
 - /output/raster/[METHOD]_[YEAR]_gear_temperature.tif: GeoTIFF rasters of gear temperature, by method and year, with 5x5 km grid resolution.
 
-```{r}
+```{r ebs_mean_temp}
 # Calculate cold pool area and mean bottom temperature from SEBS rasters
 bottom_temp_files <- list.files(here::here("output", "raster", "sebs", "gear_temperature"), 
                                 full.names = TRUE)

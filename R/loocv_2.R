@@ -62,6 +62,7 @@ loocv_2 <- function(dat, var.col, lat.col, lon.col, in.proj = "+proj=longlat +da
   
   # Initialize vectors to store bootstrap RMSE
   idw.rmse.mean <- rep(NA, iter)
+  idw_nmax4.rmse.mean <- rep(NA, iter)
   tps.rmse.mean <- rep(NA, iter)
   exp.rmse.mean <- rep(NA, iter)
   sph.rmse.mean <- rep(NA, iter)
@@ -86,9 +87,16 @@ loocv_2 <- function(dat, var.col, lat.col, lon.col, in.proj = "+proj=longlat +da
     nn.rmse.mean[i] <- mean(RMSE(observed = fit_test$var.col, predicted = nn.predict$var1.pred))
     
     # IDW
-    idw_fit <- gstat::gstat(formula = var.col~1, locations = train, nmax = nm)
+    idw_fit <- gstat::gstat(formula = var.col~1, locations = train, set = list(idp = 2), nmax = nm)
     idw.predict <- predict(idw_fit, fit_test)
     idw.rmse.mean[i] <- mean(RMSE(observed = fit_test$var.col, predicted = idw.predict$var1.pred))
+    
+    idw_nmax4_fit <- gstat::gstat(formula = var.col ~ 1,
+                                  locations = train,
+                                  set = list(idp = 2),
+                                  nmax = 4)
+    idw_nmax4.predict <- predict(idw_nmax4_fit, fit_test)
+    idw_nmax4.rmse.mean[i] <- mean(RMSE(observed = fit_test$var.col, predicted = idw_nmax4.predict$var1.pred))
     
     # Ordinary kriging
     exp.vgfit_train <- gstat::fit.variogram(variogram(idw_fit), vgm(c("Exp")))
@@ -135,6 +143,7 @@ loocv_2 <- function(dat, var.col, lat.col, lon.col, in.proj = "+proj=longlat +da
   
   sp_compare.rmse <- data.frame(nn = nn.rmse.mean,
                                 idw = idw.rmse.mean,
+                                idwnmax4 = idw_nmax4.rmse.mean,
                                 Exp = exp.rmse.mean,
                                 Sph = sph.rmse.mean,
                                 Cir = cir.rmse.mean,
@@ -152,21 +161,29 @@ loocv_2 <- function(dat, var.col, lat.col, lon.col, in.proj = "+proj=longlat +da
     pre <- var.col
   }
   
-  write.csv(sp_compare.rmse, file = paste0("./output/", "_rmse_loocv_", pre, ".csv"), row.names = F)
-  print(colMeans(sp_compare.rmse[,c(1:10)]))
+  if(!dir.exists("./output/loocv/")) {
+    dir.create("./output/loocv/", recursive = TRUE)
+  }
+  
+  write.csv(sp_compare.rmse, file = paste0("./output/loocv/", "rmse_loocv_", pre, ".csv"), row.names = F)
+  print(colMeans(sp_compare.rmse[,c(1:11)]))
   
   # Calulate RMSE from cross validation
-  best.method <- names(sp_compare.rmse)[which.min(colMeans(sp_compare.rmse[,c(1:10)]))]
+  best.method <- names(sp_compare.rmse)[which.min(colMeans(sp_compare.rmse[,c(1:11)]))]
   print(paste("Using", best.method))
   
   #===========================================
   # INTERPOLATE
   #===========================================
   
-  if(best.method %in% c("idw", "Exp", "Sph", "Bes", "Gau", "Cir", "Mat", "Ste")) {
-    best.k_fit <- gstat::gstat(formula = var.col~1, locations = sp_interp.df , nmax = nm)
+  if(best.method %in% c("idw", "idwnmax4", "Exp", "Sph", "Bes", "Gau", "Cir", "Mat", "Ste")) {
+    best.k_fit <- gstat::gstat(formula = var.col~1, locations = sp_interp.df,  set = list(idp = 2), nmax = nm)
     
-    if(best.method != "idw") {
+    if(best.method == "idwnmax4") {
+      best.k_fit <- gstat::gstat(formula = var.col~1, locations = sp_interp.df,  set = list(idp = 2), nmax = 4)
+    }
+    
+    if(!(best.method %in% c("idw", "idwnmax4"))) {
       best.vgfit <- gstat::fit.variogram(gstat::variogram(best.k_fit), gstat::vgm(best.method))
       best.k_fit <- gstat::gstat(formula = var.col~1, locations = sp_interp.df, model = best.vgfit, nmax = nm)
     }
