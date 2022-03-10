@@ -301,7 +301,7 @@ make_tm_product_figs <- function(fig_res = 600) {
                                               set.crs = coldpool:::ebs_proj_crs)
   
   year_vec <- as.numeric(gsub("[^0-9.-]", "", names(coldpool:::nbs_ebs_bottom_temperature)))
-  end_year <- which(year_vec == max_year)
+  end_year <- which(year_vec == 2021)
   
   coords <- raster::coordinates(coldpool:::nbs_ebs_bottom_temperature)
   
