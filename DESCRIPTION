@@ -3,7 +3,8 @@ Type: Package
 Title: Generate GAP's EBS temperature products
 Version: 1.1
 Authors@R: c(person("Sean", "Rohan", email = "sean.rohan@noaa.gov", role = c("aut", "cre")),
-    person("Lewis", "Barnett", email = "lewis.barnett@noaa.gov", role = c("aut", "ctb")))
+    person("Lewis", "Barnett", email = "lewis.barnett@noaa.gov", role = c("aut", "ctb")),
+    person("Emily", "Markowitz", role = c("ctb")))
 Maintainer: Sean Rohan <sean.rohan@noaa.gov>
 Depends: R (>= 3.5),
     akgfmaps (>= 1.7),
@@ -23,8 +24,6 @@ Depends: R (>= 3.5),
     sf,
     viridis,
     utils
-Suggests: metR,
-    cowplot
 Description: This package calculates the area of the cold pool in the eastern Bering Sea (cold pool index), mean bottom temperature, and mean sea surface temperature. The cold pool is defined as the estimated area of the eastern Bering Sea continental shelf survey area with bottom temperatures less than or equal to 2 degrees C.
 License: GPL (>=2)
 Encoding: UTF-8
@@ -32,4 +31,4 @@ LazyData: false
 RoxygenNote: 7.1.2
 Imports: colorspace,
     viridis
-Suggests: knitr, rmarkdown, RODBC, getPass, readr, testthat, cowplot
+Suggests: knitr, rmarkdown, RODBC, getPass, readr, testthat, cowplot, metR, cowplot
