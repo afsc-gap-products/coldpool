@@ -6,12 +6,6 @@
 
 plot_stn_doy <- function() {
   
-  library(ggplot2)
-  library(dplyr)
-  library(akgfmaps)
-  library(lubridate)
-  library(coldpool)
-  
   channel <- coldpool::get_connected(schema = "AFSC")
   
   # Retrieve haul data from RACEBASE
@@ -43,8 +37,8 @@ plot_stn_doy <- function() {
   # Combine strata by main survey region + SEBS plus NW
   agg_stratum <- ebs_layers$survey.strata %>%
     dplyr::mutate(agg_stratum = Stratum) %>%
-    dplyr::mutate(agg_stratum = replace(agg_stratum, agg_stratum %in% c(31,32,30,41,42,43,61,62,60,10,20,50), "EBS\nStandard"),
-                  agg_stratum = replace(agg_stratum, agg_stratum %in% c(82, 90), "EBS\nNW"),
+    dplyr::mutate(agg_stratum = replace(agg_stratum, agg_stratum %in% c(31,32,30,41,42,43,61,62,60,10,20,50), "EBS Shelf\nStandard"),
+                  agg_stratum = replace(agg_stratum, agg_stratum %in% c(82, 90), "EBS\nPlus NW"),
                   agg_stratum = replace(agg_stratum, agg_stratum %in% c(70,71,81), "NBS")) %>% 
     dplyr::group_by(agg_stratum) %>% 
     dplyr::summarise()
@@ -65,7 +59,7 @@ plot_stn_doy <- function() {
                                 aes(x = x,
                                     y = y, 
                                     label = agg_stratum),
-                                size = rel(5),
+                                size = rel(4.5),
                                 color = "black",
                                 bg.color = "white") +
     shadowtext::geom_shadowtext(data = data.frame(x = -158.5, 
@@ -75,7 +69,7 @@ plot_stn_doy <- function() {
                                 mapping = aes(x = x,
                                               y = y,
                                               label = lab),
-                                size = rel(8),
+                                size = rel(6),
                                 color = "black",
                                 bg.color = "white") +
     shadowtext::geom_shadowtext(data = data.frame(x = -166.2, 
@@ -85,12 +79,12 @@ plot_stn_doy <- function() {
                                 mapping = aes(x = x,
                                               y = y,
                                               label = lab),
-                                size = rel(3),
+                                size = rel(2.5),
                                 color = "black",
                                 bg.color = "white") +
-    shadowtext::geom_shadowtext(data = data.frame(x = -169, 
-                                                  y = 66.3, 
-                                                  lab = "Bering\nStrait") %>%
+    shadowtext::geom_shadowtext(data = data.frame(x = c(-169, -159.5), 
+                                                  y = c(66.3, 57.7), 
+                                                  lab = c("Bering\nStrait", "Bristol\nBay")) %>%
                                   akgfmaps::transform_data_frame_crs(out.crs = coldpool:::ebs_proj_crs),
                                 mapping = aes(x = x,
                                               y = y,
@@ -109,9 +103,10 @@ plot_stn_doy <- function() {
                                 breaks = ebs_layers$lat.breaks) +
     theme_bw() +
     ggplot2::theme(axis.title = element_blank(),
-                   axis.text = element_text(color = "black"),
-                   axis.ticks = element_line(color = "black"),
                    panel.border = element_rect(color = "black", fill = NA),
+                   legend.title = element_text(size = 9, color = "black"),
+                   legend.text = element_text(size = 8, color = "black"),
+                   axis.text = element_text(size = 8, color = "black"),
                    panel.grid = element_blank(),
                    panel.background = element_rect(color = "black", fill = "#bee8ff"),
                    legend.margin = margin(-12,0,0,0),

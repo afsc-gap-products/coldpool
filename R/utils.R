@@ -305,3 +305,16 @@ theme_multi_map <- function() {
 scale_fill_fermenter_custom <- function(pal, na.value = "grey50", guide = "coloursteps", aesthetics = "fill", ...) {
   ggplot2::binned_scale("fill", "fermenter", ggplot2:::binned_pal(scales::manual_pal(unname(pal))), na.value = na.value, guide = guide, ...)
 }
+
+#' Tech memo figure without legend
+#' @export
+
+theme_tm_no_legend <- function() {
+  theme_bw() %+replace%
+    theme(legend.title = element_blank(),
+          panel.border = element_rect(color = "black", fill = NA),
+          legend.text = element_text(size = 8, color = "black"),
+          axis.title = element_text(size = 9, color = "black"),
+          axis.text = element_text(size = 8, color = "black"),
+          plot.background = element_rect(fill = NA, color = NA))
+}
