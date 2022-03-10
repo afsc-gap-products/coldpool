@@ -211,7 +211,7 @@ interpolate_variable <- function(dat,
                              filename = here::here("output", 
                                                    "raster", 
                                                    select.region, 
-                                                   var.col, paste0(select.region, "_idw_nmax4_", dat.year, "_", var.col, ".tif" )),
+                                                   var.col, paste0(select.region, "_idwnmax4_", dat.year, "_", var.col, ".tif" )),
                              format = "GTiff",
                              overwrite = TRUE,
                              layer_name = dat.year)
