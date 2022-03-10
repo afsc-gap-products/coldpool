@@ -62,15 +62,36 @@ coldpool::loocv_gear_temp(temp_data_path =  here::here("data", "index_hauls_temp
                           proj_crs = proj_crs,
                           interp_variable = "gear_temperature")
 
-# Calculate cold pool area using interpolation methods ----
+# Generate rasters using interpolation methods ----
 # Writes:
-# -- /output/raster/[method]_[year]_gear_temperature.tif: GeoTIFF raster files for each interpolation method and year
-cpa_df <- interpolation_wrapper(temp_data_path = here::here("data", "index_hauls_temperature_data.csv"),
+# -- /output/raster/[method]_[year]_gear_temperature.tiff: GeoTIFF raster files for each interpolation method and year
+interpolation_wrapper(temp_data_path = here::here("data", "index_hauls_temperature_data.csv"),
                                 proj_crs = coldpool:::ebs_proj_crs,
                                 cell_resolution = 5000, # In meters
                                 select_years = 1982:2021, 
                                 interp_variable = "gear_temperature",
                                 select_region = "sebs")
+
+interpolation_wrapper(temp_data_path = here::here("data", "index_hauls_temperature_data.csv"),
+                                proj_crs = coldpool:::ebs_proj_crs,
+                                cell_resolution = 5000, # In meters
+                                select_years = 1982:2021, 
+                                interp_variable = "surface_temperature",
+                                select_region = "sebs")
+
+interpolation_wrapper(temp_data_path = here::here("data", "index_hauls_temperature_data.csv"),
+                                proj_crs = coldpool:::ebs_proj_crs,
+                                cell_resolution = 5000, # In meters
+                                select_years = 1982:2021, 
+                                interp_variable = "gear_temperature",
+                                select_region = "ebs")
+
+interpolation_wrapper(temp_data_path = here::here("data", "index_hauls_temperature_data.csv"),
+                                proj_crs = coldpool:::ebs_proj_crs,
+                                cell_resolution = 5000, # In meters
+                                select_years = 1982:2021, 
+                                interp_variable = "surface_temperature",
+                                select_region = "ebs")
 ```
 
 # Compare interpolation methods
