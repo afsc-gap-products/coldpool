@@ -1,8 +1,8 @@
 ---
-title: "Compare interpolation methods"
+title: "Estimating mean temperatures and cold pool are from AFSC bottom trawl surveys of the eastern Bering Sea"
 author: "Sean Rohan, Lewis Barnett, and Nicole Charriere"
 date: "3/4/2022"
-output: word_document
+output: html_document
 ---
 
 # Get data
