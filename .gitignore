@@ -50,4 +50,3 @@ vignettes/*.pdf
 /Presentation/
 /output/
 *.tiff
-/plots/*.png
