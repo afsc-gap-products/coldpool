@@ -23,7 +23,7 @@ Depends: R (>= 3.5),
     sf,
     viridis,
     utils
-Remotes: afsc-data-products/akgfmaps
+Remotes: afsc-gap-products/akgfmaps
 Description: This package calculates the area of the cold pool in the eastern Bering Sea (cold pool index), mean bottom temperature, and mean sea surface temperature. The cold pool is defined as the estimated area of the eastern Bering Sea continental shelf survey area with bottom temperatures less than or equal to 2 degrees C.
 License: GPL (>=2)
 Encoding: UTF-8
