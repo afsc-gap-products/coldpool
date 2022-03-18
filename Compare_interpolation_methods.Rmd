@@ -465,19 +465,19 @@ Kendall's Tau correlations among interpolation methods for BT, SST, and CPA.
 
 ```{r kendalls_tau}
 # Make Kendall's tau ranking tables
-coldpool:::combined_sst_df %>%
+combined_sst_df %>%
   dplyr::filter(year > 1986) %>%
   coldpool:::make_rank_table() %>%
   write.csv(file = here::here("output", "kendall_tau_method_sst.csv"), 
             row.names = FALSE)
 
-coldpool:::combined_bt_df %>%
+combined_bt_df %>%
   dplyr::filter(year > 1986) %>%
   coldpool:::make_rank_table() %>%
   write.csv(file = here::here("output", "kendall_tau_method_bt.csv"), 
             row.names = FALSE)
 
-coldpool:::combined_cpa_df %>%
+combined_cpa_df %>%
   dplyr::filter(year < 2020) %>%
   coldpool:::make_rank_table() %>%
   write.csv(file = here::here("output", "kendall_tau_method_cpa.csv"), 
