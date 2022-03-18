@@ -14,6 +14,7 @@
 #'      \item{LAST_UPDATE}{Date when cold pool index and temperature rasters were last updated.}
 #' }
 #' @source \url{https://www.fisheries.noaa.gov/contact/groundfish-assessment-program}
+#' @export
 "cold_pool_index"
 
 #' Northern Bering Sea Mean Temperature (nbs_mean_temperature)
@@ -28,6 +29,7 @@
 #'      \item{LAST_UPDATE}{Date when cold pool index and temperature rasters were last updated.}
 #' }
 #' @source \url{https://www.fisheries.noaa.gov/contact/groundfish-assessment-program}
+#' @export
 "nbs_mean_temperature"
 
 #' Historical cold pool area calculations (cpa_pre2021)
@@ -54,6 +56,7 @@
 #' Character vector for North American Datum 1983 / Albers Equal Area Alaska (EPSG:3338).
 #' 
 #' @format A 1L character vector
+#' @export
 "ebs_proj_crs"
 
 #' Rasters of summer bottom temperature in the eastern Bering Sea at 5-km resolution
@@ -65,6 +68,7 @@
 #'      \item{ste_(year)_gear_temperature}{Raster layer of temperature for a given year}
 #' }
 #' @source \url{https://www.fisheries.noaa.gov/contact/groundfish-assessment-program}
+#' @export
 "ebs_bottom_temperature"
 
 #' Rasters of summer sea surface temperature in the eastern Bering Sea at 5-km resolution
@@ -76,6 +80,7 @@
 #'      \item{ste_(year)_gear_temperature}{Raster layer of temperature for a given year}
 #' }
 #' @source \url{https://www.fisheries.noaa.gov/contact/groundfish-assessment-program}
+#' @export
 "ebs_surface_temperature"
 
 #' Rasters of summer bottom temperature in the eastern and northern Bering Sea at 5-km resolution
@@ -87,6 +92,7 @@
 #'      \item{ste_(year)_gear_temperature}{Raster layer of temperature for a given year}
 #' }
 #' @source \url{https://www.fisheries.noaa.gov/contact/groundfish-assessment-program}
+#' @export
 "nbs_ebs_bottom_temperature"
 
 #' Rasters of summer bottom temperature in the eastern and northern Bering Sea at 5-km resolution
@@ -98,4 +104,5 @@
 #'      \item{ste_(year)_gear_temperature}{Raster layer of temperature for a given year}
 #' }
 #' @source \url{https://www.fisheries.noaa.gov/contact/groundfish-assessment-program}
+#' @export
 "nbs_ebs_surface_temperature"
