@@ -115,7 +115,16 @@ bt_df <- data.frame(YEAR = numeric(length = length(bottom_temp_files)),
                     AREA_LTE1_KM2 = numeric(length = length(bottom_temp_files)),
                     AREA_LTE0_KM2 = numeric(length = length(bottom_temp_files)),
                     AREA_LTEMINUS1_KM2 = numeric(length = length(bottom_temp_files)),
-                    MEAN_GEAR_TEMPERATURE = numeric(length = length(bottom_temp_files)))
+                    MEAN_GEAR_TEMPERATURE = numeric(length = length(bottom_temp_files)),
+                    MEAN_BT_LT100M = numeric(length = length(bottom_temp_files)))
+
+# Setup mask to calculate mean bottom temperature from <100 m strata
+ebs_layers <- akgfmaps::get_base_layers(select.region = "sebs", set.crs = proj_crs)
+
+lt100_strata <- ebs_layers$survey.strata %>%
+  dplyr::filter(Stratum %in% c(10, 20, 31, 32, 41, 42, 43)) %>%
+  dplyr::group_by(SURVEY) %>%
+  dplyr::summarise()
 
 for(i in 1:length(bottom_temp_files)) {
   bt_raster <- raster::raster(bottom_temp_files[i], values = TRUE)
@@ -130,6 +139,9 @@ for(i in 1:length(bottom_temp_files)) {
     cpa_from_raster(raster_units = "m", temperature_threshold = -1)
   bt_df$MEAN_GEAR_TEMPERATURE[i] <- raster::values(bt_raster) %>% 
     mean(na.rm = TRUE)
+  lt100_temp <- raster::mask(bt_raster, 
+                           lt100_strata)
+  bt_df$MEAN_BT_LT100M[i] <- mean(lt100_temp@data@values, na.rm = TRUE)
   
 }
 

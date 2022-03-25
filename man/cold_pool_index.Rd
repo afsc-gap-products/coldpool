@@ -5,7 +5,7 @@
 \alias{cold_pool_index}
 \title{Cold Pool Index and SEBS Mean Temperature (cold_pool_index)}
 \format{
-A data frame with 39 rows and 8 columns.
+A data frame with 39 rows and 9 columns.
 \describe{
      \item{YEAR}{Year}
      \item{AREA_LTE2_KM2}{Cold Pool Index. Total area with bottom temperatures less than or equal to 2 celsius, in square kilometers}
@@ -14,6 +14,7 @@ A data frame with 39 rows and 8 columns.
      \item{AREA_LTEMINUS1_KM2}{Total area with bottom temperatures less than or equal to -1 celsius, in square kilometers}
      \item{MEAN_GEAR_TEMPERATURE}{Mean gear temperature (i.e. bottom temperature) in the survey area.}
      \item{MEAN_SURFACE_TEMPERATURE}{Mean sea surface temperature in the survey area.}
+     \item{MEAN_BT_LT100M}{Mean gear temperature (i.e. bottom temperature) for EBS shelf strata with bottom depth less than or equal to 100 m (strata 10, 20, 31, 32, 41, 42, 43).}
      \item{LAST_UPDATE}{Date when cold pool index and temperature rasters were last updated.}
 }
 }
