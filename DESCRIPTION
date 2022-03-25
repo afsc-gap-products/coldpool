@@ -1,7 +1,7 @@
 Package: coldpool
 Type: Package
 Title: Generate GAP's EBS temperature products
-Version: 1.2
+Version: 1.3
 Authors@R: c(person("Sean", "Rohan", email = "sean.rohan@noaa.gov", role = c("aut", "cre")),
     person("Lewis", "Barnett", email = "lewis.barnett@noaa.gov", role = c("aut", "ctb")),
     person("Emily", "Markowitz", role = c("ctb")))
