@@ -570,6 +570,45 @@ make_tm_product_figs <- function(fig_res = 600) {
           strip.background = element_rect(fill = "#0055a4",
                                           color = NA))
   
+  # Map of MEAN_BT_LT100M strata
+  lt100_strata <- ebs_layers$survey.strata %>%
+    dplyr::filter(Stratum %in% c(10, 20, 31, 32, 41, 42, 43)) %>%
+    dplyr::group_by(SURVEY) %>%
+    dplyr::summarise() %>%
+    dplyr::mutate(Stratum = "MEAN_BT_LT100M Strata")
+  
+  panel_extent <- data.frame(y = c(53, 64),
+                             x = c(-174, -156)) %>%
+    akgfmaps::transform_data_frame_crs(out.crs = coldpool:::ebs_proj_crs)
+  
+  png(file = here::here("plots", "MEAN_BT_LT100M_strata.png"), width = 6, height = 6, units = "in", res = 120)
+  print(
+    ggplot() +
+      ggplot2::geom_sf(data = ebs_layers$akland, 
+                       fill = "grey70", 
+                       color = "black") +
+      geom_sf(data = lt100_strata, aes(fill = Stratum)) +
+      geom_sf(data = ebs_layers$survey.strata, fill = NA) +
+      geom_sf_text(data = sf::st_centroid(ebs_layers$survey.strata),
+                   aes(label = Stratum)) +
+      ggplot2::coord_sf(xlim = panel_extent$x, 
+                        ylim = panel_extent$y) +
+      ggplot2::scale_x_continuous(name = "Longitude", 
+                                  breaks = ebs_layers$lon.breaks) + 
+      ggplot2::scale_y_continuous(name = "Latitude", 
+                                  breaks = ebs_layers$lat.breaks) +
+      theme_bw() +
+      ggplot2::theme(axis.title = element_blank(),
+                     axis.text = element_text(color = "black"),
+                     axis.ticks = element_line(color = "black"),
+                     panel.border = element_rect(color = "black", fill = NA),
+                     panel.background = element_rect(color = "black", fill = NA),
+                     legend.key.width = unit(12, "mm"),
+                     legend.position = "bottom")
+  )
+  dev.off()
+  
+  
   
   # Write plots to files ----
   png(file = here::here("plots", "tm_stacked_temperature.png"), height = 4, width = 6, units = "in", res = 600)

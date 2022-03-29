@@ -2,7 +2,7 @@
 #' 
 #' Data frame containing mean gear temperature (i.e., bottom temperature), mean surface temperatures, and areas of temperatures less than or equal to 2, 1, 0, and -1 degree celcius. The Cold Pool Index (i.e., cold pool area) is the area of the eastern Bering Sea continental shelf bottom trawl survey area with bottom temperatures less than or equal to two (2) degrees celsius during AFSC/RACE/GAP summer bottom trawl surveys. In this data set, the Cold Pool Index has the column name AREA_LTE2_KM2.
 #' 
-#' @format A data frame with 39 rows and 8 columns.
+#' @format A data frame with 39 rows and 9 columns.
 #' \describe{
 #'      \item{YEAR}{Year}
 #'      \item{AREA_LTE2_KM2}{Cold Pool Index. Total area with bottom temperatures less than or equal to 2 celsius, in square kilometers}
@@ -11,9 +11,11 @@
 #'      \item{AREA_LTEMINUS1_KM2}{Total area with bottom temperatures less than or equal to -1 celsius, in square kilometers}
 #'      \item{MEAN_GEAR_TEMPERATURE}{Mean gear temperature (i.e. bottom temperature) in the survey area.}
 #'      \item{MEAN_SURFACE_TEMPERATURE}{Mean sea surface temperature in the survey area.}
+#'      \item{MEAN_BT_LT100M}{Mean gear temperature (i.e. bottom temperature) for EBS shelf *STANDARD* strata (i.e., excluding northwest strata 82 and 90) with bottom depth less than 100 m (strata 10, 20, 31, 32, 41, 42, 43).}
 #'      \item{LAST_UPDATE}{Date when cold pool index and temperature rasters were last updated.}
 #' }
 #' @source \url{https://www.fisheries.noaa.gov/contact/groundfish-assessment-program}
+#' @export
 "cold_pool_index"
 
 #' Northern Bering Sea Mean Temperature (nbs_mean_temperature)
@@ -28,6 +30,7 @@
 #'      \item{LAST_UPDATE}{Date when cold pool index and temperature rasters were last updated.}
 #' }
 #' @source \url{https://www.fisheries.noaa.gov/contact/groundfish-assessment-program}
+#' @export
 "nbs_mean_temperature"
 
 #' Historical cold pool area calculations (cpa_pre2021)
@@ -54,6 +57,7 @@
 #' Character vector for North American Datum 1983 / Albers Equal Area Alaska (EPSG:3338).
 #' 
 #' @format A 1L character vector
+#' @export
 "ebs_proj_crs"
 
 #' Rasters of summer bottom temperature in the eastern Bering Sea at 5-km resolution
@@ -65,6 +69,7 @@
 #'      \item{ste_(year)_gear_temperature}{Raster layer of temperature for a given year}
 #' }
 #' @source \url{https://www.fisheries.noaa.gov/contact/groundfish-assessment-program}
+#' @export
 "ebs_bottom_temperature"
 
 #' Rasters of summer sea surface temperature in the eastern Bering Sea at 5-km resolution
@@ -76,6 +81,7 @@
 #'      \item{ste_(year)_gear_temperature}{Raster layer of temperature for a given year}
 #' }
 #' @source \url{https://www.fisheries.noaa.gov/contact/groundfish-assessment-program}
+#' @export
 "ebs_surface_temperature"
 
 #' Rasters of summer bottom temperature in the eastern and northern Bering Sea at 5-km resolution
@@ -87,6 +93,7 @@
 #'      \item{ste_(year)_gear_temperature}{Raster layer of temperature for a given year}
 #' }
 #' @source \url{https://www.fisheries.noaa.gov/contact/groundfish-assessment-program}
+#' @export
 "nbs_ebs_bottom_temperature"
 
 #' Rasters of summer bottom temperature in the eastern and northern Bering Sea at 5-km resolution
@@ -98,4 +105,5 @@
 #'      \item{ste_(year)_gear_temperature}{Raster layer of temperature for a given year}
 #' }
 #' @source \url{https://www.fisheries.noaa.gov/contact/groundfish-assessment-program}
+#' @export
 "nbs_ebs_surface_temperature"
