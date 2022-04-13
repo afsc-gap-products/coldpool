@@ -671,6 +671,10 @@ zscore_plot <- ggplot(data = cp_summary,
         strip.background = element_rect(fill = "#0055a4",
                                         color = NA),
         legend.position = "none")
+
+png(file = here::here("plots", paste0(max_year, "_anomaly.png")), width = 6, height = 6, units = "in", res = fig_res)
+print(zscore_plot)
+dev.off()
 ```
 
 Contributed by Sean Rohan^1^ and Lewis Barnett^1^   
