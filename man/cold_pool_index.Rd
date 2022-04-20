@@ -14,7 +14,7 @@ A data frame with 39 rows and 9 columns.
      \item{AREA_LTEMINUS1_KM2}{Total area with bottom temperatures less than or equal to -1 celsius, in square kilometers}
      \item{MEAN_GEAR_TEMPERATURE}{Mean gear temperature (i.e. bottom temperature) in the survey area.}
      \item{MEAN_SURFACE_TEMPERATURE}{Mean sea surface temperature in the survey area.}
-     \item{MEAN_BT_LT100M}{Mean gear temperature (i.e. bottom temperature) for EBS shelf strata with bottom depth less than or equal to 100 m (strata 10, 20, 31, 32, 41, 42, 43).}
+     \item{MEAN_BT_LT100M}{Mean gear temperature (i.e. bottom temperature) for EBS shelf *STANDARD* strata (i.e., excluding northwest strata 82 and 90) with bottom depth less than 100 m (strata 10, 20, 31, 32, 41, 42, 43).}
      \item{LAST_UPDATE}{Date when cold pool index and temperature rasters were last updated.}
 }
 }

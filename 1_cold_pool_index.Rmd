@@ -609,6 +609,74 @@ print(plot_sebs_average_temperature)
 dev.off()
 ```
 
+```{r zscore_temperature}
+cp_summary <- dplyr::bind_rows(
+  dplyr::mutate(cold_pool_index, 
+                diff = MEAN_GEAR_TEMPERATURE - mean(MEAN_GEAR_TEMPERATURE)) |> 
+    dplyr::mutate(sign = sign(diff),
+                  z = diff/sd(MEAN_GEAR_TEMPERATURE)) |>
+    dplyr::inner_join(data.frame(sign = c(-1,1),
+                                 symbol = c("-","+"),
+                                 col = c(1,2))) |>
+    dplyr::select(YEAR, diff, symbol, z, col) |>
+    dplyr::mutate(var = "Bottom temperature"),
+  dplyr::mutate(cold_pool_index, 
+                diff = MEAN_SURFACE_TEMPERATURE - mean(MEAN_SURFACE_TEMPERATURE)) |> 
+    dplyr::mutate(sign = sign(diff),
+                  z = diff/sd(MEAN_SURFACE_TEMPERATURE)) |>
+    dplyr::inner_join(data.frame(sign = c(-1,1),
+                                 symbol = c("-","+"),
+                                 col = c(1,2))) |>
+    dplyr::select(YEAR, diff, symbol, z, col) |>
+    dplyr::mutate(var = "Sea surface temperature"),
+  dplyr::mutate(cold_pool_index, 
+                diff = AREA_LTE2_KM2 - mean(AREA_LTE2_KM2)) |> 
+    dplyr::mutate(sign = sign(diff),
+                  z = diff/sd(AREA_LTE2_KM2)) |>
+    dplyr::inner_join(data.frame(sign = c(-1,1),
+                                 symbol = c("-","+"),
+                                 col = c(2,1))) |>
+    dplyr::select(YEAR, diff, symbol, z, col) |>
+    dplyr::mutate(var = "Cold pool area")) |>
+  dplyr::mutate(group = YEAR < 2020,
+                var = factor(cp_summary$var, 
+                             levels = c("Bottom temperature",
+                                        "Sea surface temperature",
+                                        "Cold pool area")))
+
+zscore_plot <- ggplot(data = cp_summary, 
+       aes(x = YEAR, 
+           y = z, 
+           group = group)) +
+  geom_hline(yintercept = c(0), linetype = 1) +
+  geom_hline(yintercept = c(-1,1), linetype = 2) +
+  geom_hline(yintercept = c(-2,2), linetype = 3) +
+  geom_point() +
+  geom_line() +
+  geom_text(data = cp_summary,
+            aes(x = YEAR, y = 2.5, label = symbol, color = factor(col))) +
+  facet_wrap(~var, nrow = 3) +
+  scale_x_continuous(name = "Year") +
+  scale_y_continuous(name = "Anomaly") +
+  scale_color_manual(values = c("blue", "red")) +
+  theme_bw() +
+  theme(axis.text = element_text(color = "black"),
+        axis.ticks = element_line(color = "black"),
+        panel.border = element_rect(color = "black", fill = NA),
+        panel.background = element_rect(color = "black", fill = NA),
+        strip.text = element_text(size = 9,
+                                  color = "white",
+                                  face = "bold",
+                                  margin = margin(0.5, 0, 0.5, 0, "mm")),
+        strip.background = element_rect(fill = "#0055a4",
+                                        color = NA),
+        legend.position = "none")
+
+png(file = here::here("plots", paste0(max_year, "_anomaly.png")), width = 6, height = 6, units = "in", res = fig_res)
+print(zscore_plot)
+dev.off()
+```
+
 Contributed by Sean Rohan^1^ and Lewis Barnett^1^   
 ^1^ Resource Assessment and Conservation Engineering Division, Alaska Fisheries Science Center, National Marine Fisheries Service, NOAA  
 **Contact**: sean.rohan@noaa.gov

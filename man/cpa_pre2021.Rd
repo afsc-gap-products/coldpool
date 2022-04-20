@@ -15,7 +15,15 @@ A data frame with 38 rows and 9 columns:
      \item{AREA_KM2_2}{Area with bottom temperatures between 1 and 2 celsius, in square kilometers}
      \item{AREA_SUM_KM2_LTE2}{Cold Pool Index. Total area with bottom temperatures less than or equal to 2 celsius, in square kilometers}
      \item{AREA_KM2_LTE1}{Total area with bottom temperatures less than or equal to 1 celsius, in square kilometers}
-      \item{AREA_KM2_LTE0}{Total area with bottom temperatures less than or equal to 0 celsius, in square kilometers}
+     \item{AREA_KM2_LTE0}{Total area with bottom temperatures less than or equal to 0 celsius, in square kilometers}
+     \item{AVGBSBT_PLUSNW}{Stratum-area weighted mean bottom temperature for EBS shelf standard and plusNW survey strata}
+     \item{AVGBSST_PLUSNW}{Stratum-area weighted mean sea surface temperature for EBS shelf standard and plusNW survey strata}
+     \item{AVGBSBT_STANDARD}{Stratum-area weighted mean bottom temperature for EBS shelf standard survey strata}
+     \item{AVGBSST_STANDARD}{Stratum-area weighted mean sea surface temperature for EBS shelf standard survey strata}
+     \item{AVGBSBT_NBS}{Stratum-area weighted mean bottom temperature for the NBS}
+     \item{AVGBSST_NBS}{Stratum-area weighted mean sea surface temperature for the NBS}
+     \item{AVGBSBT_LT100M}{Stratum-area weighted mean bottom temperature for EBS shelf stations at bottom depths < 100 m}
+     \item{AVGBSST_LT100M}{Stratum-area weighted mean sea surface temperature for EBS shelf stations at bottom depths < 100 m}
 }
 }
 \source{

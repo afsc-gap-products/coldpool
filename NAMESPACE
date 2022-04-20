@@ -3,6 +3,7 @@
 export(cold_pool_index)
 export(compare_cpa_station_filter)
 export(cpa_from_raster)
+export(cpa_pre2021)
 export(ebs_bottom_temperature)
 export(ebs_proj_crs)
 export(ebs_surface_temperature)

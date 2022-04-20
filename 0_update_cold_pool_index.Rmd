@@ -231,7 +231,7 @@ if(update_sysdata) {
                                                         file_name_contains = "ste_",
                                                         file_type = ".tif")
   
-  cpa_pre2021 <- coldpool:::cpa_pre2021
+  cpa_pre2021 <- read.csv(file = here::here("inst", "extdata", "old_method_cpa_temperature_2021.csv"))
   ebs_proj_crs <- coldpool:::ebs_proj_crs
   cold_pool_index <- output_df
     

@@ -35,21 +35,29 @@
 
 #' Historical cold pool area calculations (cpa_pre2021)
 #' 
-#' Historical temperature cold pool and temperature band areas that were calculated prior to 2021 by Bob Lauth and Lyle Britt. Historical cold pool calculations were conducted in ArcGIS and used inverse distance weighting with a maximum of four nearest neighbor points for interpolation (search radius nmax = 4) and weighting function power equal to 2 (i.e., idp = 2). Default ArcGIS settings were used to generate rasters cells for interpolation (cell dimensions equal to the smaller horizontal or vertical dimension divided by 250). Protocols for including stations for interpolation varied among years but it was intended for all standard survey grid stations from the EBS survey to be included. In some years, it is possible that near-shore stations or red king crab resample stations were included in the calculations. Rasters were converted to polygon shapefiles and areas were calculated from polygons. The CRS used in ArcGIS .mxd files was North American Datum 1983 / Albers Equal Area Alaska (EPSG:3338)
+#' Historical temperature cold pool area  (AREA_SUM_KM2_LTE2) and other temperature isotherm (AREA_KM2_MINUS1, AREA_KM2_0, AREA_KM2_1, AREA_KM2_2, AREA_KM2_LTE0, AREA_KM2_LTE1) areas that were calculated prior to 2021 by Bob Lauth, Lyle Britt, Dan Nichol, and Rebecca Haehn. These calculations were obtained from raster surfaces generated using ArcMap by interpolating temperatures using inverse distance weighting with a maximum of four nearest neighbor points for interpolation (search radius nmax = 4) and weighting function power equal to 2 (i.e., idp = 2). Default ArcGIS settings were used to generate rasters cells for interpolation (cell dimensions equal to the smaller horizontal or vertical dimension divided by 250). Protocols for including stations for interpolation varied among years but it was intended for all standard survey grid stations from the EBS survey to be included. In some years, it is possible that near-shore stations or red king crab resample stations were included in the calculations. Rasters were converted to polygon shapefiles and areas were calculated from polygons. The CRS used in ArcGIS .mxd files was North American Datum 1983 / Albers Equal Area Alaska (EPSG:3338). Historical weighted average temperature data products (AVGBSBT_PLUSNW, AVGBSST_PLUSNW, AVGBSBT_STANDARD, AVGBSST_STANDARD, AVGBSBT_NBS, AVGBSST_NBS, AVGBSBT_LT100M, AVGBSST_LT100M) were calculated by weighting temperature observations from survey stations in proportion to the area of the stratum where they were collected relative to the total survey area. Historical mean temperature for stations at bottom depths < 100 m (AVGBSBT_LT100M, AVGBSST_LT100M) were calculated by averaging temperature observations from samples collected at bottom depths < 100 m.
 #' 
-#' @format A data frame with 38 rows and 9 columns:
+#' @format A data frame with 39 rows and 16 columns:
 #' \describe{
 #'      \item{YEAR}{Year}
-#'      \item{AVG_STRATA_WEIGHTED_BOTTEMP_STD_AREA}{Mean bottom temperature by stratum, weighted by stratum area, in square kilometers}
 #'      \item{AREA_KM2_MINUS1}{Area with bottom temperatures less than -1 celsius, in square kilometers}
 #'      \item{AREA_KM2_0}{Area with bottom temperatures between -1 and 0 celsius, in square kilometers}
 #'      \item{AREA_KM2_1}{Area with bottom temperatures between 0 and 1 celsius, in square kilometers}
 #'      \item{AREA_KM2_2}{Area with bottom temperatures between 1 and 2 celsius, in square kilometers}
 #'      \item{AREA_SUM_KM2_LTE2}{Cold Pool Index. Total area with bottom temperatures less than or equal to 2 celsius, in square kilometers}
 #'      \item{AREA_KM2_LTE1}{Total area with bottom temperatures less than or equal to 1 celsius, in square kilometers}
-#'       \item{AREA_KM2_LTE0}{Total area with bottom temperatures less than or equal to 0 celsius, in square kilometers}
+#'      \item{AREA_KM2_LTE0}{Total area with bottom temperatures less than or equal to 0 celsius, in square kilometers}
+#'      \item{AVGBSBT_PLUSNW}{Stratum-area weighted mean bottom temperature for EBS shelf standard and plusNW survey strata}
+#'      \item{AVGBSST_PLUSNW}{Stratum-area weighted mean sea surface temperature for EBS shelf standard and plusNW survey strata}
+#'      \item{AVGBSBT_STANDARD}{Stratum-area weighted mean bottom temperature for EBS shelf standard survey strata}
+#'      \item{AVGBSST_STANDARD}{Stratum-area weighted mean sea surface temperature for EBS shelf standard survey strata}
+#'      \item{AVGBSBT_NBS}{Stratum-area weighted mean bottom temperature for the NBS}
+#'      \item{AVGBSST_NBS}{Stratum-area weighted mean sea surface temperature for the NBS}
+#'      \item{AVGBSBT_LT100M}{Mean bottom temperature for EBS shelf stations at bottom depths < 100 m}
+#'      \item{AVGBSST_LT100M}{Mean sea surface temperature for EBS shelf stations at bottom depths < 100 m}
 #' }
 #' @source \url{https://www.fisheries.noaa.gov/contact/groundfish-assessment-program}
+#' @export
 "cpa_pre2021"
 
 #' CRS for eastern Bering Sea cold pool index
