@@ -28,7 +28,8 @@ plot_stn_doy <- function() {
                           dplyr::summarise()) %>%
     dplyr::inner_join(haul_dat %>%
                         dplyr::group_by(STATIONID) %>%
-                        dplyr::summarise(MEAN_DOY = mean(DOY)))
+                        dplyr::summarise(MEAN_DOY = mean(DOY),
+                                         MEAN_DEPTH = mean(BOTTOM_DEPTH, na.rm = TRUE)))
   
   # Define plot exent (through trial end error)
   panel_extent <- data.frame(x = c(-1326559.21, -87636.05),

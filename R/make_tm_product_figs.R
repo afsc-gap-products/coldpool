@@ -119,8 +119,7 @@ make_tm_product_figs <- function(fig_res = 600) {
                                y = coords[,2],
                                temperature = coldpool:::ebs_bottom_temperature@data@values[,i])
     sel_layer_df <- sel_layer_df[!is.na(sel_layer_df$temperature),]
-    sel_layer_df <- sel_layer_df %>%
-      dplyr::filter(temperature <= 2)
+    # sel_layer_df <- sel_layer_df
     sel_layer_df$year <- year_vec[i]
     
     if(i == start_year) {
@@ -169,7 +168,8 @@ make_tm_product_figs <- function(fig_res = 600) {
     geom_sf(data = sebs_layers$akland, fill = "black", 
             color = NA) +
     geom_sf(data = sebs_layers$survey.area, fill = "grey75") +
-    geom_tile(data = bt_year_df,
+    geom_tile(data = bt_year_df %>%
+                dplyr::filter(temperature <= 2),
               aes(x = x, 
                   y = y,
                   fill = temp_disc),
@@ -223,8 +223,7 @@ make_tm_product_figs <- function(fig_res = 600) {
                                y = coords[,2],
                                temperature = coldpool:::ebs_bottom_temperature@data@values[,i])
     sel_layer_df <- sel_layer_df[!is.na(sel_layer_df$temperature),]
-    sel_layer_df <- sel_layer_df %>%
-      dplyr::filter(temperature <= 2)
+    # sel_layer_df <- sel_layer_df
     sel_layer_df$year <- year_vec[i]
     
     if(i == (mid_year+1)) {
@@ -295,8 +294,6 @@ make_tm_product_figs <- function(fig_res = 600) {
   )
   
   # Setup EBS+NBS layers ----
-  
-  
   nbs_ebs_layers <- akgfmaps::get_base_layers(select.region = "ebs",
                                               set.crs = coldpool:::ebs_proj_crs)
   
@@ -456,6 +453,137 @@ make_tm_product_figs <- function(fig_res = 600) {
                                             temp_map_cbar,
                                             nrow = 2,
                                             rel_heights = c(0.8,0.2))
+  
+  # tm_temp_grid_1.png
+  
+  ebs_nbs_bt_grid <- ggplot2::ggplot() +
+    ggplot2::geom_sf(data = nbs_ebs_layers$akland, 
+                     fill = "grey70", 
+                     color = "black") +
+    ggplot2::geom_sf(data = nbs_ebs_layers$survey.area, fill = "grey65") +
+    ggplot2::geom_tile(data = bt_year_df,
+                       aes(x = x, 
+                           y = y,
+                           fill = cut(temperature, 
+                                      breaks = nbs_ebs_temp_breaks))) +
+    ggplot2::geom_sf(data = nbs_ebs_agg_strata, 
+                     fill = NA,
+                     color = "black") +
+    ggplot2::facet_wrap(~year, nrow = 2) +
+    ggplot2::coord_sf(xlim = panel_extent$x, 
+                      ylim = panel_extent$y) +
+    ggplot2::scale_x_continuous(name = "Longitude", 
+                                breaks = nbs_ebs_layers$lon.breaks) + 
+    ggplot2::scale_y_continuous(name = "Latitude", 
+                                breaks = nbs_ebs_layers$lat.breaks) +
+    ggplot2::scale_fill_manual(values = viridis_pal(option = nbs_ebs_viridis_option)(n_temp_breaks)) +
+    theme_bw() +
+    ggplot2::theme(axis.title = element_blank(),
+                   axis.text = element_text(color = "black"),
+                   axis.ticks = element_line(color = "black"),
+                   panel.border = element_rect(color = "black", fill = NA),
+                   panel.background = element_rect(color = "black", fill = NA),
+                   legend.key.width = unit(12, "mm"),
+                   legend.position = "none",
+                   legend.direction = "horizontal", 
+                   plot.margin = unit(c(5.5, 5.5,-25,5.5), units = "pt"))
+  
+  ebs_nbs_layers <- akgfmaps::get_base_layers(select.region = "ebs",
+                                              set.crs = coldpool:::ebs_proj_crs)
+  
+  year_vec <- as.numeric(gsub("[^0-9.-]", "", names(coldpool:::ebs_nbs_bottom_temperature)))
+  start_year <- which(year_vec == min_year)
+  mid_year <- which(year_vec == max_year)
+  end_year <- which(year_vec == 2021)
+  
+  coords <- raster::coordinates(coldpool:::ebs_bottom_temperature)
+  
+  for(i in start_year:mid_year) {
+    sel_layer_df <- data.frame(x = coords[,1],
+                               y = coords[,2],
+                               temperature = coldpool:::ebs_bottom_temperature@data@values[,i])
+    sel_layer_df <- sel_layer_df[!is.na(sel_layer_df$temperature),]
+    sel_layer_df <- sel_layer_df
+    sel_layer_df$year <- year_vec[i]
+    
+    if(i == start_year) {
+      bt_year_df <- sel_layer_df
+    } else{
+      bt_year_df <- dplyr::bind_rows(bt_year_df, sel_layer_df)
+    }
+  }
+  
+  cold_pool_cbar <- coldpool::legend_discrete_cbar(breaks = c(-Inf, -1, 0, 1, 2),
+                                                   colors = rev(c("#21dae7", "#0071ff", "#0000e3", "#000040")),
+                                                   legend_direction = "vertical",
+                                                   font_size = 3.5,
+                                                   width = 0.1,
+                                                   expand_size.x = 0.3,
+                                                   expand_size.y = 0.3,
+                                                   expand.x = 0.2,
+                                                   expand.y = 0.9,
+                                                   spacing_scaling = 1,
+                                                   text.hjust = 0,
+                                                   font.family = "sans",
+                                                   neat.labels = FALSE) +
+    annotate("text",
+             x = 1.1,
+             y = 2.05,
+             label =  expression(bold("Bottom\nTemperature"~(degree*C))),
+             size = rel(3.2)) +
+    theme(plot.margin = unit(c(-25, 0,0,-10), units = "pt"))
+  
+  sebs_bt_panels <- ggplot() +
+    geom_sf(data = sebs_layers$akland, fill = "black", 
+            color = NA) +
+    geom_sf(data = sebs_layers$survey.area, fill = "grey75") +
+    geom_tile(data = bt_year_df,
+              aes(x = x, 
+                  y = y,
+                  fill = temperature),
+              color = NA) +
+    geom_sf(data = sebs_layers$survey.area, 
+            fill = NA, 
+            color = "black") +
+    geom_sf(data = sebs_layers$bathymetry) +
+    geom_label(data = label_2020,
+               aes(x = x,
+                   y = y,
+                   label = label),
+               label.size = NA) +
+    coord_sf(xlim = panel_extent$x, 
+             ylim = panel_extent$y,
+             expand = c(0,0)) +
+    scale_x_continuous(name = "Longitude", 
+                       breaks = c(-180, -170, -160)) + 
+    scale_y_continuous(name = "Latitude", 
+                       breaks = c(54, 58, 62)) +
+    scale_fill_viridis(option = "C") +
+    # scale_fill_manual(name = expression("T"~(degree*C)),
+    #                   values = rev(cpa_palette), 
+    #                   drop = FALSE,
+    #                   na.value = NA) +
+    theme_bw() +
+    theme(axis.title = element_blank(),
+          axis.text = element_text(color = "black"),
+          axis.ticks = element_line(color = "black"),
+          panel.border = element_rect(color = "black", fill = NA),
+          panel.background = element_rect(color = "black", fill = NA),
+          strip.text = element_text(size = 9,
+                                    color = "white",
+                                    face = "bold",
+                                    margin = margin(0.5, 0, 0.5, 0, "mm")),
+          strip.background = element_rect(fill = "#0055a4",
+                                          color = NA),
+          legend.position = "none") +
+    facet_wrap(~year, ncol = 4)
+  
+  cold_pool_grid_1 <- cowplot::plot_grid(
+    cold_pool_panels,
+    cowplot::plot_grid(NA, cold_pool_cbar, NA,
+                       nrow = 3),
+    rel_widths = c(0.9,0.2)
+  )
   
   # tm_average_temperature.png ----
   
