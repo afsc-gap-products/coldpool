@@ -40,8 +40,8 @@ vignettes/*.pdf
 .Renviron
 
 # Local data directory
-/data/
-/sim_data/
+/data/*.rds
+/data/idw_files/
 /archive/
 
 # Manuscript and presentations

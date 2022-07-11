@@ -318,3 +318,26 @@ theme_tm_no_legend <- function() {
           axis.text = element_text(size = 8, color = "black"),
           plot.background = element_rect(fill = NA, color = NA))
 }
+
+
+#' Multi-panel map theme with blue strip
+#' 
+#' Theme for multipanel maps with blue strip
+#' 
+#' @export
+
+theme_multi_map_blue_strip <- function() {
+  theme_bw() %+replace%
+    theme(axis.title = element_text(color = "black", face = "bold"),
+          axis.text = element_text(color = "black"),
+          axis.ticks = element_line(color = "black"),
+          panel.grid = element_blank(),
+          legend.title = element_blank(),
+          legend.position = "bottom",
+          strip.text = element_text(size = 9,
+                                    color = "white",
+                                    face = "bold",
+                                    margin = margin(0.5, 0, 0.5, 0, "mm")),
+          strip.background = element_rect(fill = "#0055a4",
+                                          color = NA))
+}
