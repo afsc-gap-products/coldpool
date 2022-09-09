@@ -21,7 +21,7 @@ if(!dir.exists("plots")) {dir.create("plots")}
 
 fig_res <- 600
 cpa_palette <- c("#21dae7", "#0071ff", "#0000e3", "#000040")
-max_year <- 2021
+max_year <- 2022
 min_year <- max_year - 19 # Default for 20 panel cold pool maps
 
 coldpool:::cold_pool_index$YEAR[order(coldpool:::cold_pool_index$AREA_LTE2_KM2)]
@@ -100,18 +100,14 @@ area_df <- coldpool:::cold_pool_index %>%
                 proportion = value/sebs_layers$survey.area$AREA_KM2)
 
 stacked_area_plot <- ggplot() +
-  geom_area(data = area_df %>%
-              dplyr::filter(YEAR < 2020),
+    geom_area(data = filter(area_df, YEAR < 2020),
             mapping = aes(x = YEAR,
                           y = proportion,
                           fill = variable)) +
-  geom_point(data = area_df %>%
-               dplyr::filter(YEAR == 2021),
-             mapping = aes(x = YEAR,
-                           y = proportion,
-                           fill = variable),
-             shape = 21,
-             size = rel(3)) +
+    geom_area(data = filter(area_df, YEAR > 2020),
+            mapping = aes(x = YEAR,
+                          y = proportion,
+                          fill = variable)) +
   scale_fill_manual(name = "Temperature", 
                     values = cpa_palette) +
   scale_y_continuous(name = "Proportion of EBS Shelf (Plus NW) Survey Area",
@@ -119,9 +115,9 @@ stacked_area_plot <- ggplot() +
                      expand = c(0, 0),
                      breaks = seq(0,1,0.1)) +
   scale_x_continuous(name = "Year", 
-                     limits = c(1982, 2021.25),
+                     limits = c(1982, max_year + 0.25),
                      expand = c(0, 0),
-                     breaks = seq(1982,2021,4)) +
+                     breaks = seq(1982, max_year, 4)) +
   theme_bw() +
   theme(panel.grid.minor = element_blank(),
         axis.title = element_text(face = "bold"),
@@ -131,23 +127,19 @@ stacked_area_plot <- ggplot() +
         legend.position = c(0.2, 0.8),
         legend.title = element_blank())
 
-png(file = here::here("plots", paste0(max_year, "stacked_temperature.png")), height = 4, width = 6, units = "in", res = 600)
+png(file = here::here("plots", paste0(max_year, "_stacked_temperature.png")), height = 4, width = 6, units = "in", res = 600)
 print(stacked_area_plot)
 dev.off()
 
 stacked_area_simple_label_plot <- ggplot() +
-  geom_area(data = area_df %>%
-              dplyr::filter(YEAR < 2020),
+    geom_area(data = filter(area_df, YEAR < 2020),
             mapping = aes(x = YEAR,
-                  y = proportion,
-                fill = variable)) +
-  geom_point(data = area_df %>%
-              dplyr::filter(YEAR == 2021),
+                          y = proportion,
+                          fill = variable)) +
+    geom_area(data = filter(area_df, YEAR > 2020),
             mapping = aes(x = YEAR,
-                y = proportion,
-                fill = variable),
-            shape = 21,
-            size = rel(3)) +
+                          y = proportion,
+                          fill = variable)) +
   scale_fill_manual(name = "Temperature", 
                     values = cpa_palette) +
   scale_y_continuous(name = "Proportion of EBS Shelf Survey Area",
@@ -155,9 +147,9 @@ stacked_area_simple_label_plot <- ggplot() +
                      expand = c(0, 0),
                      breaks = seq(0,1,0.1)) +
   scale_x_continuous(name = "Year", 
-                     limits = c(1982, 2021.25),
+                     limits = c(1982, max_year + 0.25),
                      expand = c(0, 0),
-                     breaks = seq(1982,2021,4)) +
+                     breaks = seq(1982, max_year,4)) +
   theme_bw() +
   theme(panel.grid.minor = element_blank(),
         axis.title = element_text(face = "bold"),
@@ -358,7 +350,7 @@ panel_extent <- data.frame(y = c(53, 67),
   akgfmaps::transform_data_frame_crs(out.crs = coldpool:::ebs_proj_crs)
 
 nbs_ebs_temp_breaks <- c(-Inf, seq(-1,8,1), Inf)
-nbs_ebs_viridis_option <- "H" # viridis turbo palette
+nbs_ebs_viridis_option <- "C" # viridis turbo palette
 n_temp_breaks <- length(nbs_ebs_temp_breaks)-1
 
 ebs_nbs_temperature_map <- ggplot2::ggplot() +
@@ -450,7 +442,7 @@ ebs_nbs_temperature_contour_map <- ggplot2::ggplot() +
                  plot.margin = unit(c(5.5, 5.5,-25,5.5), units = "pt"))
 
 temp_map_cbar <- coldpool::legend_discrete_cbar(breaks = nbs_ebs_temp_breaks,
-                                                 colors = viridis::viridis_pal(option = "H")(n_temp_breaks),
+                                                 colors = viridis::viridis_pal(option = nbs_ebs_viridis_option)(n_temp_breaks),
                                                  legend_direction = "horizontal",
                                                  font_size = 3,
                                                  width = 0.1,
@@ -485,6 +477,117 @@ dev.off()
 
 png(filename = here::here("plots", paste0(max_year, "_nbs_ebs_temperature_contour_map.png")), width = 6, height = 6, units = "in", res = fig_res)
 print(ebs_nbs_contour_map)
+dev.off()
+
+# Four panel bottom temperature map
+
+max_year <- 2022
+skip_year <- 2020
+n_panels <- 4
+grid_layout <- c(2,2)
+nbs_years <- c(2010, 2017, 2019, 2021, 2022)
+plot_years <- (max_year-n_panels+ifelse(max_year-n_panels < skip_year, 0, 1)):max_year
+plot_years <- plot_years[!(plot_years %in% skip_year)]
+ebs_years <- which(!(plot_years %in% nbs_years))
+
+fig_res <- 600
+
+nbs_ebs_layers <- akgfmaps::get_base_layers(select.region = "ebs",
+                                            set.crs = coldpool:::ebs_proj_crs)
+
+coords <- raster::coordinates(coldpool:::nbs_ebs_bottom_temperature)
+
+bt_year_df <- data.frame()
+
+for(ii in 1:length(plot_years)) {
+  
+  if(plot_years %in% ebs_years) {
+    sel_raster <- raster::mask(coldpool:::nbs_ebs_bottom_temperature, 
+                               nbs_ebs_layers$survey.area |>
+                                 filter(SURVEY == "EBS_SHELF"))
+  } else {
+    sel_raster <- coldpool:::nbs_ebs_bottom_temperature
+  }
+
+  
+  sel_layer_df <- data.frame(x = coords[,1],
+                             y = coords[,2],
+                             temperature = sel_raster@data@values[,grep(pattern = plot_years[ii], x = names(sel_raster))])
+  sel_layer_df <- sel_layer_df[!is.na(sel_layer_df$temperature),]
+  sel_layer_df$year <- plot_years[ii]
+  
+  bt_year_df <- dplyr::bind_rows(bt_year_df, sel_layer_df)
+
+}
+
+# Union to combine strata 31, 32 into 30, etc.
+nbs_ebs_agg_strata <- nbs_ebs_layers$survey.strata %>%
+  dplyr::mutate(agg_stratum = Stratum) %>%
+  dplyr::mutate(agg_stratum = replace(agg_stratum, agg_stratum %in% c(31,32), 30),
+                agg_stratum = replace(agg_stratum, agg_stratum %in% c(41,42,43), 40),
+                agg_stratum = replace(agg_stratum, agg_stratum %in% c(61,62), 60)) %>% 
+  dplyr::group_by(agg_stratum) %>% 
+  dplyr::summarise()
+
+
+nbs_ebs_temp_breaks <- c(-Inf, seq(-1,8,1), Inf)
+nbs_ebs_viridis_option <- "B" # viridis turbo palette
+
+ebs_nbs_temperature_map <- ggplot2::ggplot() +
+  ggplot2::geom_sf(data = nbs_ebs_layers$akland, 
+                   fill = "grey70", 
+                   color = "black") +
+  ggplot2::geom_sf(data = nbs_ebs_layers$survey.area, fill = "grey65") +
+  ggplot2::geom_tile(data = bt_year_df,
+                     aes(x = x, 
+                         y = y,
+                         fill = cut(temperature, breaks = nbs_ebs_temp_breaks))) +
+  ggplot2::facet_wrap(~year, ncol = grid_layout[1], nrow = grid_layout[2]) +
+  ggplot2::geom_sf(data = nbs_ebs_agg_strata, 
+                   fill = NA,
+                   color = "black") +
+  ggplot2::geom_sf(data = nbs_ebs_layers$graticule,
+                   alpha = 0.3) +
+  ggplot2::coord_sf(xlim = nbs_ebs_layers$plot.boundary$x, 
+                    ylim = nbs_ebs_layers$plot.boundary$y) +
+  ggplot2::scale_x_continuous(name = "Longitude", 
+                              breaks = nbs_ebs_layers$lon.breaks) + 
+  ggplot2::scale_y_continuous(name = "Latitude", 
+                              breaks = nbs_ebs_layers$lat.breaks) +
+  ggplot2::scale_fill_manual(values = viridis_pal(option = nbs_ebs_viridis_option)(length(nbs_ebs_temp_breaks)-1)) +
+  coldpool::theme_multi_map_blue_strip() +
+  theme(legend.position = "none",
+        plot.margin = unit(c(5,5,-5,5), units = "mm"),
+        axis.title = element_blank(),
+        axis.text = element_text(size = 9))
+
+temp_map_cbar <- coldpool::legend_discrete_cbar(breaks = nbs_ebs_temp_breaks,
+                                                colors = viridis::viridis_pal(option = nbs_ebs_viridis_option),
+                                                legend_direction = "horizontal",
+                                                font_size = 3,
+                                                width = 0.1,
+                                                expand_size.x = 0.3,
+                                                expand_size.y = 0.3,
+                                                expand.x = 0.3,
+                                                expand.y = 0.9,
+                                                spacing_scaling = 1.2,
+                                                text.hjust = 0.5,
+                                                font.family = "sans",
+                                                neat.labels = FALSE) + 
+  annotate("text", 
+           x = 1.15, 
+           y = 3.5, 
+           label =  expression(bold("Bottom Temperature"~(degree*C))), 
+           size = rel(3.2)) + 
+  theme(plot.margin = unit(c(0,0, 0, 5), units = "mm"))
+
+ebs_nbs_map_grid <- cowplot::plot_grid(ebs_nbs_temperature_map,
+                                  temp_map_cbar,
+                                  nrow = 2,
+                                  rel_heights = c(0.85,0.15))
+
+png(filename = here::here("plots", paste0(max_year, "_nbs_ebs_temperature_map_grid.png")), width = 6, height = 6, units = "in", res = fig_res)
+print(ebs_nbs_map_grid)
 dev.off()
 ```
 
@@ -639,7 +742,7 @@ cp_summary <- dplyr::bind_rows(
     dplyr::select(YEAR, diff, symbol, z, col) |>
     dplyr::mutate(var = "Cold pool area")) |>
   dplyr::mutate(group = YEAR < 2020,
-                var = factor(cp_summary$var, 
+                var = factor(var, 
                              levels = c("Bottom temperature",
                                         "Sea surface temperature",
                                         "Cold pool area")))

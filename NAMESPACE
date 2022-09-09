@@ -2,6 +2,7 @@
 
 export(cold_pool_index)
 export(compare_cpa_station_filter)
+export(convert_ddm_to_dd)
 export(cpa_from_raster)
 export(cpa_pre2021)
 export(ebs_bottom_temperature)

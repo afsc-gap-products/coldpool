@@ -34,7 +34,7 @@ ebs_csv_path <- here::here("data", paste0("index_hauls_temperature_data.csv"))
 nbs_ebs_csv_path <- here::here("data", paste0("ebs_nbs_temperature_full_area.csv"))
 
 ### UPDATE!!! ###
-nbs_years <- c(2010, 2017, 2018, 2019, 2021)
+nbs_years <- c(2010, 2017, 2018, 2019, 2021, 2022)
 ```
 
 # 2. Retrieve temperature data
@@ -51,7 +51,7 @@ if(update_sysdata) {
   channel <- get_connected()
   
   # Get temperature data and write csvs to data directory ----
-  coldpool::get_data(channel = channel)
+  coldpool:::get_data(channel = channel, include_preliminary_data = "nbs")
 }
 ```
 
@@ -68,7 +68,7 @@ Writes:
 interpolation_wrapper(temp_data_path = ebs_csv_path,
                       proj_crs = proj_crs,
                       cell_resolution = 5000, # 5x5 km grid resolution
-                      select_years = 1982:2021, 
+                      select_years = 1982:2022,
                       interp_variable = "gear_temperature",
                       select_region = "sebs") 
 
@@ -76,7 +76,7 @@ interpolation_wrapper(temp_data_path = ebs_csv_path,
 interpolation_wrapper(temp_data_path = ebs_csv_path,
                       proj_crs = proj_crs,
                       cell_resolution = 5000, # 5x5 km grid resolution
-                      select_years = 1982:2021,
+                      select_years = 1982:2022,
                       interp_variable = "surface_temperature",
                       select_region = "sebs") 
 ```
@@ -86,7 +86,7 @@ interpolation_wrapper(temp_data_path = ebs_csv_path,
 interpolation_wrapper(temp_data_path = nbs_ebs_csv_path,
                       proj_crs = proj_crs,
                       cell_resolution = 5000, # 5x5 km grid resolution
-                      select_years = nbs_years, 
+                      select_years = nbs_years,
                       interp_variable = "gear_temperature",
                       select_region = "ebs") # Full EBS+NBS
 
@@ -110,6 +110,8 @@ Writes:
 bottom_temp_files <- list.files(here::here("output", "raster", "sebs", "gear_temperature"), 
                                 full.names = TRUE)
 bottom_temp_files <- bottom_temp_files[grep(pattern = "ste_", x = bottom_temp_files)]
+bottom_temp_files <- bottom_temp_files[-grep(pattern = ".aux.xml", x = bottom_temp_files)]
+
 bt_df <- data.frame(YEAR = numeric(length = length(bottom_temp_files)),
                     AREA_LTE2_KM2 = numeric(length = length(bottom_temp_files)),
                     AREA_LTE1_KM2 = numeric(length = length(bottom_temp_files)),
@@ -149,6 +151,8 @@ for(i in 1:length(bottom_temp_files)) {
 surface_temp_files <- list.files(here::here("output", "raster", "sebs", "surface_temperature"), 
                                  full.names = TRUE)
 surface_temp_files <- surface_temp_files[grep(pattern = "ste_", x = surface_temp_files)]
+surface_temp_files <- surface_temp_files[-grep(pattern = ".aux.xml", x = surface_temp_files)]
+
 sst_df <- data.frame(YEAR = numeric(length = length(bottom_temp_files)),
                      MEAN_SURFACE_TEMPERATURE = numeric(length = length(surface_temp_files)))
 
@@ -173,11 +177,13 @@ nbs_ebs_bt_files <- list.files(here::here("output", "raster", "ebs", "gear_tempe
 # Select Stein's Matern and remove 2018 unplanned extension (didn't have full spatial coverage)
 nbs_ebs_bt_files <- nbs_ebs_bt_files[grep(pattern = "ste_", x = nbs_ebs_bt_files)]
 nbs_ebs_bt_files <- nbs_ebs_bt_files[-grep(pattern = 2018, x = nbs_ebs_bt_files)]
+nbs_ebs_bt_files <- nbs_ebs_bt_files[-grep(pattern = ".aux.xml", x = nbs_ebs_bt_files)]
 
 nbs_ebs_sst_files <- list.files(here::here("output", "raster", "ebs", "surface_temperature"), 
                                 full.names = TRUE)
 nbs_ebs_sst_files <- nbs_ebs_sst_files[grep(pattern = "ste_", x = nbs_ebs_sst_files)]
 nbs_ebs_sst_files <- nbs_ebs_sst_files[-grep(pattern = 2018, x = nbs_ebs_sst_files)]
+nbs_ebs_sst_files <- nbs_ebs_sst_files[-grep(pattern = ".aux.xml", x = nbs_ebs_sst_files)]
 
 nbs_mean_temperature <- data.frame(YEAR = numeric(length = length(nbs_ebs_bt_files)),
                     MEAN_GEAR_TEMPERATURE = numeric(length = length(nbs_ebs_bt_files)),

@@ -341,3 +341,15 @@ theme_multi_map_blue_strip <- function() {
           strip.background = element_rect(fill = "#0055a4",
                                           color = NA))
 }
+
+#' Convert decimal degree minutes to decimal degrees
+#' 
+#' Converts latitude or longitude in decimal degree minutes, DDDMM.MMM (i.e. -17330.000) to decimal degrees, DDD.DDDDD (i.e. -173.50000).
+#' 
+#' @param x Numerical vector of decimal degree minutes.
+#' @return Numerical vector of decimal degrees
+#' @export
+
+convert_ddm_to_dd <- function(x) {
+  return(floor(x/100) + x%%100/60)
+}

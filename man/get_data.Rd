@@ -4,10 +4,12 @@
 \alias{get_data}
 \title{Get gear temperature data from all hauls, write to 'data/[date]_all_temperature_data.csv}
 \usage{
-get_data(channel)
+get_data(channel, include_preliminary_data = NULL)
 }
 \arguments{
 \item{channel}{ODBC connection as an RODBC class}
+
+\item{include_preliminary_data}{Character vector indicating whether to include preliminary data from the EBS ("ebs") and NBS ("nbs") Should the query return preliminary data from the current year from the race_data.edit_* tables? If this is used, the sql script needs to be updated for the current year.}
 }
 \description{
 Get gear temperature data from all hauls, write to 'data/[date]_all_temperature_data.csv
