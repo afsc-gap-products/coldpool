@@ -488,7 +488,7 @@ grid_layout <- c(2,2)
 nbs_years <- c(2010, 2017, 2019, 2021, 2022)
 plot_years <- (max_year-n_panels+ifelse(max_year-n_panels < skip_year, 0, 1)):max_year
 plot_years <- plot_years[!(plot_years %in% skip_year)]
-ebs_years <- which(!(plot_years %in% nbs_years))
+ebs_years <- plot_years[which(!(plot_years %in% nbs_years))]
 
 fig_res <- 600
 
@@ -500,11 +500,20 @@ coords <- raster::coordinates(coldpool:::nbs_ebs_bottom_temperature)
 bt_year_df <- data.frame()
 
 for(ii in 1:length(plot_years)) {
-  
-  if(plot_years %in% ebs_years) {
-    sel_raster <- raster::mask(coldpool:::nbs_ebs_bottom_temperature, 
-                               nbs_ebs_layers$survey.area |>
-                                 filter(SURVEY == "EBS_SHELF"))
+  if(plot_years[ii] == 2018) {
+    sel_raster <- raster::mask(coldpool:::nbs_ebs_bottom_temperature,
+                               dplyr::filter(nbs_ebs_layers$survey.grid,
+                                                          STATIONID %in% c("V-01", "U-01", "T-01", "S-01", "R-01",
+                                                                           "V-02", "U-02", "T-02", "S-02", "R-02",
+                                                                           "DD-03", "ZZ-03", "Y-03", "X-03", "W-03", "V-03", "U-03", "T-03", "S-03", "R-03",
+                                                                           "DD-04", "CC-04", "BB-04", "AA-04", "ZZ-04", "Y-04", "X-04", "W-04", "V-04", "U-04", "T-04", "S-04", "R-04",
+                                                                           "DD-05", "CC-05", "BB-05", "AA-05", "ZZ-05", "Y-05", "X-05", "W-05", "V-05", "U-05", "T-05", "S-05", "R-05",
+                                                                           "DD-06", "CC-06", "BB-06", "AA-06", "ZZ-06", "Y-06", "X-06", "W-06", "V-06", "U-06", "T-06", "S-06", "R-06",
+                                                                           "DD-07", "CC-07", "BB-07", "AA-07", "ZZ-07", "Y-07", "X-07", "W-07", "V-07", "U-07", "T-07", "S-07", "R-07",
+                                                                           "DD-08", "CC-08", "BB-08", "AA-08", "ZZ-08", "Y-08", "X-08", "W-08", "V-08", "U-08", "T-08", "S-08", "R-08",
+                                                                           "DD-09", "CC-09", "BB-09", "AA-09", "ZZ-09", "Y-09", "X-09", "W-09", "V-09", "U-09", "T-09", "S-09", "R-09",
+                                                                           "DD-10", "CC-10", "BB-10", "AA-10", "ZZ-10", "Y-10", "X-10", "W-10", "V-10", "U-10", "T-10", "S-10", "R-10")),
+                               inverse = TRUE)
   } else {
     sel_raster <- coldpool:::nbs_ebs_bottom_temperature
   }
@@ -537,7 +546,9 @@ ebs_nbs_temperature_map <- ggplot2::ggplot() +
   ggplot2::geom_sf(data = nbs_ebs_layers$akland, 
                    fill = "grey70", 
                    color = "black") +
-  ggplot2::geom_sf(data = nbs_ebs_layers$survey.area, fill = "grey65") +
+    ggplot2::geom_sf(data = nbs_ebs_layers$survey.area, 
+                   fill = "grey85", 
+                   color = "black") +
   ggplot2::geom_tile(data = bt_year_df,
                      aes(x = x, 
                          y = y,
@@ -554,7 +565,8 @@ ebs_nbs_temperature_map <- ggplot2::ggplot() +
                               breaks = nbs_ebs_layers$lon.breaks) + 
   ggplot2::scale_y_continuous(name = "Latitude", 
                               breaks = nbs_ebs_layers$lat.breaks) +
-  ggplot2::scale_fill_manual(values = viridis_pal(option = nbs_ebs_viridis_option)(length(nbs_ebs_temp_breaks)-1)) +
+  ggplot2::scale_fill_manual(values = viridis_pal(option = nbs_ebs_viridis_option)(length(nbs_ebs_temp_breaks)-1),
+                             na.value = NA) +
   coldpool::theme_multi_map_blue_strip() +
   theme(legend.position = "none",
         plot.margin = unit(c(5,5,-5,5), units = "mm"),
@@ -712,7 +724,7 @@ print(plot_sebs_average_temperature)
 dev.off()
 ```
 
-```{r zscore_temperature}
+```{r zscore_temperature, message=FALSE, warning=FALSE, include=FALSE}
 cp_summary <- dplyr::bind_rows(
   dplyr::mutate(cold_pool_index, 
                 diff = MEAN_GEAR_TEMPERATURE - mean(MEAN_GEAR_TEMPERATURE)) |> 
@@ -804,7 +816,7 @@ print(coldpool_with_area)
 Mean surface and bottom temperatures were cooler than in the prior survey year (2019) on the shelf of the eastern and northern Bering Sea  (Figure 4). In 2021, the mean bottom temperature in the eastern Bering Sea was 3.3&deg;C, the fifth highest on record after 2019, 2018, and 2017, and 0.9&deg;C above the grand mean of the time series (2.5&deg;C). The 2021 mean surface temperature was 7.2&deg;C, which was 2.0&deg;C lower than in 2019 yet 0.5&deg;C higher than the grand mean of the time series (6.7&deg;C).
 
 ```{r fig.height=6,fig.width=6,fig.cap="\\label{fig:figs}Figure 3. Contour map of bottom temperatures from the 2021 eastern and northern Bering Sea shelf bottom trawl surveys.", message=FALSE, warning=FALSE, echo=FALSE}
-print(ebs_nbs_map)
+print(ebs_nbs_map_grid)
 ```
 
 ```{r fig.height=3,fig.width=6,fig.cap="\\label{fig:figs}Figure 4. Average summer surface (green triangles) and bottom (blue circles) temperatures (&deg;C) on the eastern Bering Sea (EBS) shelf based on data collected during standardized summer bottom trawl surveys from 1982–2021. Dashed lines represent the time series mean.", message=FALSE, warning=FALSE, echo=FALSE}
