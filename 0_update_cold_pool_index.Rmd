@@ -23,7 +23,7 @@ This document provides code for updating the annual summer Cold Pool Index and a
 library(coldpool)
 
 # Set global options ----
-fig_res <- 300
+fig_res <- 600
 proj_crs <- coldpool:::ebs_proj_crs
 
 # Should data included in the package be updated with new data (i.e. for annual update)? ----
@@ -51,7 +51,7 @@ if(update_sysdata) {
   channel <- get_connected()
   
   # Get temperature data and write csvs to data directory ----
-  coldpool:::get_data(channel = channel, include_preliminary_data = "nbs")
+  coldpool:::get_data(channel = channel, include_preliminary_data = NULL)
 }
 ```
 

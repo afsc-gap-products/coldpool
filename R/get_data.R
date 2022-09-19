@@ -1,4 +1,4 @@
-#' Get gear temperature data from all hauls, write to 'data/[date]_all_temperature_data.csv
+#' Get gear temperature data from racebase and write to /data/
 #' 
 #' @param channel ODBC connection as an RODBC class
 #' @param include_preliminary_data Character vector indicating whether to include preliminary data from the EBS ("ebs") and NBS ("nbs") Should the query return preliminary data from the current year from the race_data.edit_* tables? If this is used, the sql script needs to be updated for the current year.
