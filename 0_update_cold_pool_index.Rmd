@@ -23,7 +23,7 @@ This document provides code for updating the annual summer Cold Pool Index and a
 library(coldpool)
 
 # Set global options ----
-fig_res <- 300
+fig_res <- 600
 proj_crs <- coldpool:::ebs_proj_crs
 
 # Should data included in the package be updated with new data (i.e. for annual update)? ----
