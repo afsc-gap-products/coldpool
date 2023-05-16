@@ -51,3 +51,5 @@ vignettes/*.pdf
 /output/
 *.tiff
 /plots/cpchange
+/analysis/variability/
+/analysis/temperature_eof/
