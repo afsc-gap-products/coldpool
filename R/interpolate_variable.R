@@ -159,7 +159,7 @@ interpolate_variable <- function(dat,
     if(tolower(methods[ii]) == "tps") {
       
       mod <- fields::Tps(x = sf::st_coordinates(interp_df),
-                         y = interp_df$var.col)
+                         Y = interp_df$var.col)
       
       fit <- raster::interpolate(interp_raster, mod)
       
