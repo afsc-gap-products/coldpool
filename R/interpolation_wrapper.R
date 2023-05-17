@@ -34,18 +34,18 @@ interpolation_wrapper <- function(temp_data_path,
   }
 
   # Calculate cold pool area and generate rasters
-  for(i in 1:length(year_vec)) {
+  for(ii in 1:length(year_vec)) {
 
-    cpa_year <- interpolate_variable(dat = dplyr::filter(temperature_df, year == year_vec[i]),
-                                     dat.year = year_vec[i],
-                                     in.crs = "+proj=longlat",
+    cpa_year <- interpolate_variable(dat = dplyr::filter(temperature_df, year == year_vec[ii]),
+                                     dat.year = year_vec[ii],
+                                     in.crs = "EPSG:4326",
                                      interpolation.crs = proj_crs,
                                      cell.resolution = cell_resolution,
                                      lon.col = "longitude",
                                      lat.col = "latitude",
                                      var.col = interp_variable,
                                      nm = Inf,
-                                     pre = paste0("_", toupper(interp_variable), "_", year_vec[i]),
+                                     pre = paste0("_", toupper(interp_variable), "_", year_vec[ii]),
                                      select.region = select_region)
 
   }

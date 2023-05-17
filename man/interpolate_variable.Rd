@@ -10,13 +10,15 @@ interpolate_variable(
   var.col,
   lat.col,
   lon.col,
-  in.crs = "+proj=longlat +datum=NAD83",
+  in.crs = "EPSG:4326",
   interpolation.crs,
   cell.resolution,
   interpolation.extent = NULL,
   nm = Inf,
   pre = NA,
-  select.region = "sebs"
+  select.region = "sebs",
+  methods = c("NN", "IDW", "IDW4", "Exp", "Sph", "Bes", "Gau", "Cir", "Mat", "Ste",
+    "Tps")
 )
 }
 \arguments{
@@ -41,6 +43,8 @@ interpolate_variable(
 \item{pre}{Prefix for file names in output (in development.)}
 
 \item{select.region}{Region for interpolation as a character string. Options = "ebs", "sebs", "nbs"}
+
+\item{methods}{To use as a character vector. Valid choices: "NN", "IDW", "IDW4", "Exp", "Sph", "Bes", "Gau", "Cir", "Mat", "Ste", "Tps"}
 }
 \value{
 Returns a data frame containing cold pool areas estimated by interpolation methods, for cutoffs at zero degrees and two degrees C. If argument write.to.file = TRUE, also writes a GeoTIFF raster to output directory.
