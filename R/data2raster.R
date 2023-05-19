@@ -63,7 +63,7 @@ data2raster <- function(dat,
     print(paste0("Removing ", 
                  sum(is.na(dat$var.col)), 
                  " var.col NA values from data set"))
-    dat <- dat %>% 
+    dat <- dat |> 
       dplyr::filter(!is.na(var.col))
   }
   
@@ -233,7 +233,7 @@ data2raster <- function(dat,
     
     # Interpolate data to raster and mask outside of polygon
     
-    rastmp <- xpredict %>%
+    rastmp <- xpredict |>
       akgfmaps::rasterize_and_mask(mymask)
     
     outraster <- addLayer(outraster, rastmp)
@@ -345,9 +345,9 @@ calcindices_temp <- function (datafile,
   
   ebs_layers <- akgfmaps::get_base_layers(select.region = "sebs", set.crs = proj_crs)
   
-  lt100_strata <- ebs_layers$survey.strata %>%
-    dplyr::filter(Stratum %in% c(10, 20, 31, 32, 41, 42, 43)) %>%
-    dplyr::group_by(SURVEY) %>%
+  lt100_strata <- ebs_layers$survey.strata |>
+    dplyr::filter(Stratum %in% c(10, 20, 31, 32, 41, 42, 43)) |>
+    dplyr::group_by(SURVEY) |>
     dplyr::summarise()
   
   lt100_strata <- sf::st_intersection(lt100_strata, maskpoly)
@@ -393,14 +393,14 @@ calcindices_temp <- function (datafile,
                          bbox = bbox)
       ras <- ras[[1]] # 1-layer rasterstack to plain raster
       
-      bt_df$MEAN_GEAR_TEMPERATURE[i] <- raster::values(ras) %>%
+      bt_df$MEAN_GEAR_TEMPERATURE[i] <- raster::values(ras) |>
         mean(na.rm = TRUE)
       
       lt100_temp <- raster::mask(ras, lt100_strata)
       bt_df$MEAN_BT_LT100M[i] <- mean(lt100_temp@data@values, na.rm = TRUE)
       
       for (it in 1:nthresh) {
-        area_lte[i,it] <- ras %>%
+        area_lte[i,it] <- ras |>
           cpa_from_raster(raster_units = "m", temperature_threshold = threshold[it])
       }
       
@@ -423,7 +423,7 @@ calcindices_temp <- function (datafile,
                          bbox = bbox)
       ras <- ras[[1]] # 1-layer rasterstack to plain raster  
       
-      bt_df$MEAN_SURFACE_TEMPERATURE[i] <- raster::values(ras) %>%
+      bt_df$MEAN_SURFACE_TEMPERATURE[i] <- raster::values(ras) |>
         mean(na.rm = TRUE)
     }
   }

@@ -4,7 +4,7 @@
 #' 
 #' @param sel_paths File paths to loocv output files
 #' @param interp_variable Name of the variable to calculate summary statistics for (i.e., "gear_temperature")
-#' @export
+#' @noRd
 
 make_loocv_summary <- function(sel_paths = list.files("./output/loocv", full.names = TRUE),
                                interp_variable = "gear_temperature") {
@@ -25,8 +25,8 @@ make_loocv_summary <- function(sel_paths = list.files("./output/loocv", full.nam
   
   names(sel_loocv) <- toupper(names(sel_loocv))
   
-  sel_loocv <- sel_loocv %>%
-    dplyr::mutate(YEAR = floor(CRUISE/100)) %>%
+  sel_loocv <- sel_loocv |>
+    dplyr::mutate(YEAR = floor(CRUISE/100)) |>
     dplyr::select(-CRUISE)
   
   id_cols <- c("YEAR", "STATIONID", "TRANSFORM.VARS")
@@ -35,23 +35,23 @@ make_loocv_summary <- function(sel_paths = list.files("./output/loocv", full.nam
   sel_loocv <- reshape2::melt(sel_loocv, 
                               id.vars = id_cols)
   
-  all_rmse <- sel_loocv %>% 
-    dplyr::group_by(YEAR, variable) %>%
+  all_rmse <- sel_loocv |> 
+    dplyr::group_by(YEAR, variable) |>
     dplyr::summarise(rmse = mean(value))
   
-  best_rmse <- inner_join(sel_loocv %>% 
-                            dplyr::group_by(YEAR, variable) %>%
+  best_rmse <- inner_join(sel_loocv |> 
+                            dplyr::group_by(YEAR, variable) |>
                             dplyr::summarise(rmse = mean(value)), 
-                          sel_loocv %>% 
-                            dplyr::group_by(YEAR, variable) %>%
-                            dplyr::summarise(rmse = mean(value)) %>%
-                            dplyr::ungroup() %>%
-                            dplyr::group_by(YEAR) %>%
-                            dplyr::summarise(rmse = min(rmse))) %>%
+                          sel_loocv |> 
+                            dplyr::group_by(YEAR, variable) |>
+                            dplyr::summarise(rmse = mean(value)) |>
+                            dplyr::ungroup() |>
+                            dplyr::group_by(YEAR) |>
+                            dplyr::summarise(rmse = min(rmse))) |>
     dplyr::mutate(best = TRUE)
   
   
-  best_freq <- as.data.frame(table(best_rmse$variable)) %>%
+  best_freq <- as.data.frame(table(best_rmse$variable)) |>
     dplyr::rename(variable = Var1)
   
   print(paste0("Writing results tables to ./output/method_rmse_", interp_variable, ".csv"))
@@ -59,33 +59,33 @@ make_loocv_summary <- function(sel_paths = list.files("./output/loocv", full.nam
   #           file = paste0("./output/best_method_frequency_", interp_variable, ".csv"),
   #           row.names = FALSE)
   
-  best_rmse <- sel_loocv %>% 
+  best_rmse <- sel_loocv |> 
     dplyr::left_join(best_rmse)
   
-  method_rmse <- all_rmse %>%
-    dplyr::group_by(variable) %>%
+  method_rmse <- all_rmse |>
+    dplyr::group_by(variable) |>
     dplyr::summarise(mean = mean(rmse),
                      sd = sd(rmse),
                      min = min(rmse),
                      max = max(rmse))
   
-  method_rmse <- method_rmse %>%
+  method_rmse <- method_rmse |>
     dplyr::inner_join(all_rmse, 
                       by = c("variable" = "variable", 
-                             "max" = "rmse")) %>%
-    dplyr::rename(max_year = YEAR) %>%
+                             "max" = "rmse")) |>
+    dplyr::rename(max_year = YEAR) |>
     dplyr::inner_join(
-  method_rmse %>%
+  method_rmse |>
     dplyr::inner_join(all_rmse, 
                       by = c("variable" = "variable", 
-                             "min" = "rmse")) %>%
+                             "min" = "rmse")) |>
     dplyr::rename(min_year = YEAR))
   
-  method_rmse <- method_rmse %>%
+  method_rmse <- method_rmse |>
     dplyr::mutate(mean = round(mean, 3),
                   sd = round(sd, 3),
                   min = round(min, 3),
-                  max = round(max, 3)) %>%
+                  max = round(max, 3)) |>
     dplyr::inner_join(best_freq)
   
   write.csv(method_rmse,

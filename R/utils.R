@@ -15,6 +15,7 @@ sql_to_rqry <- function(sql_path) {
 }
 
 
+
 #' Create a database connection using RODBC
 #'
 #' A function that accepts a data source name, username, and password to establish returns an Oracle DataBase Connection (ODBC) as an RODBC class in R.
@@ -36,6 +37,8 @@ get_connected <- function(schema = NA){
                                  believeNRows = FALSE)
 }
 
+
+
 #' Save raster to file
 #'
 #' Saves a raster to file using a custom name for the value column.
@@ -55,45 +58,58 @@ make_raster_file <- function(x,
 
   names(x) <- layer_name
 
-  raster::writeRaster(x,
-                      filename = filename,
-                      format = format,
-                      overwrite = overwrite)
+  terra::writeRaster(x,
+                     filename = filename,
+                     filetype = format,
+                     overwrite = overwrite)
 
 }
 
-#' Make a raster stack from multiple rasters
+
+
+#' Combine multiple raster files into a SpatRaster object with multiple layers
 #'
-#' Make a raster stack from multiple stackable raster layers (i.e. raster .grd, GeoTIFF, EHDR)
+#' Make a raster stack from multiple raster layers that can be opened with  (i.e. raster .grd, GeoTIFF, EHDR)
+#' 
 #' @param file_path Path to the directory containing raster files
 #' @param file_name_contains Character vector to filter on. (e.g., using "ste_" will ignore all filepaths that don't contain the characters sequence)
 #' @param file_type File type. Default = ".tif" for GeoTIFF. Also works with native raster .grd and other stackable raster formats.
+#' @param wrap Should the SpatRaster be used to create a Packged object (i.e., an object that can be saved as an R object to disk such as .RData or .rds)?
 #' @export
 
 make_raster_stack <- function(file_path,
                               file_name_contains = NULL,
-                              file_type = ".tif") {
-
-  file_paths <- dir(file_path, full.names = T)[grep(file_type, dir(file_path, full.names = T))]
-
-  if(length(file_paths[-grep(".xml", file_paths)]) > 0) {
-    file_paths <- file_paths[-grep(".xml", file_paths)]
-  }
-
+                              file_type = ".tif",
+                              wrap) {
+  
   if(!is.null(file_name_contains)) {
-    file_paths <- file_paths[grep(file_name_contains, file_paths)]
+    
+    file_paths <- list.files(file_path, full.name = TRUE, pattern = file_name_contains)
+    
+  } else{
+    
+    file_paths <- list.files(file_path, full.name = TRUE)
+    
   }
-
-  for(i in 1:length(file_paths)) {
-    if(i == 1) {
-      rstack <- raster::stack(raster::raster(file_paths[i], values = TRUE))
-    } else {
-      rstack <- raster::addLayer(rstack, raster(file_paths[i], values = TRUE))
-    }
+  
+  file_paths <- file_paths[grepl(pattern = ".tif", x = file_paths)]
+  
+  rstack <- terra::rast(file_paths[1])
+  
+  for(ii in 2:length(file_paths)) {
+    
+    rstack <- c(rstack, terra::rast(file_paths[ii]))
+    
   }
-
+  
+  if(wrap) {
+    rstack <- terra::wrap(rstack)
+  }
+  
   return(rstack)
 }
+
+
 
 #' Discrete continuous bar
 #'
@@ -276,6 +292,8 @@ legend_discrete_cbar = function(
   cbar_plot
 }
 
+
+
 #' Multi-panel map theme
 #' @export
 
@@ -290,6 +308,8 @@ theme_multi_map <- function() {
                  legend.position = "none",
                  plot.background = element_rect(fill = NA, color = NA)))
 }
+
+
 
 #' Custom fermenter fill scale for ggplot2
 #'
@@ -306,6 +326,8 @@ scale_fill_fermenter_custom <- function(pal, na.value = "grey50", guide = "colou
   ggplot2::binned_scale("fill", "fermenter", ggplot2:::binned_pal(scales::manual_pal(unname(pal))), na.value = na.value, guide = guide, ...)
 }
 
+
+
 #' Tech memo figure without legend
 #' @export
 
@@ -318,6 +340,7 @@ theme_tm_no_legend <- function() {
           axis.text = element_text(size = 8, color = "black"),
           plot.background = element_rect(fill = NA, color = NA))
 }
+
 
 
 #' Multi-panel map theme with blue strip
@@ -341,6 +364,8 @@ theme_multi_map_blue_strip <- function() {
           strip.background = element_rect(fill = "#0055a4",
                                           color = NA))
 }
+
+
 
 #' Convert decimal degree minutes to decimal degrees
 #' 

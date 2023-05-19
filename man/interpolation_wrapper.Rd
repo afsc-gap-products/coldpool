@@ -10,7 +10,8 @@ interpolation_wrapper(
   cell_resolution,
   select_years = NULL,
   interp_variable,
-  select_region = "sebs"
+  select_region = "sebs",
+  methods = NULL
 )
 }
 \arguments{
@@ -23,6 +24,8 @@ interpolation_wrapper(
 \item{select_years}{Optional. Select years to use for interpolation. Default NULL uses all years.}
 
 \item{select_region}{Region for interpolation as a character string. Options = "ebs", "sebs", "nbs"}
+
+\item{methods}{Optional character vector of methods to pass to interpolate_variable(). Valid choices: "NN", "IDW", "IDW4", "Exp", "Sph", "Bes", "Gau", "Cir", "Mat", "Ste", "Tps". If NULL, uses defaults.}
 }
 \value{
 Data frame of estimated cold pool area from multiple candidate interpolation methods.

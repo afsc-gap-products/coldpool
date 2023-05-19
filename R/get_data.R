@@ -8,14 +8,14 @@ get_data <- function(channel, include_preliminary_data = NULL) {
   
   temperature_all_hauls_df <- RODBC::sqlQuery(channel, coldpool::sql_to_rqry(system.file("sql", 
                                                                                          "ebs_gear_temperature_all_hauls.sql", 
-                                                                                         package = "coldpool"))) %>%
+                                                                                         package = "coldpool"))) |>
     dplyr::mutate(LATITUDE = (START_LATITUDE + END_LATITUDE)/2,
                   LONGITUDE = (START_LONGITUDE + END_LONGITUDE)/2,
-                  YEAR = floor(CRUISE/100)) %>%
+                  YEAR = floor(CRUISE/100)) |>
     dplyr::select(-START_LATITUDE, 
                   -END_LATITUDE, 
                   -START_LONGITUDE, 
-                  -END_LONGITUDE) %>%
+                  -END_LONGITUDE) |>
     dplyr::filter(!is.na(GEAR_TEMPERATURE), 
                   !is.na(LATITUDE), 
                   !is.na(LONGITUDE))
@@ -24,11 +24,11 @@ get_data <- function(channel, include_preliminary_data = NULL) {
   
   if(any(tolower(include_preliminary_data == "nbs"))) {
     prelim_temperature_all_hauls_df <- RODBC::sqlQuery(channel, 
-                                                       coldpool::sql_to_rqry(system.file("sql", "ebs_gear_temperature_all_hauls_current_year.sql", package = "coldpool"))) %>%
+                                                       coldpool::sql_to_rqry(system.file("sql", "ebs_gear_temperature_all_hauls_current_year.sql", package = "coldpool"))) |>
       dplyr::mutate(LATITUDE = coldpool::convert_ddm_to_dd(LATITUDE_DMS),
                     LONGITUDE = coldpool::convert_ddm_to_dd(LONGITUDE_DMS),
-                    YEAR = floor(CRUISE/100)) %>%
-      dplyr::select(-LATITUDE_DMS, -LONGITUDE_DMS, -CRUISE_ID, -EVENT_TYPE_ID, -SURVEY_DEFINITION_ID) %>%
+                    YEAR = floor(CRUISE/100)) |>
+      dplyr::select(-LATITUDE_DMS, -LONGITUDE_DMS, -CRUISE_ID, -EVENT_TYPE_ID, -SURVEY_DEFINITION_ID) |>
       dplyr::filter(!is.na(GEAR_TEMPERATURE), !is.na(LATITUDE), !is.na(LONGITUDE))
     
     names(prelim_temperature_all_hauls_df) <- tolower(names(prelim_temperature_all_hauls_df))
@@ -49,25 +49,25 @@ get_data <- function(channel, include_preliminary_data = NULL) {
   # Gear temperature for SEBS index stations
   temperature_df <- RODBC::sqlQuery(channel, coldpool::sql_to_rqry(system.file("sql", 
                                                                                "ebs_gear_temperature_cold_pool_hauls.sql", 
-                                                                               package = "coldpool"))) %>%
+                                                                               package = "coldpool"))) |>
     dplyr::mutate(LATITUDE = (START_LATITUDE + END_LATITUDE)/2,
                   LONGITUDE = (START_LONGITUDE + END_LONGITUDE)/2,
-                  YEAR = floor(CRUISE/100)) %>%
+                  YEAR = floor(CRUISE/100)) |>
     dplyr::select(-START_LATITUDE, 
                   -END_LATITUDE, 
                   -START_LONGITUDE, 
-                  -END_LONGITUDE) %>%
+                  -END_LONGITUDE) |>
     dplyr::filter(!is.na(GEAR_TEMPERATURE), !is.na(LATITUDE), !is.na(LONGITUDE))
   
   names(temperature_df) <- tolower(names(temperature_df))
   
   if(any(tolower(include_preliminary_data == "ebs"))) {
     prelim_temperature_df <- RODBC::sqlQuery(channel, 
-                                             coldpool::sql_to_rqry(system.file("sql", "ebs_gear_temperature_cold_pool_hauls_current_year.sql", package = "coldpool"))) %>%
+                                             coldpool::sql_to_rqry(system.file("sql", "ebs_gear_temperature_cold_pool_hauls_current_year.sql", package = "coldpool"))) |>
       dplyr::mutate(LATITUDE = coldpool::convert_ddm_to_dd(LATITUDE_DMS),
                     LONGITUDE = coldpool::convert_ddm_to_dd(LONGITUDE_DMS),
-                    YEAR = floor(CRUISE/100)) %>%
-      dplyr::select(-LATITUDE_DMS, -LONGITUDE_DMS, -CRUISE_ID, -EVENT_TYPE_ID, -SURVEY_DEFINITION_ID) %>%
+                    YEAR = floor(CRUISE/100)) |>
+      dplyr::select(-LATITUDE_DMS, -LONGITUDE_DMS, -CRUISE_ID, -EVENT_TYPE_ID, -SURVEY_DEFINITION_ID) |>
       dplyr::filter(!is.na(GEAR_TEMPERATURE), !is.na(LATITUDE), !is.na(LONGITUDE))
     
     names(prelim_temperature_df) <- tolower(names(prelim_temperature_df))

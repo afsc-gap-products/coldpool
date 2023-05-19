@@ -32,6 +32,19 @@ interpolate_variable <- function(dat,
                                  methods = c("NN", "IDW", "IDW4", "Exp", "Sph", "Bes", "Gau", "Cir", "Mat", "Ste", "Tps"))
 {
   
+  # dat = dplyr::filter(temperature_df, year == year_vec[ii])
+  # dat.year = year_vec[ii]
+  # in.crs = "EPSG:4326"
+  # interpolation.crs = proj_crs
+  # cell.resolution = cell_resolution
+  # lon.col = "longitude"
+  # lat.col = "latitude"
+  # var.col = interp_variable
+  # nm = Inf
+  # pre = paste0("_", toupper(interp_variable), "_", year_vec[ii])
+  # select.region = select_region
+  # methods = methods
+  
   if(!all(tolower(methods) %in% c("nn", "idw", "idw4", "exp",  "sph", "bes", "gau", "cir", "mat",  "ste", "tps" ))) {
   
     invalid_methods <- methods[which(!(tolower(methods) %in% c("nn", "idw", "idw4", "exp",  "sph", "bes", "gau", "cir", "mat",  "ste", "tps" )))]
@@ -53,7 +66,7 @@ interpolate_variable <- function(dat,
     print(paste0("coldpool::interpolate_variable: Removing ", 
                  sum(is.na(dat$var.col)), 
                  " var.col NA values from data set"))
-    dat <- dat %>% 
+    dat <- dat |> 
       dplyr::filter(!is.na(var.col))
   }
   
@@ -66,14 +79,19 @@ interpolate_variable <- function(dat,
   if(select.region %in% c("sebs", "bs.south")) {
   # Make raster for interpolation ----
     n_dim <- floor(abs(-1625000 - -35000))/cell.resolution
-    interp_raster <- raster::raster(xmn = -1625000, 
-                                     xmx = -35000, 
-                                     ymn = 379500, 
-                                     ymx = 1969500, 
-                                     nrow = n_dim, 
-                                     ncol = n_dim)
+    
+    interp_raster <- terra::rast(xmin = -1625000, 
+                                 xmax = -35000, 
+                                 ymin = 379500, 
+                                 ymax = 1969500, 
+                                 nrow = n_dim, 
+                                 ncol = n_dim,
+                                 crs = interpolation.crs)
+
   } else {
+    
     if(select.region %in% c("bs.north", "nbs")) {extrap.box = c(xmn = -179.5, xmx = -157, ymn = 50, ymx = 68)}
+    
     if(select.region %in% c("bs.all", "ebs")) {extrap.box = c(xmn = -179.5, xmx = -157, ymn = 50, ymx = 68)}
 
     plot.boundary <- akgfmaps::transform_data_frame_crs(data.frame(x = c(extrap.box['xmn'], extrap.box['xmx']), 
@@ -83,18 +101,18 @@ interpolate_variable <- function(dat,
 
     
     n_dim <- floor(abs(plot.boundary$x[1] - plot.boundary$x[2]))/cell.resolution
-    interp_raster <- raster::raster(xmn = plot.boundary$x[1], 
-                                       xmx = plot.boundary$x[2], 
-                                       ymn = plot.boundary$y[1], 
-                                       ymx = plot.boundary$y[2], 
-                                       nrow = n_dim, 
-                                       ncol = n_dim)
+    
+    interp_raster <- terra::rast(xmin = plot.boundary$x[1], 
+                                 xmax = plot.boundary$x[2], 
+                                 ymin = plot.boundary$y[1], 
+                                 ymax = plot.boundary$y[2], 
+                                 nrow = n_dim, 
+                                 ncol = n_dim,
+                                 crs = interpolation.crs)
+  
   }
-  
-  raster::projection(interp_raster) <- interpolation.crs
-  
-  loc_df <- raster::coordinates(interp_raster) |>
-    as.data.frame() |>
+
+  loc_df <- suppressWarnings(terra::crds(interp_raster, df = TRUE, na.rm = FALSE)) |>
     sf::st_as_sf(coords = c("x", "y"),
                  crs = interpolation.crs)
   
@@ -143,13 +161,15 @@ interpolate_variable <- function(dat,
                                   locations = interp_df, 
                                   nmax = Inf)
       
+      # Estimate variogram
       vgfit <- gstat::fit.variogram(object = gstat::variogram(idw_vgm_fit),
                                     model = gstat::vgm(vgm_type))
       
-      mod <- gstat(formula = var.col ~ 1,
-                       locations = interp_df,
-                       model = vgfit,
-                       nmax = nm)
+      # Add variogram
+      mod <- gstat::gstat(formula = var.col ~ 1,
+                          locations = interp_df,
+                          model = vgfit,
+                          nmax = nm)
       
       fit <- predict(object = mod, newdata = loc_df)
       
@@ -160,17 +180,20 @@ interpolate_variable <- function(dat,
       
       mod <- fields::Tps(x = sf::st_coordinates(interp_df),
                          Y = interp_df$var.col)
+
+      fit <- loc_df
       
-      fit <- raster::interpolate(interp_raster, mod)
+      fit$var1.pred <- predict(object = mod, x = sf::st_coordinates(loc_df))
       
     }
     
     if("sf" %in% class(fit)) {
-      raster::values(interp_raster) <- fit$var1.pred
+       terra::values(interp_raster) <- fit$var1.pred
+       fit <- interp_raster
     }
-    
+
     # Write masked raster
-    akgfmaps::rasterize_and_mask(sgrid = interp_raster, 
+    akgfmaps::rasterize_and_mask(sgrid = fit, 
                                  amask = region_layers$survey.area) |>
     coldpool::make_raster_file(filename = here::here("output", 
                                                      "raster", 
