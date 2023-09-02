@@ -40,15 +40,15 @@ make_var_by_method <- function(method_prefix = c("ste_", "tps_", "mat_", "sph_",
     for(ii in 1:length(bottom_temp_files)) {
       bt_raster <- raster::raster(bottom_temp_files[ii], values = TRUE)
       bt_df$YEAR[ii] <- as.numeric(gsub("[^0-9.-]", "", gsub(method_prefix[jj], "", names(bt_raster)))) # Extract year
-      bt_df$AREA_LTE2_KM2[ii] <- bt_raster %>% 
+      bt_df$AREA_LTE2_KM2[ii] <- bt_raster |> 
         cpa_from_raster(raster_units = "m", temperature_threshold = 2)
-      bt_df$AREA_LTE1_KM2[ii] <- bt_raster %>% 
+      bt_df$AREA_LTE1_KM2[ii] <- bt_raster |> 
         cpa_from_raster(raster_units = "m", temperature_threshold = 1)
-      bt_df$AREA_LTE0_KM2[ii] <- bt_raster %>% 
+      bt_df$AREA_LTE0_KM2[ii] <- bt_raster |> 
         cpa_from_raster(raster_units = "m", temperature_threshold = 0)
-      bt_df$AREA_LTEMINUS1_KM2[ii] <- bt_raster %>% 
+      bt_df$AREA_LTEMINUS1_KM2[ii] <- bt_raster |> 
         cpa_from_raster(raster_units = "m", temperature_threshold = -1)
-      bt_df$MEAN_GEAR_TEMPERATURE[ii] <- raster::values(bt_raster) %>% 
+      bt_df$MEAN_GEAR_TEMPERATURE[ii] <- raster::values(bt_raster) |> 
         mean(na.rm = TRUE)
       
     }
@@ -61,7 +61,7 @@ make_var_by_method <- function(method_prefix = c("ste_", "tps_", "mat_", "sph_",
     for(ii in 1:length(surface_temp_files)) {
       sst_raster <- raster::raster(surface_temp_files[ii], values = TRUE)
       sst_df$YEAR[ii] <- as.numeric(gsub("[^0-9.-]", "", gsub(method_prefix[jj], "", names(sst_raster))))  # Extract year
-      sst_df$MEAN_SURFACE_TEMPERATURE[ii] <- raster::values(sst_raster) %>% 
+      sst_df$MEAN_SURFACE_TEMPERATURE[ii] <- raster::values(sst_raster) |> 
         mean(na.rm = TRUE)
     }
     

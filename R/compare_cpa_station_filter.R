@@ -7,7 +7,7 @@
 #' @param sel_idw4_geotiff File path to a geotiff IDW raster with nmax = 4.
 #' @param set_crs Coordinate reference system
 #' @param temp_data_path Filed path to the temperature data .csv
-#' @export
+#' @noRd
 
 compare_cpa_station_filter <- function(sel_year = 2000,
                                        sel_old_raster = "./data/idw_files/bt00_idw/",
@@ -22,13 +22,13 @@ compare_cpa_station_filter <- function(sel_year = 2000,
   
   # RKC resample locations
   stn_locs_2000 <- read.csv(file = temp_data_path,
-                            stringsAsFactors = FALSE) %>%
+                            stringsAsFactors = FALSE) |>
     akgfmaps::transform_data_frame_crs(coords = c("longitude", "latitude"),
-                                       out.crs = set_crs) %>%
+                                       out.crs = set_crs) |>
     dplyr::filter(year == sel_year)
   
   # Load IDW with nmax = 4, generated using R ----
-  idw_nmax4 <- raster::raster(sel_idw4_geotiff) %>%
+  idw_nmax4 <- terra::rast(sel_idw4_geotiff) |>
     akgfmaps::rasterize_and_mask(amask = sebs_layers$survey.area)
   
   idw_nmax4_df <- as.data.frame(idw_nmax4, xy = TRUE)
@@ -36,7 +36,7 @@ compare_cpa_station_filter <- function(sel_year = 2000,
   plot_extent <- idw_nmax4@extent
   
   # Load old IDW raster ----
-  og_idw <- raster::raster(sel_old_raster)
+  og_idw <- terra::rast(sel_old_raster)
   og_idw_df <- as.data.frame(og_idw, xy = TRUE)
   
   # Set up temperature legend ----
@@ -66,7 +66,7 @@ compare_cpa_station_filter <- function(sel_year = 2000,
   print(
     cowplot::plot_grid(
       ggplot() +
-        geom_tile(data = og_idw_df %>%
+        geom_tile(data = og_idw_df |>
                     dplyr::filter(!is.na(bt00_idw)),
                   aes(x = x,
                       y = y,
@@ -79,7 +79,7 @@ compare_cpa_station_filter <- function(sel_year = 2000,
                 fill = "grey70") +
         geom_sf(data = sebs_layers$bathymetry, 
                 size = rel(0.3)) +
-        geom_point(data = stn_locs_2000 %>% 
+        geom_point(data = stn_locs_2000 |> 
                      dplyr::filter(haul_type == 17), 
                    aes(x = longitude, 
                        y = latitude),
@@ -95,7 +95,7 @@ compare_cpa_station_filter <- function(sel_year = 2000,
         ggtitle(label = paste0("With RKC resample (", sel_year, ")")) +
         theme_multi_map(),
       ggplot() +
-        geom_tile(data = idw_nmax4_df %>%
+        geom_tile(data = idw_nmax4_df |>
                     filter(!is.na(idw_nmax4_2000_gear_temperature)),
                   aes(x = x, 
                       y = y, 

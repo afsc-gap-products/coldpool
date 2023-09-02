@@ -1,23 +1,20 @@
 Package: coldpool
 Type: Package
 Title: AFSC/RACE Groundfish Assessment Program EBS and NBS temperature products
-Version: 2.2-2
+Version: 3.0-3
 Authors@R: c(person("Sean", "Rohan", email = "sean.rohan@noaa.gov", role = c("aut", "cre")),
     person("Lewis", "Barnett", email = "lewis.barnett@noaa.gov", role = c("aut", "ctb")),
     person("Kelly", "Kearney", role = c("ctb")),
     person("Emily", "Markowitz", role = c("ctb")))
 Maintainer: Sean Rohan <sean.rohan@noaa.gov>
-Depends: R (>= 3.5),
+Depends: R (>= 4.0),
     ggthemes,
     ggplot2,
     gstat (>= 2.0-1),
-    here,
     fields,
     lubridate,
-    raster (>= 3.2-1),
-    rgdal (>= 1.5-8),
+    terra,
     reshape2,
-    sp,
     stringr,
     dplyr,
     sf,
@@ -30,5 +27,7 @@ Encoding: UTF-8
 LazyData: false
 RoxygenNote: 7.2.3
 Imports: colorspace,
-    viridis
-Suggests: knitr, rmarkdown, RODBC, getPass, readr, testthat, cowplot, metR, cowplot, plyr
+    viridis,
+    raster,
+    here
+Suggests: knitr, rmarkdown, RODBC, getPass, readr, testthat, cowplot, metR

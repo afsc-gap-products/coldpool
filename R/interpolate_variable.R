@@ -13,22 +13,47 @@
 #' @param nm Maximum number of cells to use for interpolation. 
 #' @param pre Prefix for file names in output (in development.)
 #' @param select.region Region for interpolation as a character string. Options = "ebs", "sebs", "nbs"
+#' @param methods To use as a character vector. Valid choices: "NN", "IDW", "IDW4", "Exp", "Sph", "Bes", "Gau", "Cir", "Mat", "Ste", "Tps"
+#' @param bbox Bounding box for the interpolated grid.  Can be either a string 
+#'    ("sebs", "bs.south", "nebs", "ebs", "bs.north", "bs.all") corresponding to 
+#'    specific bounds, or a 4-element named vector with values xmin, xmax, ymin, 
+#'    and ymax.
+#' @param return.raster Should a raster be returned?
 #' @return Returns a data frame containing cold pool areas estimated by interpolation methods, for cutoffs at zero degrees and two degrees C. If argument write.to.file = TRUE, also writes a GeoTIFF raster to output directory.
 #' @export
 
 interpolate_variable <- function(dat,
-                                     dat.year,
-                                     var.col,
-                                     lat.col,
-                                     lon.col,
-                                     in.crs = "+proj=longlat +datum=NAD83",
-                                     interpolation.crs,
-                                     cell.resolution,
+                                 dat.year,
+                                 var.col,
+                                 lat.col,
+                                 lon.col,
+                                 in.crs = "EPSG:4326",
+                                 interpolation.crs,
+                                 cell.resolution,
                                  interpolation.extent = NULL,
-                                     nm = Inf,
-                                     pre = NA,
-                                 select.region = "sebs")
-{
+                                 nm = Inf,
+                                 pre = NA,
+                                 select.region = "sebs",
+                                 methods = c("NN", "IDW", "IDW4", "Exp", "Sph", "Bes", "Gau", "Cir", "Mat", "Ste", "Tps"),
+                                 bbox = NULL,
+                                 return_raster = FALSE) {
+  
+  if(!all(tolower(methods) %in% c("nn", "idw", "idw4", "exp",  "sph", "bes", "gau", "cir", "mat",  "ste", "tps" ))) {
+  
+    invalid_methods <- methods[which(!(tolower(methods) %in% c("nn", "idw", "idw4", "exp",  "sph", "bes", "gau", "cir", "mat",  "ste", "tps" )))]
+
+    stop(paste0("interpolate_variable: Provided methods ", paste(invalid_method, collapse = ", "), " invalid. See documentation for valid methods (?interpolate_variable"))
+      
+  }
+  
+  if(return_raster) {
+    stopifnot("interpolate_variable: Can only choose one method if the raster is returned" = length(methods) == 1)
+  }
+  
+  if(!dir.exists(here::here("output", "raster", select.region, var.col))) {
+    dir.create(here::here("output", "raster", select.region, var.col), recursive = TRUE)
+  }
+  
   names(dat)[which(names(dat) == var.col)] <- "var.col"
   names(dat)[which(names(dat) == lat.col)] <- "lat.col"
   names(dat)[which(names(dat) == lon.col)] <- "lon.col"
@@ -38,7 +63,7 @@ interpolate_variable <- function(dat,
     print(paste0("coldpool::interpolate_variable: Removing ", 
                  sum(is.na(dat$var.col)), 
                  " var.col NA values from data set"))
-    dat <- dat %>% 
+    dat <- dat |> 
       dplyr::filter(!is.na(var.col))
   }
   
@@ -47,261 +72,158 @@ interpolate_variable <- function(dat,
                                            set.crs = interpolation.crs)
   
   # Set dimensions for raster cells ----
-
   
-  if(select.region %in% c("sebs", "bs.south")) {
-  # Make raster for interpolation ----
-    n_dim <- floor(abs(-1625000 - -35000))/cell.resolution
-  sp_interp.raster <- raster::raster(xmn = -1625000, 
-                                     xmx = -35000, 
-                                     ymn = 379500, 
-                                     ymx = 1969500, 
-                                     nrow = n_dim, 
-                                     ncol = n_dim)
+  if(is.null(bbox)) {
+    
+    if(select.region %in% c("sebs", "bs.south")) {
+      # Make raster for interpolation ----
+      n_dim <- floor(abs(-1625000 - -35000))/cell.resolution
+      
+      interp_raster <- terra::rast(xmin = -1625000, 
+                                   xmax = -35000, 
+                                   ymin = 379500, 
+                                   ymax = 1969500, 
+                                   nrow = n_dim, 
+                                   ncol = n_dim,
+                                   crs = interpolation.crs)
+      
+    } else {
+      
+      if(select.region %in% c("bs.north", "nbs")) {extrap.box = c(xmn = -179.5, xmx = -157, ymn = 50, ymx = 68)}
+      
+      if(select.region %in% c("bs.all", "ebs")) {extrap.box = c(xmn = -179.5, xmx = -157, ymn = 50, ymx = 68)}
+      
+      plot.boundary <- akgfmaps::transform_data_frame_crs(data.frame(x = c(extrap.box['xmn'], extrap.box['xmx']), 
+                                                                     y = c(extrap.box['ymn'], extrap.box['ymx'])), 
+                                                          out.crs = interpolation.crs)
+      
+      
+      
+      n_dim <- floor(abs(plot.boundary$x[1] - plot.boundary$x[2]))/cell.resolution
+      
+      interp_raster <- terra::rast(xmin = plot.boundary$x[1], 
+                                   xmax = plot.boundary$x[2], 
+                                   ymin = plot.boundary$y[1], 
+                                   ymax = plot.boundary$y[2], 
+                                   nrow = n_dim, 
+                                   ncol = n_dim,
+                                   crs = interpolation.crs)
+      
+    }
   } else {
-    if(select.region %in% c("bs.north", "nbs")) {extrap.box = c(xmn = -179.5, xmx = -157, ymn = 50, ymx = 68)}
-    if(select.region %in% c("bs.all", "ebs")) {extrap.box = c(xmn = -179.5, xmx = -157, ymn = 50, ymx = 68)}
-
-    plot.boundary <- akgfmaps::transform_data_frame_crs(data.frame(x = c(extrap.box['xmn'], extrap.box['xmx']), 
-                                                                   y = c(extrap.box['ymn'], extrap.box['ymx'])), 
-                                                        out.crs = interpolation.crs)
     
-
+    # Section to maintain backwards compatibility for data2raster
+    interp_raster <- terra::rast(xmin = bbox["xmin"],
+                                 xmax = bbox["xmax"],
+                                 ymin = bbox["ymin"],
+                                 ymax = bbox["ymax"],
+                                 nrows = floor((bbox["ymax"]-bbox["ymin"])/cell.resolution),
+                                 ncols = floor((bbox["xmax"]-bbox["xmin"])/cell.resolution),
+                                 crs = interpolation.crs)
     
-    n_dim <- floor(abs(plot.boundary$x[1] - plot.boundary$x[2]))/cell.resolution
-    sp_interp.raster <- raster::raster(xmn = plot.boundary$x[1], 
-                                       xmx = plot.boundary$x[2], 
-                                       ymn = plot.boundary$y[1], 
-                                       ymx = plot.boundary$y[2], 
-                                       nrow = n_dim, 
-                                       ncol = n_dim)
   }
   
-  raster::projection(sp_interp.raster) <- interpolation.crs
+  
+
+  loc_df <- suppressWarnings(terra::crds(interp_raster, df = TRUE, na.rm = FALSE)) |>
+    sf::st_as_sf(coords = c("x", "y"),
+                 crs = interpolation.crs)
   
   # Transform data for interpolation ----
-  sp_interp.df <- unique(dat)
-  sp::coordinates(sp_interp.df) <- c(x = "lon.col", y = "lat.col")
-  sp::proj4string(sp_interp.df) <- sp::CRS(in.crs)
-  sp_interp.df <- sp::spTransform(sp_interp.df, sp::CRS(interpolation.crs))
+  interp_df <- unique(dat) |> # Only unique columns
+    sf::st_as_sf(coords = c("lon.col", "lat.col"), crs = in.crs) |>
+    sf::st_transform(crs = interpolation.crs)
   
-  # Nearest-neighbor
-  nn_fit <- gstat::gstat(formula = var.col ~ 1,
-                         locations = sp_interp.df,
-                         set = list(idp = 0),
-                         nmax = 4)
-  nn.predict <- predict(nn_fit, as(sp_interp.raster, "SpatialGrid"))
-
-  # Inverse distance weighting w/ nmax = 4 (ArcGIS Default) ----
-  idw_nmax4_fit <- gstat::gstat(formula = var.col ~ 1,
-                                locations = sp_interp.df,
-                                set = list(idp = 2),
-                                nmax = 4)
-  idw_nmax4.predict <- predict(idw_nmax4_fit, as(sp_interp.raster, "SpatialGrid"))
-
-  # Inverse distance weighting w/ nmax = Inf
-  idw_fit <- gstat::gstat(formula = var.col ~ 1,
-                          locations = sp_interp.df,
+  
+  for(ii in 1:length(methods)) {
+    
+    if(tolower(methods[ii]) == "nn") {
+      mod <- gstat::gstat(formula = var.col ~ 1,
+                             locations = interp_df,
+                             set = list(idp = 0),
+                             nmax = 4)
+      fit <- predict(object = mod, newdata = loc_df)
+    }
+    
+    if(tolower(methods[ii]) == "idw4") {
+  
+      mod <- gstat::gstat(formula = var.col ~ 1,
+                          locations = interp_df,
+                          set = list(idp = 2),
+                          nmax = 4)
+      fit <- predict(object = mod, newdata = loc_df)
+      
+    }
+    
+    if(tolower(methods[ii]) == "idw") {
+      
+      mod <- gstat::gstat(formula = var.col ~ 1,
+                          locations = interp_df,
                           set = list(idp = 2),
                           nmax = Inf)
+      fit <- predict(object = mod, newdata = loc_df)
+      
+    }
+    
+    if(tolower(methods[ii]) %in% c("exp", "sph", "bes", "gau", "cir", "mat", "ste")) {
+      
+      vgm_type <- c("Exp", "Sph", "Bes", "Gau", "Cir", "Mat", "Ste")[match(tolower(methods[ii]), c("exp", "sph", "bes", "gau", "cir", "mat", "ste"))]
 
-  idw.predict <- predict(idw_fit, as(sp_interp.raster, "SpatialGrid"))
-  
-  # Set up a new IDW for ordinary kriging ----
-  idw_vgm_fit <- gstat::gstat(formula = var.col ~ 1, 
-                              locations = sp_interp.df, 
-                              nmax = Inf)
-  
-  # Ordinary Kriging: Exponential VGM----
-  exp.vgfit <- gstat::fit.variogram(variogram(idw_vgm_fit),
-                                    vgm(c("Exp")))
-  exp_fit <- gstat(formula = var.col ~ 1,
-                   locations = sp_interp.df,
-                   model = exp.vgfit,
-                   nmax = nm)
-  exp.predict <- predict(exp_fit, as(sp_interp.raster, "SpatialGrid"))
-
-  # Ordinary Kriging: Spherical VGM----
-  sph.vgfit <- gstat::fit.variogram(variogram(idw_vgm_fit),
-                                    vgm(c("Sph")))
-  sph_fit <- gstat::gstat(formula = var.col ~ 1,
-                          locations = sp_interp.df,
-                          model = sph.vgfit,
+      # Set up object for kriging ----
+      idw_vgm_fit <- gstat::gstat(formula = var.col ~ 1, 
+                                  locations = interp_df, 
+                                  nmax = Inf)
+      
+      # Estimate variogram
+      vgfit <- gstat::fit.variogram(object = gstat::variogram(idw_vgm_fit),
+                                    model = gstat::vgm(vgm_type))
+      
+      # Add variogram
+      mod <- gstat::gstat(formula = var.col ~ 1,
+                          locations = interp_df,
+                          model = vgfit,
                           nmax = nm)
-  sph.predict <- predict(sph_fit, as(sp_interp.raster, "SpatialGrid"))
+      
+      fit <- predict(object = mod, newdata = loc_df)
+      
+    }
+    
+    
+    if(tolower(methods[ii]) == "tps") {
+      
+      mod <- fields::Tps(x = sf::st_coordinates(interp_df),
+                         Y = interp_df$var.col)
 
-  # Ordinary Kriging: Bessel VGM----
-  bes.vgfit <- gstat::fit.variogram(variogram(idw_vgm_fit),
-                                    vgm(c("Bes")))
-  bes_fit <- gstat::gstat(formula = var.col ~ 1,
-                          locations = sp_interp.df,
-                          model = bes.vgfit,
-                          nmax = nm)
-  bes.predict <- predict(bes_fit, as(sp_interp.raster, "SpatialGrid"))
+      fit <- loc_df
+      
+      fit$var1.pred <- predict(object = mod, x = sf::st_coordinates(loc_df))
+      
+    }
+    
+    if("sf" %in% class(fit)) {
+       terra::values(interp_raster) <- fit$var1.pred
+       fit <- interp_raster
+    }
+    
+    # Added to maintain backwards compatibility with data2raster
+    if(return_raster) {
+      return(fit)
+    }
 
-  # Ordinary Kriging: Bessel VGM----
-  gau.vgfit <- gstat::fit.variogram(variogram(idw_vgm_fit),
-                                    vgm(c("Gau")))
-  gau_fit <- gstat::gstat(formula = var.col ~ 1,
-                          locations = sp_interp.df,
-                          model = gau.vgfit,
-                          nmax = nm)
-  gau.predict <- predict(gau_fit, as(sp_interp.raster, "SpatialGrid"))
-
-  # Ordinary Kriging: Circular VGM----
-  cir.vgfit <- gstat::fit.variogram(variogram(idw_vgm_fit),
-                                    vgm(c("Cir")))
-  cir_fit <- gstat::gstat(formula = var.col ~ 1,
-                          locations = sp_interp.df,
-                          model = cir.vgfit,
-                          nmax = nm)
-  cir.predict <- predict(cir_fit, as(sp_interp.raster, "SpatialGrid"))
-
-  # Ordinary Kriging: Matern VGM----
-  mat.vgfit <- gstat::fit.variogram(variogram(idw_vgm_fit),
-                                    vgm(c("Mat")))
-  mat_fit <- gstat::gstat(formula = var.col ~ 1,
-                          locations = sp_interp.df,
-                          model = mat.vgfit,
-                          nmax = nm)
-  mat.predict <- predict(mat_fit, as(sp_interp.raster, "SpatialGrid"))
-  
-  # Ordinary Kriging: Stein's Matern VGM----
-  ste.vgfit <- gstat::fit.variogram(variogram(idw_vgm_fit), 
-                                    vgm(c("Ste")))
-  ste_fit <- gstat::gstat(formula = var.col ~ 1, 
-                          locations = sp_interp.df, 
-                          model = ste.vgfit, 
-                          nmax = nm)
-  ste.predict <- predict(ste_fit, as(sp_interp.raster, "SpatialGrid"))
-
-  # Thin-plate spline ----
-  tps_fit <- fields::Tps(sp::coordinates(sp_interp.df),
-                         sp_interp.df$var.col)
-  tps.predict <- raster::interpolate(sp_interp.raster,
-                                     tps_fit)
-  
-  print("Writing rasters")
-  if(!dir.exists(here::here("output"))) {
-    dir.create(here::here("output"))
+    # Write masked raster
+    akgfmaps::rasterize_and_mask(sgrid = fit, 
+                                 amask = region_layers$survey.area) |>
+    coldpool::make_raster_file(filename = here::here("output", 
+                                                     "raster", 
+                                                     select.region,
+                                                     var.col, 
+                                                     paste0(select.region, "_", tolower(methods[ii]), "_", dat.year, "_", var.col, ".tif" )),
+                               format = "GTiff",
+                               overwrite = TRUE,
+                               layer_name = dat.year)
+     
   }
-  if(!dir.exists(here::here("output", "raster"))) {
-    dir.create(here::here("output", "raster"))
-  }
-  if(!dir.exists(here::here("output", "raster", select.region))) {
-    dir.create(here::here("output", "raster", select.region))
-  }
-  if(!dir.exists(here::here("output", "raster", select.region, var.col))) {
-    dir.create(here::here("output", "raster", select.region, var.col))
-  }
+  
 
   
-  # write unmasked surfaces to raster
-  coldpool::make_raster_file(nn.predict %>%
-                               akgfmaps::rasterize_and_mask(region_layers$survey.area),
-                             filename = here::here("output", 
-                                                   "raster", 
-                                                   select.region,
-                                                   var.col, paste0(select.region, "_nn_", dat.year, "_", var.col, ".tif" )),
-                             format = "GTiff",
-                             overwrite = TRUE,
-                             layer_name = dat.year)
-  coldpool::make_raster_file(idw_nmax4.predict %>%
-                               akgfmaps::rasterize_and_mask(region_layers$survey.area),
-                             filename = here::here("output", 
-                                                   "raster", 
-                                                   select.region, 
-                                                   var.col, paste0(select.region, "_idwnmax4_", dat.year, "_", var.col, ".tif" )),
-                             format = "GTiff",
-                             overwrite = TRUE,
-                             layer_name = dat.year)
-  coldpool::make_raster_file(idw.predict %>%
-                               akgfmaps::rasterize_and_mask(region_layers$survey.area),
-                             filename = here::here("output", 
-                                                   "raster", 
-                                                   select.region, 
-                                                   var.col, 
-                                                   paste0(select.region, "_idw_", dat.year, "_", var.col, ".tif" )),
-                             format = "GTiff",
-                             overwrite = TRUE,
-                             layer_name = dat.year)
-  coldpool::make_raster_file(exp.predict %>%
-                               akgfmaps::rasterize_and_mask(region_layers$survey.area),
-                             filename = here::here("output", 
-                                                   "raster", 
-                                                   select.region, 
-                                                   var.col, 
-                                                   paste0(select.region, "_exp_", dat.year, "_", var.col, ".tif" )),
-                             format = "GTiff",
-                             overwrite = TRUE,
-                             layer_name = dat.year)
-  coldpool::make_raster_file(sph.predict %>%
-                               akgfmaps::rasterize_and_mask(region_layers$survey.area),
-                             filename = here::here("output", 
-                                                   "raster", 
-                                                   select.region, 
-                                                   var.col, 
-                                                   paste0(select.region, "_sph_", dat.year, "_", var.col, ".tif" )),
-                             format = "GTiff",
-                             overwrite = TRUE,
-                             layer_name = dat.year)
-  coldpool::make_raster_file(bes.predict %>%
-                               akgfmaps::rasterize_and_mask(region_layers$survey.area),
-                             filename = here::here("output", 
-                                                   "raster", 
-                                                   select.region, 
-                                                   var.col, 
-                                                   paste0(select.region, "_bes_", dat.year, "_", var.col, ".tif" )),
-                             format = "GTiff",
-                             overwrite = TRUE,
-                             layer_name = dat.year)
-  coldpool::make_raster_file(gau.predict %>%
-                               akgfmaps::rasterize_and_mask(region_layers$survey.area),
-                             filename = here::here("output", 
-                                                   "raster", 
-                                                   select.region, 
-                                                   var.col, 
-                                                   paste0(select.region, "_gau_", dat.year, "_", var.col, ".tif" )),
-                             format = "GTiff",
-                             overwrite = TRUE,
-                             layer_name = dat.year)
-  coldpool::make_raster_file(cir.predict %>%
-                               akgfmaps::rasterize_and_mask(region_layers$survey.area),
-                             filename =here::here("output", 
-                                                  "raster", 
-                                                  select.region, 
-                                                  var.col, 
-                                                  paste0(select.region, "_cir_", dat.year, "_", var.col, ".tif" )),
-                             format = "GTiff",
-                             overwrite = TRUE,
-                             layer_name = dat.year)
-  coldpool::make_raster_file(mat.predict %>%
-                               akgfmaps::rasterize_and_mask(region_layers$survey.area),
-                             filename = here::here("output", 
-                                                   "raster", 
-                                                   select.region, 
-                                                   var.col, 
-                                                   paste0(select.region, "_mat_", dat.year, "_", var.col, ".tif" )),
-                             format = "GTiff",
-                             overwrite = TRUE,
-                             layer_name = dat.year)
-  coldpool::make_raster_file(ste.predict %>% 
-                               akgfmaps::rasterize_and_mask(region_layers$survey.area), 
-                             filename = here::here("output", 
-                                                   "raster", 
-                                                   select.region, 
-                                                   var.col, paste0(select.region, "_ste_", dat.year, "_", var.col, ".tif" )),
-                             format = "GTiff", 
-                             overwrite = TRUE, 
-                             layer_name = dat.year)
-  coldpool::make_raster_file(tps.predict %>%
-                               akgfmaps::rasterize_and_mask(region_layers$survey.area),
-                             filename = here::here("output", 
-                                                   "raster", 
-                                                   select.region, 
-                                                   var.col, 
-                                                   paste0(select.region, "_tps_", dat.year, "_", var.col, ".tif" )),
-                             format = "GTiff",
-                             overwrite = TRUE,
-                             layer_name = dat.year)
 }

@@ -35,7 +35,8 @@
 #'    ("sebs", "bs.south", "nebs", "ebs", "bs.north", "bs.all") corresponding to 
 #'    specific bounds, or a 4-element named vector with values xmin, xmax, ymin, 
 #'    and ymax.
-#' @return raster stack of interpolated data, with one layer per input fit type
+#' @import raster
+#' @return terra SpatRaster of interpolated data, with one layer per input fit type
 
 data2raster <- function(dat,
                         dat.year,
@@ -51,194 +52,241 @@ data2raster <- function(dat,
                         bbox = NULL)
 { 
   
-  # Rename data columns for ease
   
-  names(dat)[which(names(dat) == var.col)] <- "var.col"
-  names(dat)[which(names(dat) == lat.col)] <- "lat.col"
-  names(dat)[which(names(dat) == lon.col)] <- "lon.col"
+ if(is.character(bbox)) {
+   in_bbox <- NULL
+ }
   
-  # Remove NAs
-  
-  if(any(is.na(dat$var.col))) {
-    print(paste0("Removing ", 
-                 sum(is.na(dat$var.col)), 
-                 " var.col NA values from data set"))
-    dat <- dat %>% 
-      dplyr::filter(!is.na(var.col))
+  if(is.numeric(bbox)) {
+      bbox <- sf::st_bbox(st_buffer(mymask, cell.resolution*5))
+      bbox <- round(bbox/cell_resolution)*cell_resolution # round to align rows/cols
+      xshift <- ((-1625000/cell_resolution) - floor(-1625000/cell_resolution))*cell_resolution
+      yshift <- ((379500/cell_resolution) - floor(379500/cell_resolution))*cell_resolution
+      in_bbox <- bbox + c(xshift,yshift,xshift,yshift)
   }
   
-  # Load AKGF polygon for masking, or the user-supplied mask
+  
+  for(ii in 1:length(fittypes)) {
+     fit_terra <- interpolate_variable(
+      dat = dat,
+      dat.year = dat.year,
+      var.col = var.col,
+      lat.col = lat.col,
+      lon.col = lon.col,
+      in.crs = in.crs,
+      interpolation.crs = interpolation.crs,
+      cell.resolution = cell.resolution,
+      interpolation.extent = NULL,
+      nm = nm,
+      pre = NA,
+      select.region = select.region,
+      methods = fittypes[ii],
+      return_raster = TRUE,
+      bbox = in_bbox
+    )
+    
+    
+    if(ii == 1) {
+      out <- fit_terra
+    } else {
+      out <- c(out, fit_terra)
+    }
+  }
   
   mymask <- parseregion(select.region, interpolation.crs)
   
-  # Set dimensions for raster cells ---
-  # Note: If SEBS or EBS/NEBS is specified, we set the raster to match the older
-  # ArcGIS rasters.  If user does not specify anything, a raster is created that
-  # encompasses the masking polygon plus a bit of a buffer and aligns with the
-  # default SEBS raster.
-  
-  if (is.character(bbox)) {
-    if (bbox %in% c("sebs","bs.south")) {
-      bbox = c(xmin = -1625000, 
-               xmax = -35000, 
-               ymin = 379500, 
-               ymax = 1969500)
-    } else if (bbox %in% c("nebs","ebs","bs.north","bs.all")) {
-      extrap.box <- c(xmn = -179.5, xmx = -157, ymn = 50, ymx = 68)
-      plot.boundary <- akgfmaps::transform_data_frame_crs(data.frame(x = c(extrap.box['xmn'], extrap.box['xmx']), 
-                                                                     y = c(extrap.box['ymn'], extrap.box['ymx'])), 
-                                                          out.crs = interpolation.crs)
-      bbox = c(xmin = plot.boundary$x[1],
-               xmax = plot.boundary$x[2],
-               ymin = plot.boundary$y[1],
-               ymax = plot.boundary$y[2],
-      )
-    } else {
-      stop("Unrecognized value of bbox")
-    }
-  } else if (is.null(bbox)) {
-    bbox <- st_bbox(st_buffer(mymask, cell.resolution*5))
-    bbox <- round(bbox/cell_resolution)*cell_resolution # round to align rows/cols
-    xshift <- ((-1625000/cell_resolution) - floor(-1625000/cell_resolution))*cell_resolution
-    yshift <- ((379500/cell_resolution) - floor(379500/cell_resolution))*cell_resolution
-    bbox = bbox + c(xshift,yshift,xshift,yshift)
-  }
-  
-  sp_interp.raster <- raster::raster(xmn = bbox["xmin"],
-                                     xmx = bbox["xmax"], 
-                                     ymn = bbox["ymin"],
-                                     ymx = bbox["ymax"], 
-                                     nrows = floor((bbox["ymax"]-bbox["ymin"])/cell.resolution), 
-                                     ncols = floor((bbox["xmax"]-bbox["xmin"])/cell.resolution))
-  
-  raster::projection(sp_interp.raster) <- interpolation.crs
-  
-  # Transform data for interpolation ----
-  sp_interp.df <- unique(dat)
-  sp::coordinates(sp_interp.df) <- c(x = "lon.col", y = "lat.col")
-  sp::proj4string(sp_interp.df) <- sp::CRS(in.crs)
-  sp_interp.df <- sp::spTransform(sp_interp.df, sp::CRS(interpolation.crs))
+  out <- out |>
+    akgfmaps::rasterize_and_mask(mymask)
   
   
-  # Fit data and build rasters
-  
-  # IDW base for variogram-based fits
-  
-  if (any(c("exp", "sph", "bes", "gau", "cir", "mat", "ste") %in% fittypes)){
-    idw_vgm_fit <- gstat::gstat(formula = var.col ~ 1,
-                                locations = sp_interp.df,
-                                nmax = Inf)
-  }
-  
-  # Loop over requested fit types
-  
-  outraster <- stack()
-  
-  for (f in fittypes) {
-    
-    # Fit data
-    
-    if (f == "nn") {
-      xfit <- gstat::gstat(formula = var.col ~ 1,
-                           locations = sp_interp.df,
-                           set = list(idp = 0),
-                           nmax = 4)
-    }
-    if (f == "idwnmax4") {
-      xfit <- gstat::gstat(formula = var.col ~ 1,
-                           locations = sp_interp.df,
-                           set = list(idp = 2),
-                           nmax = 4)
-    }
-    if (f == "idw") {
-      xfit <- gstat::gstat(formula = var.col ~ 1,
-                           locations = sp_interp.df,
-                           set = list(idp = 2),
-                           nmax = Inf)
-    }
-    if (f == "exp") {
-      vgfit <- gstat::fit.variogram(variogram(idw_vgm_fit),
-                                    vgm(c("Exp")))
-      
-      xfit <- gstat::gstat(formula = var.col ~ 1,
-                           locations = sp_interp.df,
-                           model = vgfit,
-                           nmax = nm)
-    }
-    if (f == "sph") {
-      vgfit <- gstat::fit.variogram(variogram(idw_vgm_fit),
-                                    vgm(c("Sph")))
-      
-      xfit <- gstat::gstat(formula = var.col ~ 1,
-                           locations = sp_interp.df,
-                           model = vgfit,
-                           nmax = nm)
-    }
-    if (f == "bes") {
-      vgfit <- gstat::fit.variogram(variogram(idw_vgm_fit),
-                                    vgm(c("Bes")))
-      xfit <- gstat::gstat(formula = var.col ~ 1,
-                           locations = sp_interp.df,
-                           model = vgfit,
-                           nmax = nm)
-    }
-    if (f == "gau") {
-      vgfit <- gstat::fit.variogram(variogram(idw_vgm_fit),
-                                    vgm(c("Gau")))
-      xfit <- gstat::gstat(formula = var.col ~ 1,
-                           locations = sp_interp.df,
-                           model = vgfit,
-                           nmax = nm)
-    }
-    if (f == "cir") {
-      vgfit <- gstat::fit.variogram(variogram(idw_vgm_fit),
-                                    vgm(c("Cir")))
-      xfit <- gstat::gstat(formula = var.col ~ 1,
-                           locations = sp_interp.df,
-                           model = vgfit,
-                           nmax = nm)
-    }
-    if (f == "mat") {
-      
-      vgfit <- gstat::fit.variogram(variogram(idw_vgm_fit),
-                                    vgm(c("Mat")))
-      xfit <- gstat::gstat(formula = var.col ~ 1,
-                           locations = sp_interp.df,
-                           model = vgfit,
-                           nmax = nm)
-    }
-    if (f == "ste") {
-      
-      vgfit <- gstat::fit.variogram(variogram(idw_vgm_fit), 
-                                    vgm(c("Ste")))
-      
-      xfit <- gstat::gstat(formula = var.col ~ 1, 
-                           locations = sp_interp.df, 
-                           model = vgfit, 
-                           nmax = nm)
-    }
-    if (f == "tps") {
-      xfit <- fields::Tps(sp::coordinates(sp_interp.df),
-                          sp_interp.df$var.col)
-    }
-    
-    # Build predictor
-    
-    if (f == "tps") {
-      xpredict <- raster::interpolate(sp_interp.raster,
-                                      xfit)
-    } else {
-      xpredict <- predict(xfit, as(sp_interp.raster, "SpatialGrid"))
-    }
-    
-    # Interpolate data to raster and mask outside of polygon
-    
-    rastmp <- xpredict %>%
-      akgfmaps::rasterize_and_mask(mymask)
-    
-    outraster <- addLayer(outraster, rastmp)
-  }
-  return(outraster)
+  # Rename data columns for ease
+  # 
+  # names(dat)[which(names(dat) == var.col)] <- "var.col"
+  # names(dat)[which(names(dat) == lat.col)] <- "lat.col"
+  # names(dat)[which(names(dat) == lon.col)] <- "lon.col"
+  # 
+  # # Remove NAs
+  # 
+  # if(any(is.na(dat$var.col))) {
+  #   print(paste0("Removing ", 
+  #                sum(is.na(dat$var.col)), 
+  #                " var.col NA values from data set"))
+  #   dat <- dat |> 
+  #     dplyr::filter(!is.na(var.col))
+  # }
+  # 
+  # # Load AKGF polygon for masking, or the user-supplied mask
+  # 
+  # mymask <- parseregion(select.region, interpolation.crs)
+  # 
+  # # Set dimensions for raster cells ---
+  # # Note: If SEBS or EBS/NEBS is specified, we set the raster to match the older
+  # # ArcGIS rasters.  If user does not specify anything, a raster is created that
+  # # encompasses the masking polygon plus a bit of a buffer and aligns with the
+  # # default SEBS raster.
+  # 
+  # if (is.character(bbox)) {
+  #   if (bbox %in% c("sebs","bs.south")) {
+  #     bbox = c(xmin = -1625000, 
+  #              xmax = -35000, 
+  #              ymin = 379500, 
+  #              ymax = 1969500)
+  #   } else if (bbox %in% c("nebs","ebs","bs.north","bs.all")) {
+  #     extrap.box <- c(xmn = -179.5, xmx = -157, ymn = 50, ymx = 68)
+  #     plot.boundary <- akgfmaps::transform_data_frame_crs(data.frame(x = c(extrap.box['xmn'], extrap.box['xmx']), 
+  #                                                                    y = c(extrap.box['ymn'], extrap.box['ymx'])), 
+  #                                                         out.crs = interpolation.crs)
+  #     bbox = c(xmin = plot.boundary$x[1],
+  #              xmax = plot.boundary$x[2],
+  #              ymin = plot.boundary$y[1],
+  #              ymax = plot.boundary$y[2],
+  #     )
+  #   } else {
+  #     stop("Unrecognized value of bbox")
+  #   }
+  # } else if (is.null(bbox)) {
+  #   bbox <- sf::st_bbox(st_buffer(mymask, cell.resolution*5))
+  #   bbox <- round(bbox/cell_resolution)*cell_resolution # round to align rows/cols
+  #   xshift <- ((-1625000/cell_resolution) - floor(-1625000/cell_resolution))*cell_resolution
+  #   yshift <- ((379500/cell_resolution) - floor(379500/cell_resolution))*cell_resolution
+  #   bbox = bbox + c(xshift,yshift,xshift,yshift)
+  # }
+  # 
+  # sp_interp.raster <- terra::rast(xmin = bbox["xmin"],
+  #                                 xmax = bbox["xmax"], 
+  #                                 ymin = bbox["ymin"],
+  #                                 ymax = bbox["ymax"], 
+  #                                 nrows = floor((bbox["ymax"]-bbox["ymin"])/cell.resolution), 
+  #                                 ncols = floor((bbox["xmax"]-bbox["xmin"])/cell.resolution))
+  # 
+  # raster::projection(sp_interp.raster) <- interpolation.crs
+  # 
+  # # Transform data for interpolation ----
+  # sp_interp.df <- unique(dat)
+  # sp::coordinates(sp_interp.df) <- c(x = "lon.col", y = "lat.col")
+  # sp::proj4string(sp_interp.df) <- sp::CRS(in.crs)
+  # sp_interp.df <- sp::spTransform(sp_interp.df, sp::CRS(interpolation.crs))
+  # 
+  # 
+  # # Fit data and build rasters
+  # 
+  # # IDW base for variogram-based fits
+  # 
+  # if (any(c("exp", "sph", "bes", "gau", "cir", "mat", "ste") %in% fittypes)){
+  #   idw_vgm_fit <- gstat::gstat(formula = var.col ~ 1,
+  #                               locations = sp_interp.df,
+  #                               nmax = Inf)
+  # }
+  # 
+  # # Loop over requested fit types
+  # 
+  # outraster <- stack()
+  # 
+  # for (f in fittypes) {
+  #   
+  #   # Fit data
+  #   
+  #   if (f == "nn") {
+  #     xfit <- gstat::gstat(formula = var.col ~ 1,
+  #                          locations = sp_interp.df,
+  #                          set = list(idp = 0),
+  #                          nmax = 4)
+  #   }
+  #   if (f == "idwnmax4") {
+  #     xfit <- gstat::gstat(formula = var.col ~ 1,
+  #                          locations = sp_interp.df,
+  #                          set = list(idp = 2),
+  #                          nmax = 4)
+  #   }
+  #   if (f == "idw") {
+  #     xfit <- gstat::gstat(formula = var.col ~ 1,
+  #                          locations = sp_interp.df,
+  #                          set = list(idp = 2),
+  #                          nmax = Inf)
+  #   }
+  #   if (f == "exp") {
+  #     vgfit <- gstat::fit.variogram(variogram(idw_vgm_fit),
+  #                                   vgm(c("Exp")))
+  #     
+  #     xfit <- gstat::gstat(formula = var.col ~ 1,
+  #                          locations = sp_interp.df,
+  #                          model = vgfit,
+  #                          nmax = nm)
+  #   }
+  #   if (f == "sph") {
+  #     vgfit <- gstat::fit.variogram(variogram(idw_vgm_fit),
+  #                                   vgm(c("Sph")))
+  #     
+  #     xfit <- gstat::gstat(formula = var.col ~ 1,
+  #                          locations = sp_interp.df,
+  #                          model = vgfit,
+  #                          nmax = nm)
+  #   }
+  #   if (f == "bes") {
+  #     vgfit <- gstat::fit.variogram(variogram(idw_vgm_fit),
+  #                                   vgm(c("Bes")))
+  #     xfit <- gstat::gstat(formula = var.col ~ 1,
+  #                          locations = sp_interp.df,
+  #                          model = vgfit,
+  #                          nmax = nm)
+  #   }
+  #   if (f == "gau") {
+  #     vgfit <- gstat::fit.variogram(variogram(idw_vgm_fit),
+  #                                   vgm(c("Gau")))
+  #     xfit <- gstat::gstat(formula = var.col ~ 1,
+  #                          locations = sp_interp.df,
+  #                          model = vgfit,
+  #                          nmax = nm)
+  #   }
+  #   if (f == "cir") {
+  #     vgfit <- gstat::fit.variogram(variogram(idw_vgm_fit),
+  #                                   vgm(c("Cir")))
+  #     xfit <- gstat::gstat(formula = var.col ~ 1,
+  #                          locations = sp_interp.df,
+  #                          model = vgfit,
+  #                          nmax = nm)
+  #   }
+  #   if (f == "mat") {
+  #     
+  #     vgfit <- gstat::fit.variogram(variogram(idw_vgm_fit),
+  #                                   vgm(c("Mat")))
+  #     xfit <- gstat::gstat(formula = var.col ~ 1,
+  #                          locations = sp_interp.df,
+  #                          model = vgfit,
+  #                          nmax = nm)
+  #   }
+  #   if (f == "ste") {
+  #     
+  #     vgfit <- gstat::fit.variogram(variogram(idw_vgm_fit), 
+  #                                   vgm(c("Ste")))
+  #     
+  #     xfit <- gstat::gstat(formula = var.col ~ 1, 
+  #                          locations = sp_interp.df, 
+  #                          model = vgfit, 
+  #                          nmax = nm)
+  #   }
+  #   if (f == "tps") {
+  #     xfit <- fields::Tps(sp::coordinates(sp_interp.df),
+  #                         sp_interp.df$var.col)
+  #   }
+  #   
+  #   # Build predictor
+  #   
+  #   if (f == "tps") {
+  #     xpredict <- raster::interpolate(sp_interp.raster,
+  #                                     xfit)
+  #   } else {
+  #     xpredict <- predict(xfit, as(sp_interp.raster, "SpatialGrid"))
+  #   }
+  #   
+  #   # Interpolate data to raster and mask outside of polygon
+  #   
+  #   rastmp <- xpredict |>
+  #     akgfmaps::rasterize_and_mask(mymask)
+  #   
+  #   outraster <- addLayer(outraster, rastmp)
+  # }
+  # return(outraster)
 }
 
 
@@ -345,9 +393,9 @@ calcindices_temp <- function (datafile,
   
   ebs_layers <- akgfmaps::get_base_layers(select.region = "sebs", set.crs = proj_crs)
   
-  lt100_strata <- ebs_layers$survey.strata %>%
-    dplyr::filter(Stratum %in% c(10, 20, 31, 32, 41, 42, 43)) %>%
-    dplyr::group_by(SURVEY) %>%
+  lt100_strata <- ebs_layers$survey.strata |>
+    dplyr::filter(Stratum %in% c(10, 20, 31, 32, 41, 42, 43)) |>
+    dplyr::group_by(SURVEY) |>
     dplyr::summarise()
   
   lt100_strata <- sf::st_intersection(lt100_strata, maskpoly)
@@ -393,14 +441,15 @@ calcindices_temp <- function (datafile,
                          bbox = bbox)
       ras <- ras[[1]] # 1-layer rasterstack to plain raster
       
-      bt_df$MEAN_GEAR_TEMPERATURE[i] <- raster::values(ras) %>%
+      bt_df$MEAN_GEAR_TEMPERATURE[i] <- terra::values(ras) |>
         mean(na.rm = TRUE)
       
-      lt100_temp <- raster::mask(ras, lt100_strata)
-      bt_df$MEAN_BT_LT100M[i] <- mean(lt100_temp@data@values, na.rm = TRUE)
+      lt100_temp <- terra::mask(ras, lt100_strata, touches = FALSE)
+      bt_df$MEAN_BT_LT100M[i] <- terra::values(lt100_temp ) |> 
+        mean(na.rm = TRUE)
       
       for (it in 1:nthresh) {
-        area_lte[i,it] <- ras %>%
+        area_lte[i,it] <- ras |>
           cpa_from_raster(raster_units = "m", temperature_threshold = threshold[it])
       }
       
@@ -423,7 +472,7 @@ calcindices_temp <- function (datafile,
                          bbox = bbox)
       ras <- ras[[1]] # 1-layer rasterstack to plain raster  
       
-      bt_df$MEAN_SURFACE_TEMPERATURE[i] <- raster::values(ras) %>%
+      bt_df$MEAN_SURFACE_TEMPERATURE[i] <- terra::values(ras) |>
         mean(na.rm = TRUE)
     }
   }

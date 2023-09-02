@@ -7,7 +7,7 @@
 cpa_from_raster(x, raster_units = "m", temperature_threshold)
 }
 \arguments{
-\item{x}{A RasterLayer object.}
+\item{x}{A SpatRaster object.}
 
 \item{raster_units}{Character vector indicating units for x and y dimensions in the raster. Default = "m" for meters.}
 

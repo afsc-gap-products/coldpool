@@ -7,6 +7,7 @@
 #' @param cell_resolution Interpolation grid cell dimension in meters.
 #' @param select_years Optional. Select years to use for interpolation. Default NULL uses all years.
 #' @param select_region Region for interpolation as a character string. Options = "ebs", "sebs", "nbs"
+#' @param methods Optional character vector of methods to pass to interpolate_variable(). Valid choices: "NN", "IDW", "IDW4", "Exp", "Sph", "Bes", "Gau", "Cir", "Mat", "Ste", "Tps". If NULL, uses defaults.
 #' @return Data frame of estimated cold pool area from multiple candidate interpolation methods.
 #' @export
 
@@ -15,7 +16,16 @@ interpolation_wrapper <- function(temp_data_path,
                                   cell_resolution,
                                   select_years = NULL,
                                   interp_variable,
-                                  select_region = "sebs") {
+                                  select_region = "sebs",
+                                  methods = NULL) {
+  
+  # temp_data_path = ebs_csv_path
+  # proj_crs = proj_crs
+  # cell_resolution = 5000 # 5x5 km grid resolution
+  # select_years = 1982:2022
+  # interp_variable = "gear_temperature"
+  # select_region = "sebs"
+  # methods = NULL
 
   if(!(class(temp_data_path) == "data.frame")) {
     
@@ -24,6 +34,10 @@ interpolation_wrapper <- function(temp_data_path,
     
     names(temperature_df) <- tolower(names(temperature_df))
     
+  }
+  
+  if(is.null(methods)) {
+    methods <- c("NN", "IDW", "IDW4", "Exp", "Sph", "Bes", "Gau", "Cir", "Mat", "Ste", "Tps")
   }
 
   # Vector of years ----
@@ -34,19 +48,20 @@ interpolation_wrapper <- function(temp_data_path,
   }
 
   # Calculate cold pool area and generate rasters
-  for(i in 1:length(year_vec)) {
+  for(ii in 1:length(year_vec)) {
 
-    cpa_year <- interpolate_variable(dat = dplyr::filter(temperature_df, year == year_vec[i]),
-                                     dat.year = year_vec[i],
-                                     in.crs = "+proj=longlat",
+    cpa_year <- interpolate_variable(dat = dplyr::filter(temperature_df, year == year_vec[ii]),
+                                     dat.year = year_vec[ii],
+                                     in.crs = "EPSG:4326",
                                      interpolation.crs = proj_crs,
                                      cell.resolution = cell_resolution,
                                      lon.col = "longitude",
                                      lat.col = "latitude",
                                      var.col = interp_variable,
                                      nm = Inf,
-                                     pre = paste0("_", toupper(interp_variable), "_", year_vec[i]),
-                                     select.region = select_region)
+                                     pre = paste0("_", toupper(interp_variable), "_", year_vec[ii]),
+                                     select.region = select_region,
+                                     methods = methods)
 
   }
 

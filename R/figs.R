@@ -13,21 +13,21 @@ plot_stn_doy <- function() {
   
   # Day of year of hauls
   haul_dat <- RODBC::sqlQuery(channel = channel, 
-                              query = qry_haul) %>%
-    dplyr::filter(STATIONID %in% akgfmaps::get_survey_stations(select.region = "ebs")) %>%
+                              query = qry_haul) |>
+    dplyr::filter(STATIONID %in% akgfmaps::get_survey_stations(select.region = "ebs")) |>
     dplyr::mutate(DOY = yday(as.POSIXct(START_TIME)))
   
   # Retrieve EBS base layers
   ebs_layers <- akgfmaps::get_base_layers(select.region = "ebs", set.crs = "EPSG:3338")
   
   # Join with survey grid and calculate mean day of year grid cells were sampled
-  start_df <- ebs_layers$survey.grid %>% 
-    sf::st_intersection(ebs_layers$survey.area %>%
-                          dplyr::mutate(REGION = "EBS") %>%
-                          dplyr::group_by(REGION) %>%
-                          dplyr::summarise()) %>%
-    dplyr::inner_join(haul_dat %>%
-                        dplyr::group_by(STATIONID) %>%
+  start_df <- ebs_layers$survey.grid |> 
+    sf::st_intersection(ebs_layers$survey.area |>
+                          dplyr::mutate(REGION = "EBS") |>
+                          dplyr::group_by(REGION) |>
+                          dplyr::summarise()) |>
+    dplyr::inner_join(haul_dat |>
+                        dplyr::group_by(STATIONID) |>
                         dplyr::summarise(MEAN_DOY = mean(DOY),
                                          MEAN_DEPTH = mean(BOTTOM_DEPTH, na.rm = TRUE)))
   
@@ -36,12 +36,12 @@ plot_stn_doy <- function() {
                              y = c(533099.5, 1894909.7))
   
   # Combine strata by main survey region + SEBS plus NW
-  agg_stratum <- ebs_layers$survey.strata %>%
-    dplyr::mutate(agg_stratum = Stratum) %>%
+  agg_stratum <- ebs_layers$survey.strata |>
+    dplyr::mutate(agg_stratum = Stratum) |>
     dplyr::mutate(agg_stratum = replace(agg_stratum, agg_stratum %in% c(31,32,30,41,42,43,61,62,60,10,20,50), "EBS Shelf\nStandard"),
                   agg_stratum = replace(agg_stratum, agg_stratum %in% c(82, 90), "EBS\nPlus NW"),
-                  agg_stratum = replace(agg_stratum, agg_stratum %in% c(70,71,81), "NBS")) %>% 
-    dplyr::group_by(agg_stratum) %>% 
+                  agg_stratum = replace(agg_stratum, agg_stratum %in% c(70,71,81), "NBS")) |> 
+    dplyr::group_by(agg_stratum) |> 
     dplyr::summarise()
   
   plot_ebs_nbs_survey_stations <- ggplot() +
@@ -65,7 +65,7 @@ plot_stn_doy <- function() {
                                 bg.color = "white") +
     shadowtext::geom_shadowtext(data = data.frame(x = -158.5, 
                                                   y = 62.4, 
-                                                  lab = "Alaska") %>%
+                                                  lab = "Alaska") |>
                                   akgfmaps::transform_data_frame_crs(out.crs = coldpool:::ebs_proj_crs),
                                 mapping = aes(x = x,
                                               y = y,
@@ -75,7 +75,7 @@ plot_stn_doy <- function() {
                                 bg.color = "white") +
     shadowtext::geom_shadowtext(data = data.frame(x = -166.2, 
                                                   y = 60.08, 
-                                                  lab = "Nunivak\nIsland") %>%
+                                                  lab = "Nunivak\nIsland") |>
                                   akgfmaps::transform_data_frame_crs(out.crs = coldpool:::ebs_proj_crs),
                                 mapping = aes(x = x,
                                               y = y,
@@ -85,7 +85,7 @@ plot_stn_doy <- function() {
                                 bg.color = "white") +
     shadowtext::geom_shadowtext(data = data.frame(x = c(-169, -159.5), 
                                                   y = c(66.3, 57.7), 
-                                                  lab = c("Bering\nStrait", "Bristol\nBay")) %>%
+                                                  lab = c("Bering\nStrait", "Bristol\nBay")) |>
                                   akgfmaps::transform_data_frame_crs(out.crs = coldpool:::ebs_proj_crs),
                                 mapping = aes(x = x,
                                               y = y,
@@ -137,7 +137,7 @@ plot_stn_doy <- function() {
                                 bg.color = "white") +
     shadowtext::geom_shadowtext(data = data.frame(x = -158.5, 
                                                   y = 62.4, 
-                                                  lab = "Alaska") %>%
+                                                  lab = "Alaska") |>
                                   akgfmaps::transform_data_frame_crs(out.crs = coldpool:::ebs_proj_crs),
                                 mapping = aes(x = x,
                                               y = y,
@@ -147,7 +147,7 @@ plot_stn_doy <- function() {
                                 bg.color = "white") +
     shadowtext::geom_shadowtext(data = data.frame(x = -166.2, 
                                                   y = 60.08, 
-                                                  lab = "Nunivak\nIsland") %>%
+                                                  lab = "Nunivak\nIsland") |>
                                   akgfmaps::transform_data_frame_crs(out.crs = coldpool:::ebs_proj_crs),
                                 mapping = aes(x = x,
                                               y = y,
@@ -157,7 +157,7 @@ plot_stn_doy <- function() {
                                 bg.color = "white") +
     shadowtext::geom_shadowtext(data = data.frame(x = c(-169, -159.5), 
                                                   y = c(66.3, 57.7), 
-                                                  lab = c("Bering\nStrait", "Bristol\nBay")) %>%
+                                                  lab = c("Bering\nStrait", "Bristol\nBay")) |>
                                   akgfmaps::transform_data_frame_crs(out.crs = coldpool:::ebs_proj_crs),
                                 mapping = aes(x = x,
                                               y = y,

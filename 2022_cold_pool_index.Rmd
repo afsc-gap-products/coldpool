@@ -33,8 +33,8 @@ coldpool:::cold_pool_index$YEAR[order(-1*coldpool:::cold_pool_index$MEAN_SURFACE
 
 ```{r fig1_cold_pool_index, message=FALSE, warning=FALSE, include=FALSE}
 
-cpi_df <- coldpool:::cold_pool_index %>%
-  dplyr::filter(YEAR <= max_year) %>%
+cpi_df <- coldpool:::cold_pool_index |>
+  dplyr::filter(YEAR <= max_year) |>
   dplyr::mutate(group = YEAR < 2020,
                 var = "Cold Pool Index",
                 cpi_rank = rank(AREA_LTE2_KM2))
@@ -88,14 +88,14 @@ dev.off()
 sebs_layers <- akgfmaps::get_base_layers(select.region = "sebs",
                                          set.crs = coldpool:::ebs_proj_crs)
 
-area_df <- coldpool:::cold_pool_index %>%
-  dplyr::filter(YEAR <= max_year) %>%
+area_df <- coldpool:::cold_pool_index |>
+  dplyr::filter(YEAR <= max_year) |>
   dplyr::mutate(lteminus1 = AREA_LTEMINUS1_KM2,
                 lte0 = AREA_LTE0_KM2 - AREA_LTEMINUS1_KM2,
                 lte1 = AREA_LTE1_KM2 - AREA_LTE0_KM2,
-                lte2 = AREA_LTE2_KM2 - AREA_LTE1_KM2) %>%
-  dplyr::select(YEAR, lteminus1, lte0, lte1, lte2) %>%
-  reshape2::melt(id.vars = "YEAR") %>%
+                lte2 = AREA_LTE2_KM2 - AREA_LTE1_KM2) |>
+  dplyr::select(YEAR, lteminus1, lte0, lte1, lte2) |>
+  reshape2::melt(id.vars = "YEAR") |>
   dplyr::mutate(variable = factor(variable, 
                                   levels = c( "lte2", "lte1", "lte0", "lteminus1"),
                                   labels = c("\u22642 \u00b0C", "\u22641 \u00b0C", "\u22640 \u00b0C", "\u2264-1 \u00b0C")),
@@ -143,7 +143,7 @@ stacked_area_simple_label_plot <- ggplot() +
                           y = proportion,
                           fill = variable)) +
   scale_fill_manual(name = "Temperature", 
-                    values = cpa_palette) +
+                    values = viridis::mako(5, direction = -1, end = .8)) +
   scale_y_continuous(name = "Proportion of EBS Shelf Survey Area",
                      limits = c(0, 1),
                      expand = c(0, 0),
@@ -158,7 +158,7 @@ stacked_area_simple_label_plot <- ggplot() +
         axis.ticks = element_line(color = "black"),
         panel.border = element_rect(color = "black", fill = NA),
         panel.background = element_rect(color = "black", fill = NA),
-        legend.position = c(0.2, 0.8),
+        legend.position = c(0.1, 0.8),
         legend.title = element_blank())
 
 png(file = here::here("plots", paste0(max_year, "_stacked_temperature_simple_label.png")), height = 4, width = 6, units = "in", res = 600)
@@ -176,7 +176,7 @@ for(i in start_year:end_year) {
                              y = coords[,2],
                              temperature = coldpool:::ebs_bottom_temperature@data@values[,i])
   sel_layer_df <- sel_layer_df[!is.na(sel_layer_df$temperature),]
-  sel_layer_df <- sel_layer_df %>%
+  sel_layer_df <- sel_layer_df |>
     dplyr::filter(temperature <= 2)
   sel_layer_df$year <- year_vec[i]
   
@@ -193,13 +193,13 @@ bt_year_df$temp_disc <- cut(bt_year_df$temperature,
 cpa_palette <- c("#21dae7", "#0071ff", "#0000e3", "#000040")
 
 panel_extent <- data.frame(y = c(52, 64),
-                           x = c(-175, -156)) %>%
+                           x = c(-175, -156)) |>
   akgfmaps::transform_data_frame_crs(out.crs = coldpool:::ebs_proj_crs)
 
 label_2020 <- data.frame(x = mean(panel_extent$x),
                          y = mean(panel_extent$y),
                          label = "No\nSurvey",
-                         year = 2020) %>% 
+                         year = 2020) |> 
   dplyr::filter(year <= max_year)
 
 cold_pool_cbar <- coldpool::legend_discrete_cbar(breaks = c(-Inf, -1, 0, 1, 2),
@@ -237,7 +237,7 @@ cold_pool_panels <- ggplot() +
   geom_sf(data = sebs_layers$bathymetry) +
   geom_polygon(data = data.frame(x = panel_extent$x[c(1,2,2,1,1)],
                                  y = panel_extent$y[c(1,1,2,2,1)],
-                                 year = 2020) %>% dplyr::filter(year <= max_year),
+                                 year = 2020) |> dplyr::filter(year <= max_year),
                aes(x = x,
                    y = y),
                fill = "white") +
@@ -339,16 +339,16 @@ for(i in 1:end_year) {
 }
 
 # Union to combine strata 31, 32 into 30, etc.
-nbs_ebs_agg_strata <- nbs_ebs_layers$survey.strata %>%
-  dplyr::mutate(agg_stratum = Stratum) %>%
+nbs_ebs_agg_strata <- nbs_ebs_layers$survey.strata |>
+  dplyr::mutate(agg_stratum = Stratum) |>
   dplyr::mutate(agg_stratum = replace(agg_stratum, agg_stratum %in% c(31,32), 30),
                 agg_stratum = replace(agg_stratum, agg_stratum %in% c(41,42,43), 40),
-                agg_stratum = replace(agg_stratum, agg_stratum %in% c(61,62), 60)) %>% 
-  dplyr::group_by(agg_stratum) %>% 
+                agg_stratum = replace(agg_stratum, agg_stratum %in% c(61,62), 60)) |> 
+  dplyr::group_by(agg_stratum) |> 
   dplyr::summarise()
 
 panel_extent <- data.frame(y = c(53, 67),
-                           x = c(-174, -156)) %>%
+                           x = c(-174, -156)) |>
   akgfmaps::transform_data_frame_crs(out.crs = coldpool:::ebs_proj_crs)
 
 nbs_ebs_temp_breaks <- c(-Inf, seq(-1,8,1), Inf)
@@ -360,7 +360,7 @@ ebs_nbs_temperature_map <- ggplot2::ggplot() +
                    fill = "grey70", 
                    color = "black") +
   ggplot2::geom_sf(data = nbs_ebs_layers$survey.area, fill = "grey65") +
-  ggplot2::geom_tile(data = bt_year_df %>%
+  ggplot2::geom_tile(data = bt_year_df |>
                        dplyr::filter(year == max_year),
                      aes(x = x, 
                          y = y,
@@ -371,7 +371,7 @@ ebs_nbs_temperature_map <- ggplot2::ggplot() +
                    color = "black") +
   ggplot2::geom_text(data = data.frame(x = -158.5, 
                                        y = 62.4, 
-                                       lab = "Alaska") %>%
+                                       lab = "Alaska") |>
                        akgfmaps::transform_data_frame_crs(out.crs = coldpool:::ebs_proj_crs),
                      mapping = aes(x = x,
                                    y = y,
@@ -401,12 +401,12 @@ ebs_nbs_temperature_contour_map <- ggplot2::ggplot() +
                    fill = "grey70", 
                    color = "black") +
   ggplot2::geom_sf(data = nbs_ebs_layers$survey.area, fill = "grey65") +
-  ggplot2::geom_tile(data = bt_year_df %>%
+  ggplot2::geom_tile(data = bt_year_df |>
                        dplyr::filter(year == max_year),
                      aes(x = x, 
                          y = y,
                          fill = cut(temperature, breaks = nbs_ebs_temp_breaks))) +
-  ggplot2::geom_contour(data = bt_year_df %>%
+  ggplot2::geom_contour(data = bt_year_df |>
                        dplyr::filter(year == max_year),
                      aes(x = x, 
                          y = y,
@@ -419,7 +419,7 @@ ebs_nbs_temperature_contour_map <- ggplot2::ggplot() +
                    color = "black") +
   ggplot2::geom_text(data = data.frame(x = -158.5, 
                                        y = 62.4, 
-                                       lab = "Alaska") %>%
+                                       lab = "Alaska") |>
                        akgfmaps::transform_data_frame_crs(out.crs = coldpool:::ebs_proj_crs),
                      mapping = aes(x = x,
                                    y = y,
@@ -556,12 +556,12 @@ for(ii in 1:length(plot_years)) {
 }
 
 # Union to combine strata 31, 32 into 30, etc.
-nbs_ebs_agg_strata <- nbs_ebs_layers$survey.strata %>%
-  dplyr::mutate(agg_stratum = Stratum) %>%
+nbs_ebs_agg_strata <- nbs_ebs_layers$survey.strata |>
+  dplyr::mutate(agg_stratum = Stratum) |>
   dplyr::mutate(agg_stratum = replace(agg_stratum, agg_stratum %in% c(31,32), 30),
                 agg_stratum = replace(agg_stratum, agg_stratum %in% c(41,42,43), 40),
-                agg_stratum = replace(agg_stratum, agg_stratum %in% c(61,62), 60)) %>% 
-  dplyr::group_by(agg_stratum) %>% 
+                agg_stratum = replace(agg_stratum, agg_stratum %in% c(61,62), 60)) |> 
+  dplyr::group_by(agg_stratum) |> 
   dplyr::summarise()
 
 
@@ -692,22 +692,22 @@ dev.off()
 ```
 
 ```{r fig4_mean_temperature, message=FALSE, warning=FALSE, include=FALSE}
-sebs_temperatures <- coldpool:::cold_pool_index %>%
-    dplyr::filter(YEAR <= max_year) %>%
-  dplyr::select(YEAR, MEAN_GEAR_TEMPERATURE, MEAN_SURFACE_TEMPERATURE) %>%
+sebs_temperatures <- coldpool:::cold_pool_index |>
+    dplyr::filter(YEAR <= max_year) |>
+  dplyr::select(YEAR, MEAN_GEAR_TEMPERATURE, MEAN_SURFACE_TEMPERATURE) |>
   dplyr::rename(Bottom = MEAN_GEAR_TEMPERATURE, 
-                Surface = MEAN_SURFACE_TEMPERATURE) %>%
+                Surface = MEAN_SURFACE_TEMPERATURE) |>
   dplyr::mutate(group = YEAR < 2020,
-                region = "Eastern Bering Sea (summer BT survey)") %>%
+                region = "Eastern Bering Sea (summer BT survey)") |>
   reshape2::melt(id.vars = c("YEAR", "group", "region"))
 
-nbs_temperatures <- coldpool:::nbs_mean_temperature %>%
-    dplyr::filter(YEAR <= max_year) %>%
-  dplyr::select(YEAR, MEAN_GEAR_TEMPERATURE, MEAN_SURFACE_TEMPERATURE) %>%
+nbs_temperatures <- coldpool:::nbs_mean_temperature |>
+    dplyr::filter(YEAR <= max_year) |>
+  dplyr::select(YEAR, MEAN_GEAR_TEMPERATURE, MEAN_SURFACE_TEMPERATURE) |>
   dplyr::rename(Bottom = MEAN_GEAR_TEMPERATURE, 
-                Surface = MEAN_SURFACE_TEMPERATURE) %>%
+                Surface = MEAN_SURFACE_TEMPERATURE) |>
   dplyr::mutate(group = YEAR,
-                region = "Northern Bering Sea (summer BT survey)") %>%
+                region = "Northern Bering Sea (summer BT survey)") |>
   reshape2::melt(id.vars = c("YEAR", "group", "region"))
 
 all_temperatures <- dplyr::bind_rows(sebs_temperatures,
@@ -765,7 +765,7 @@ plot_average_temperature <- ggplot(data = all_temperatures,
         strip.background = element_rect(fill = "#0055a4",
                                         color = NA))
 
-plot_sebs_average_temperature <- ggplot(data = all_temperatures %>%
+plot_sebs_average_temperature <- ggplot(data = all_temperatures |>
                dplyr::filter(region == "Eastern Bering Sea (summer BT survey)"),
                                    mapping = aes(x = YEAR,
                                                  y = value,
@@ -774,7 +774,7 @@ plot_sebs_average_temperature <- ggplot(data = all_temperatures %>%
                                                  group = paste0(group, variable))) +
   geom_point(size = rel(2)) +
   geom_line() +
-  geom_hline(data = ebs_mean_temp_df %>%
+  geom_hline(data = ebs_mean_temp_df |>
                dplyr::filter(region == "Eastern Bering Sea (summer BT survey)"),
              aes(yintercept = value,
              color = variable),
@@ -914,4 +914,5 @@ print(ebs_nbs_bt_map_grid)
 
 
 **Implications**: The cold pool has a strong influence on the thermal stratification, and overall, changes in surface and bottom temperature influence the spatial structure of the demersal community [@Kotwicki2013; @Stevenson2019; @Thorson2020], trophic structure of the eastern Bering Sea food web [@Mueter2008; @Spencer2016], and demographic processes of fish populations [@Gruss2021]. When the cold pool is small, species with warm-water affinity (e.g., arrowtooth flounder *Atheresthes stomias*) are distributed more widely over the eastern Bering Sea shelf and expand across the shelf and to the north because there is no thermal barrier to migration. In contrast, the distribution of species with cold water affinity (e.g., Arctic cod *Boreogadus saida* Bering flounder *Hippoglossoides robustus*) contracts to the north when the cold pool is small. 
+
 While the cold pool area is defined based on the 2&deg;C isotherm, recent studies suggest that a more ecologically relevant temperature for several subarctic fishes and crabs is the 1&deg;C isotherm [@Kotwicki2013] or the 0&deg;C isotherm for walleye pollock *Gadus chalcogrammus* and Pacific cod *Gadus macrocephalus* [@Eisner2020a; @Baker2021]. Similar to the most recent near-average cold pool extent year in 2017 [@Stevenson2019], the northern Bering Sea bottom trawl survey encountered considerable densities of adult walleye pollock and Pacific cod in the northern Bering Sea in 2022, which suggests the larger cold pool and extents of $\leq$ 0&deg;C and $\leq$ 1&deg;C isotherms may not have posed a significant barrier to northward migration for these species.

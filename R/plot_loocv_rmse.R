@@ -42,22 +42,22 @@ plot_loocv_rmse <- function(sel_paths = dir("./output/loocv", full.names = TRUE)
   sel_loocv <- reshape2::melt(sel_loocv, 
                               id.vars = id_cols)
   
-  all_rmse <- sel_loocv %>% 
-    dplyr::group_by(CRUISE, variable) %>%
+  all_rmse <- sel_loocv |> 
+    dplyr::group_by(CRUISE, variable) |>
     dplyr::summarise(rmse = mean(value))
   
-  best_rmse <- inner_join(sel_loocv %>% 
-                            dplyr::group_by(CRUISE, variable) %>%
+  best_rmse <- inner_join(sel_loocv |> 
+                            dplyr::group_by(CRUISE, variable) |>
                             dplyr::summarise(rmse = mean(value)), 
-                          sel_loocv %>% 
-                            dplyr::group_by(CRUISE, variable) %>%
-                            dplyr::summarise(rmse = mean(value)) %>%
-                            dplyr::ungroup() %>%
-                            dplyr::group_by(CRUISE) %>%
-                            dplyr::summarise(rmse = min(rmse))) %>%
+                          sel_loocv |> 
+                            dplyr::group_by(CRUISE, variable) |>
+                            dplyr::summarise(rmse = mean(value)) |>
+                            dplyr::ungroup() |>
+                            dplyr::group_by(CRUISE) |>
+                            dplyr::summarise(rmse = min(rmse))) |>
     dplyr::mutate(best = TRUE)
   
-  best_rmse <- sel_loocv %>% 
+  best_rmse <- sel_loocv |> 
     dplyr::left_join(best_rmse)
   
   best_rmse$best[is.na(best_rmse$best)] <- FALSE

@@ -162,9 +162,9 @@ color_vec <- c("OK-BES" = "#4E79A7",
                "AW" = "black")
 
 # Load cold pool calculations from Bob Lauth ----
-lauth_cpa_df <- coldpool:::cpa_pre2021 %>%
+lauth_cpa_df <- coldpool:::cpa_pre2021 |>
   dplyr::select(YEAR, 
-                AREA_SUM_KM2_LTE2) %>%
+                AREA_SUM_KM2_LTE2) |>
   dplyr::rename(year = YEAR,
                 `Old IDW` = AREA_SUM_KM2_LTE2)
 
@@ -175,21 +175,21 @@ annual_cpa_df <- read.csv(file = here::here("output",
 # Select cold pool area calculations for less than or equal to to 2 degrees
 annual_cpa_df <- annual_cpa_df[,c(1, which(stringr::str_detect(names(annual_cpa_df), "_area_lte2_km2")))]
 
-combined_cpa_df <- annual_cpa_df %>% 
-  reshape2::melt(id.vars = "year") %>%
-  dplyr::bind_rows(lauth_cpa_df %>% 
-                     reshape2::melt(id.vars = "year")) %>%
-  dplyr::mutate(method = stringr::str_remove(variable, "_area_lte2_km2") %>% 
-                  toupper()) %>%
+combined_cpa_df <- annual_cpa_df |> 
+  reshape2::melt(id.vars = "year") |>
+  dplyr::bind_rows(lauth_cpa_df |> 
+                     reshape2::melt(id.vars = "year")) |>
+  dplyr::mutate(method = stringr::str_remove(variable, "_area_lte2_km2") |> 
+                  toupper()) |>
   dplyr::inner_join(method_labels_df)
 
-cpa_change_df <- annual_cpa_df %>% 
-  reshape2::melt(id.vars = "year") %>%
-  dplyr::inner_join(lauth_cpa_df) %>%
+cpa_change_df <- annual_cpa_df |> 
+  reshape2::melt(id.vars = "year") |>
+  dplyr::inner_join(lauth_cpa_df) |>
   dplyr::mutate(rel_diff = 100*(value - `Old IDW`)/`Old IDW`,
-                abs_diff = value - `Old IDW`) %>%
-  dplyr::mutate(method = stringr::str_remove(variable, "_area_lte2_km2") %>% 
-                  toupper()) %>%
+                abs_diff = value - `Old IDW`) |>
+  dplyr::mutate(method = stringr::str_remove(variable, "_area_lte2_km2") |> 
+                  toupper()) |>
   dplyr::inner_join(method_labels_df)
 
 plot_cpa_by_year <- ggplot() +
@@ -252,12 +252,12 @@ Calculating mean temperature from spatially interpolated rasters of bottom and s
 
 
 ```{r load_area_weighted_temp}
-compare_temp_df <- readRDS(file = here::here("data", "ebs_bttemp_plus_nw_lt200m.rds")) %>%
-  dplyr::select(YEAR, AVGBSBT, AVGBSST) %>%
+compare_temp_df <- readRDS(file = here::here("data", "ebs_bttemp_plus_nw_lt200m.rds")) |>
+  dplyr::select(YEAR, AVGBSBT, AVGBSST) |>
   dplyr::rename(`BT[aw]` = AVGBSBT,
-                `SST[aw]` = AVGBSST) %>%
+                `SST[aw]` = AVGBSST) |>
   dplyr::full_join(coldpool:::cold_pool_index) |>
-  dplyr::select(-AREA_LTE2_KM2, -AREA_LTE1_KM2, -AREA_LTE0_KM2, -AREA_LTEMINUS1_KM2) %>%
+  dplyr::select(-AREA_LTE2_KM2, -AREA_LTE1_KM2, -AREA_LTE0_KM2, -AREA_LTEMINUS1_KM2) |>
   dplyr::rename(`SST[int]` = MEAN_SURFACE_TEMPERATURE,
                 `BT[int]` = MEAN_GEAR_TEMPERATURE)
 ```
@@ -272,25 +272,25 @@ annual_bt_df <- read.csv(file = here::here("output",
 # Select cold pool area calculations for less than or equal to to 2 degrees
 annual_bt_df <- annual_bt_df[,c(1, which(stringr::str_detect(names(annual_bt_df), "_mean_gear_temperature")))]
 
-combined_bt_df <- annual_bt_df %>% 
-  reshape2::melt(id.vars = "year") %>%
-  dplyr::bind_rows(compare_temp_df %>%
-                     dplyr::select(YEAR, `BT[aw]`) %>%
-                     dplyr::rename(year = YEAR) %>% 
-                     reshape2::melt(id.vars = "year")) %>%
-  dplyr::mutate(method = stringr::str_remove(variable, "_mean_gear_temperature") %>% 
-                  toupper()) %>%
+combined_bt_df <- annual_bt_df |> 
+  reshape2::melt(id.vars = "year") |>
+  dplyr::bind_rows(compare_temp_df |>
+                     dplyr::select(YEAR, `BT[aw]`) |>
+                     dplyr::rename(year = YEAR) |> 
+                     reshape2::melt(id.vars = "year")) |>
+  dplyr::mutate(method = stringr::str_remove(variable, "_mean_gear_temperature") |> 
+                  toupper()) |>
   dplyr::inner_join(method_labels_df)
 
-bt_change_df <- annual_bt_df %>% 
-  reshape2::melt(id.vars = "year") %>%
-  dplyr::inner_join(compare_temp_df %>%
-                      dplyr::select(YEAR, `BT[aw]`) %>%
-                      dplyr::rename(year = YEAR)) %>%
+bt_change_df <- annual_bt_df |> 
+  reshape2::melt(id.vars = "year") |>
+  dplyr::inner_join(compare_temp_df |>
+                      dplyr::select(YEAR, `BT[aw]`) |>
+                      dplyr::rename(year = YEAR)) |>
   dplyr::mutate(rel_diff = 100*(value - `BT[aw]`)/`BT[aw]`,
-                abs_diff = value - `BT[aw]`) %>%
-  dplyr::mutate(method = stringr::str_remove(variable, "_mean_gear_temperature") %>% 
-                  toupper()) %>%
+                abs_diff = value - `BT[aw]`) |>
+  dplyr::mutate(method = stringr::str_remove(variable, "_mean_gear_temperature") |> 
+                  toupper()) |>
   dplyr::inner_join(method_labels_df)
 
 plot_bt_by_year <- ggplot() +
@@ -355,25 +355,25 @@ annual_sst_df <- read.csv(file = here::here("output",
 # Select cold pool area calculations for less than or equal to to 2 degrees
 annual_sst_df <- annual_sst_df[,c(1, which(stringr::str_detect(names(annual_sst_df), "_mean_surface_temperature")))]
 
-combined_sst_df <- annual_sst_df %>% 
-  reshape2::melt(id.vars = "year") %>%
-  dplyr::bind_rows(compare_temp_df %>%
-                     dplyr::select(YEAR, `SST[aw]`) %>%
-                     dplyr::rename(year = YEAR) %>% 
-                     reshape2::melt(id.vars = "year")) %>%
-  dplyr::mutate(method = stringr::str_remove(variable, "_mean_surface_temperature") %>% 
-                  toupper()) %>%
+combined_sst_df <- annual_sst_df |> 
+  reshape2::melt(id.vars = "year") |>
+  dplyr::bind_rows(compare_temp_df |>
+                     dplyr::select(YEAR, `SST[aw]`) |>
+                     dplyr::rename(year = YEAR) |> 
+                     reshape2::melt(id.vars = "year")) |>
+  dplyr::mutate(method = stringr::str_remove(variable, "_mean_surface_temperature") |> 
+                  toupper()) |>
   dplyr::inner_join(method_labels_df)
 
-sst_change_df <- annual_sst_df %>% 
-  reshape2::melt(id.vars = "year") %>%
-  dplyr::inner_join(compare_temp_df %>%
-                      dplyr::select(YEAR, `SST[aw]`) %>%
-                      dplyr::rename(year = YEAR)) %>%
+sst_change_df <- annual_sst_df |> 
+  reshape2::melt(id.vars = "year") |>
+  dplyr::inner_join(compare_temp_df |>
+                      dplyr::select(YEAR, `SST[aw]`) |>
+                      dplyr::rename(year = YEAR)) |>
   dplyr::mutate(rel_diff = 100*(value - `SST[aw]`)/`SST[aw]`,
-                abs_diff = value - `SST[aw]`) %>%
-  dplyr::mutate(method = stringr::str_remove(variable, "_mean_surface_temperature") %>% 
-                  toupper()) %>%
+                abs_diff = value - `SST[aw]`) |>
+  dplyr::mutate(method = stringr::str_remove(variable, "_mean_surface_temperature") |> 
+                  toupper()) |>
   dplyr::inner_join(method_labels_df)
 
 plot_sst_by_year <- ggplot() +
@@ -465,21 +465,21 @@ Kendall's Tau correlations among interpolation methods for BT, SST, and CPA.
 
 ```{r kendalls_tau}
 # Make Kendall's tau ranking tables
-combined_sst_df %>%
-  dplyr::filter(year > 1986) %>%
-  coldpool:::make_rank_table() %>%
+combined_sst_df |>
+  dplyr::filter(year > 1986) |>
+  coldpool:::make_rank_table() |>
   write.csv(file = here::here("output", "kendall_tau_method_sst.csv"), 
             row.names = FALSE)
 
-combined_bt_df %>%
-  dplyr::filter(year > 1986) %>%
-  coldpool:::make_rank_table() %>%
+combined_bt_df |>
+  dplyr::filter(year > 1986) |>
+  coldpool:::make_rank_table() |>
   write.csv(file = here::here("output", "kendall_tau_method_bt.csv"), 
             row.names = FALSE)
 
-combined_cpa_df %>%
-  dplyr::filter(year < 2020) %>%
-  coldpool:::make_rank_table() %>%
+combined_cpa_df |>
+  dplyr::filter(year < 2020) |>
+  coldpool:::make_rank_table() |>
   write.csv(file = here::here("output", "kendall_tau_method_cpa.csv"), 
             row.names = FALSE)
 ```

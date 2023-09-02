@@ -15,7 +15,7 @@ make_tm_product_figs <- function(fig_res = 600) {
   max_year <- 1982+19
   min_year <- max_year - 19 # Default for 20 panel cold pool maps
   
-  cpi_df <- coldpool:::cold_pool_index %>%
+  cpi_df <- coldpool:::cold_pool_index |>
     dplyr::mutate(group = YEAR < 2020,
                   var = "Cold Pool Index",
                   cpi_rank = rank(AREA_LTE2_KM2))
@@ -61,25 +61,25 @@ make_tm_product_figs <- function(fig_res = 600) {
   sebs_layers <- akgfmaps::get_base_layers(select.region = "sebs",
                                            set.crs = coldpool:::ebs_proj_crs)
   
-  area_df <- coldpool:::cold_pool_index %>%
+  area_df <- coldpool:::cold_pool_index |>
     dplyr::mutate(lteminus1 = AREA_LTEMINUS1_KM2,
                   lte0 = AREA_LTE0_KM2 - AREA_LTEMINUS1_KM2,
                   lte1 = AREA_LTE1_KM2 - AREA_LTE0_KM2,
-                  lte2 = AREA_LTE2_KM2 - AREA_LTE1_KM2) %>%
-    dplyr::select(YEAR, lteminus1, lte0, lte1, lte2) %>%
-    reshape2::melt(id.vars = "YEAR") %>%
+                  lte2 = AREA_LTE2_KM2 - AREA_LTE1_KM2) |>
+    dplyr::select(YEAR, lteminus1, lte0, lte1, lte2) |>
+    reshape2::melt(id.vars = "YEAR") |>
     dplyr::mutate(variable = factor(variable, 
                                     levels = c( "lte2", "lte1", "lte0", "lteminus1"),
                                     labels = c("\u22642 \u00b0C", "\u22641 \u00b0C", "\u22640 \u00b0C", "\u2264-1 \u00b0C")),
                   proportion = value/sebs_layers$survey.area$AREA_KM2)
   
   stacked_area_plot <- ggplot() +
-    geom_area(data = area_df %>%
+    geom_area(data = area_df |>
                 dplyr::filter(YEAR < 2020),
               mapping = aes(x = YEAR,
                             y = proportion,
                             fill = variable)) +
-    geom_point(data = area_df %>%
+    geom_point(data = area_df |>
                  dplyr::filter(YEAR == 2021),
                mapping = aes(x = YEAR,
                              y = proportion,
@@ -135,13 +135,13 @@ make_tm_product_figs <- function(fig_res = 600) {
   cpa_palette <- c("#21dae7", "#0071ff", "#0000e3", "#000040")
   
   panel_extent <- data.frame(y = c(52, 64),
-                             x = c(-175, -156)) %>%
+                             x = c(-175, -156)) |>
     akgfmaps::transform_data_frame_crs(out.crs = coldpool:::ebs_proj_crs)
   
   label_2020 <- data.frame(x = mean(panel_extent$x),
                            y = mean(panel_extent$y),
                            label = "No\nSurvey",
-                           year = 2020) %>% 
+                           year = 2020) |> 
     dplyr::filter(year <= max_year)
   
   cold_pool_cbar <- coldpool::legend_discrete_cbar(breaks = c(-Inf, -1, 0, 1, 2),
@@ -168,7 +168,7 @@ make_tm_product_figs <- function(fig_res = 600) {
     geom_sf(data = sebs_layers$akland, fill = "black", 
             color = NA) +
     geom_sf(data = sebs_layers$survey.area, fill = "grey75") +
-    geom_tile(data = bt_year_df %>%
+    geom_tile(data = bt_year_df |>
                 dplyr::filter(temperature <= 2),
               aes(x = x, 
                   y = y,
@@ -317,16 +317,16 @@ make_tm_product_figs <- function(fig_res = 600) {
   }
   
   # Union to combine strata 31, 32 into 30, etc.
-  nbs_ebs_agg_strata <- nbs_ebs_layers$survey.strata %>%
-    dplyr::mutate(agg_stratum = Stratum) %>%
+  nbs_ebs_agg_strata <- nbs_ebs_layers$survey.strata |>
+    dplyr::mutate(agg_stratum = Stratum) |>
     dplyr::mutate(agg_stratum = replace(agg_stratum, agg_stratum %in% c(31,32), 30),
                   agg_stratum = replace(agg_stratum, agg_stratum %in% c(41,42,43), 40),
-                  agg_stratum = replace(agg_stratum, agg_stratum %in% c(61,62), 60)) %>% 
-    dplyr::group_by(agg_stratum) %>% 
+                  agg_stratum = replace(agg_stratum, agg_stratum %in% c(61,62), 60)) |> 
+    dplyr::group_by(agg_stratum) |> 
     dplyr::summarise()
   
   panel_extent <- data.frame(y = c(53, 67),
-                             x = c(-174, -156)) %>%
+                             x = c(-174, -156)) |>
     akgfmaps::transform_data_frame_crs(out.crs = coldpool:::ebs_proj_crs)
   
   nbs_ebs_temp_breaks <- c(-Inf, seq(-1,8,1), Inf)
@@ -340,7 +340,7 @@ make_tm_product_figs <- function(fig_res = 600) {
                      fill = "grey70", 
                      color = "black") +
     ggplot2::geom_sf(data = nbs_ebs_layers$survey.area, fill = "grey65") +
-    ggplot2::geom_tile(data = bt_year_df %>%
+    ggplot2::geom_tile(data = bt_year_df |>
                          dplyr::filter(year == 2021),
                        aes(x = x, 
                            y = y,
@@ -351,7 +351,7 @@ make_tm_product_figs <- function(fig_res = 600) {
                      color = "black") +
     ggplot2::geom_text(data = data.frame(x = -158.5, 
                                          y = 62.4, 
-                                         lab = "Alaska") %>%
+                                         lab = "Alaska") |>
                          akgfmaps::transform_data_frame_crs(out.crs = coldpool:::ebs_proj_crs),
                        mapping = aes(x = x,
                                      y = y,
@@ -382,12 +382,12 @@ make_tm_product_figs <- function(fig_res = 600) {
                      fill = "grey70", 
                      color = "black") +
     ggplot2::geom_sf(data = nbs_ebs_layers$survey.area, fill = "grey65") +
-    ggplot2::geom_tile(data = bt_year_df %>%
+    ggplot2::geom_tile(data = bt_year_df |>
                          dplyr::filter(year == 2021),
                        aes(x = x, 
                            y = y,
                            fill = cut(temperature, breaks = nbs_ebs_temp_breaks))) +
-    ggplot2::geom_contour(data = bt_year_df %>%
+    ggplot2::geom_contour(data = bt_year_df |>
                             dplyr::filter(year == 2021),
                           aes(x = x, 
                               y = y,
@@ -400,7 +400,7 @@ make_tm_product_figs <- function(fig_res = 600) {
                      color = "black") +
     ggplot2::geom_text(data = data.frame(x = -158.5, 
                                          y = 62.4, 
-                                         lab = "Alaska") %>%
+                                         lab = "Alaska") |>
                          akgfmaps::transform_data_frame_crs(out.crs = coldpool:::ebs_proj_crs),
                        mapping = aes(x = x,
                                      y = y,
@@ -587,20 +587,20 @@ make_tm_product_figs <- function(fig_res = 600) {
   
   # tm_average_temperature.png ----
   
-  sebs_temperatures <- coldpool:::cold_pool_index %>%
-    dplyr::select(YEAR, MEAN_GEAR_TEMPERATURE, MEAN_SURFACE_TEMPERATURE) %>%
+  sebs_temperatures <- coldpool:::cold_pool_index |>
+    dplyr::select(YEAR, MEAN_GEAR_TEMPERATURE, MEAN_SURFACE_TEMPERATURE) |>
     dplyr::rename(Bottom = MEAN_GEAR_TEMPERATURE, 
-                  Surface = MEAN_SURFACE_TEMPERATURE) %>%
+                  Surface = MEAN_SURFACE_TEMPERATURE) |>
     dplyr::mutate(group = YEAR < 2020,
-                  region = "Eastern Bering Sea (summer BT survey)") %>%
+                  region = "Eastern Bering Sea (summer BT survey)") |>
     reshape2::melt(id.vars = c("YEAR", "group", "region"))
   
-  nbs_temperatures <- coldpool:::nbs_mean_temperature %>%
-    dplyr::select(YEAR, MEAN_GEAR_TEMPERATURE, MEAN_SURFACE_TEMPERATURE) %>%
+  nbs_temperatures <- coldpool:::nbs_mean_temperature |>
+    dplyr::select(YEAR, MEAN_GEAR_TEMPERATURE, MEAN_SURFACE_TEMPERATURE) |>
     dplyr::rename(Bottom = MEAN_GEAR_TEMPERATURE, 
-                  Surface = MEAN_SURFACE_TEMPERATURE) %>%
+                  Surface = MEAN_SURFACE_TEMPERATURE) |>
     dplyr::mutate(group = YEAR,
-                  region = "Northern Bering Sea (summer BT survey)") %>%
+                  region = "Northern Bering Sea (summer BT survey)") |>
     reshape2::melt(id.vars = c("YEAR", "group", "region"))
   
   all_temperatures <- dplyr::bind_rows(sebs_temperatures,
@@ -660,7 +660,7 @@ make_tm_product_figs <- function(fig_res = 600) {
           strip.background = element_rect(fill = "#0055a4",
                                           color = NA))
   
-  plot_sebs_average_temperature <- ggplot(data = all_temperatures %>%
+  plot_sebs_average_temperature <- ggplot(data = all_temperatures |>
                                             dplyr::filter(region == "Eastern Bering Sea (summer BT survey)"),
                                           mapping = aes(x = YEAR,
                                                         y = value,
@@ -669,7 +669,7 @@ make_tm_product_figs <- function(fig_res = 600) {
                                                         group = paste0(group, variable))) +
     geom_point(size = rel(2)) +
     geom_line() +
-    geom_hline(data = ebs_mean_temp_df %>%
+    geom_hline(data = ebs_mean_temp_df |>
                  dplyr::filter(region == "Eastern Bering Sea (summer BT survey)"),
                aes(yintercept = value,
                    color = variable),
@@ -699,14 +699,14 @@ make_tm_product_figs <- function(fig_res = 600) {
                                           color = NA))
   
   # Map of MEAN_BT_LT100M strata
-  lt100_strata <- ebs_layers$survey.strata %>%
-    dplyr::filter(Stratum %in% c(10, 20, 31, 32, 41, 42, 43)) %>%
-    dplyr::group_by(SURVEY) %>%
-    dplyr::summarise() %>%
+  lt100_strata <- ebs_layers$survey.strata |>
+    dplyr::filter(Stratum %in% c(10, 20, 31, 32, 41, 42, 43)) |>
+    dplyr::group_by(SURVEY) |>
+    dplyr::summarise() |>
     dplyr::mutate(Stratum = "MEAN_BT_LT100M Strata")
   
   panel_extent <- data.frame(y = c(53, 64),
-                             x = c(-174, -156)) %>%
+                             x = c(-174, -156)) |>
     akgfmaps::transform_data_frame_crs(out.crs = coldpool:::ebs_proj_crs)
   
   png(file = here::here("plots", "MEAN_BT_LT100M_strata.png"), width = 6, height = 6, units = "in", res = 120)

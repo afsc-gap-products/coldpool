@@ -66,7 +66,7 @@ specific bounds, or a 4-element named vector with values xmin, xmax, ymin,
 and ymax.}
 }
 \value{
-raster stack of interpolated data, with one layer per input fit type
+terra SpatRaster of interpolated data, with one layer per input fit type
 }
 \description{
 This function is a variant of the interpolate_variable function that allows

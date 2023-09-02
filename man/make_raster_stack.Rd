@@ -2,9 +2,14 @@
 % Please edit documentation in R/utils.R
 \name{make_raster_stack}
 \alias{make_raster_stack}
-\title{Make a raster stack from multiple rasters}
+\title{Combine multiple raster files into a SpatRaster object with multiple layers}
 \usage{
-make_raster_stack(file_path, file_name_contains = NULL, file_type = ".tif")
+make_raster_stack(
+  file_path,
+  file_name_contains = NULL,
+  file_type = ".tif",
+  wrap
+)
 }
 \arguments{
 \item{file_path}{Path to the directory containing raster files}
@@ -12,7 +17,9 @@ make_raster_stack(file_path, file_name_contains = NULL, file_type = ".tif")
 \item{file_name_contains}{Character vector to filter on. (e.g., using "ste_" will ignore all filepaths that don't contain the characters sequence)}
 
 \item{file_type}{File type. Default = ".tif" for GeoTIFF. Also works with native raster .grd and other stackable raster formats.}
+
+\item{wrap}{Should the SpatRaster be used to create a Packged object (i.e., an object that can be saved as an R object to disk such as .RData or .rds)?}
 }
 \description{
-Make a raster stack from multiple stackable raster layers (i.e. raster .grd, GeoTIFF, EHDR)
+Make a raster stack from multiple raster layers that can be opened with  (i.e. raster .grd, GeoTIFF, EHDR)
 }

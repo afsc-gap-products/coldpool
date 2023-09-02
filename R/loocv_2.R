@@ -13,7 +13,7 @@
 #' @param scale Passed to \code{scale}  if scale.vars == TRUE
 #' @param nm Maximum number of neighboring stations to use for interpolation.
 #' @param pre Prefix for name of the output file. Default (NA) uses variable name from var.col
-#' @export
+#' @noRd
 
 loocv_2 <- function(dat, var.col, lat.col, lon.col, in.proj = "+proj=longlat +datum=NAD83", interp.proj = "+init=epsg:3338 +datum=NAD83 +units=m", scale.vars = FALSE, center = TRUE, scale = TRUE, nm = Inf, pre = NA, ...) {
   
@@ -26,7 +26,7 @@ loocv_2 <- function(dat, var.col, lat.col, lon.col, in.proj = "+proj=longlat +da
     print(paste0("coldpool::loocv_2: Removing ", 
                  sum(is.na(dat$var.col)), 
                  " var.col NA values from data set"))
-    dat <- dat %>% 
+    dat <- dat |> 
       dplyr::filter(!is.na(var.col))
   }
   

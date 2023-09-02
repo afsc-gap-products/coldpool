@@ -43,13 +43,13 @@ cell_resolution <- 5000
 
 akSEBS <- akgfmaps::get_base_layers(select.region = "bs.south", set.crs = proj_crs)
 
-b10_lte_200 <- sf::st_read(here::here("data", "B10K_lte200m_polygon.shp"), quiet = TRUE) %>%
-  st_set_crs("+proj=longlat") %>%
+b10_lte_200 <- sf::st_read(here::here("data", "B10K_lte200m_polygon.shp"), quiet = TRUE) |>
+  st_set_crs("+proj=longlat") |>
   sf::st_transform(crs = sf::st_crs(proj_crs)) 
 
-akSEBSnonw <- akSEBS$survey.strata %>%
-  dplyr::filter(Stratum <= 62) %>%
-  dplyr::group_by(SURVEY) %>%
+akSEBSnonw <- akSEBS$survey.strata |>
+  dplyr::filter(Stratum <= 62) |>
+  dplyr::group_by(SURVEY) |>
   dplyr::summarise()
 
 mymask <- list(akSEBSnonw, 
