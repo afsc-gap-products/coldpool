@@ -34,7 +34,8 @@ ebs_csv_path <- here::here("data", paste0("index_hauls_temperature_data.csv"))
 nbs_ebs_csv_path <- here::here("data", paste0("ebs_nbs_temperature_full_area.csv"))
 
 ### UPDATE!!! ###
-nbs_years <- c(2010, 2017, 2018, 2019, 2021, 2022)
+nbs_bt_years <- c(2010, 2017, 2018, 2019, 2021, 2022, 2023)
+nbs_sst_years <- c(2010, 2017, 2018, 2019, 2021, 2022)
 ```
 
 # 2. Retrieve temperature data
@@ -53,6 +54,31 @@ if(update_sysdata) {
   # Get temperature data and write csvs to data directory ----
   coldpool:::get_data(channel = channel, include_preliminary_data = NULL)
 }
+
+# Temporarily add unfinalized NBS data -- REMOVE WHEN 2023 NBS DATA ARE FINALIZED
+
+nbs_layers <- get_base_layers(select.region = "nbs", set.crs = "EPSG:4269")
+
+nbs_centroid <- nbs_layers$survey.grid |>
+sf::st_make_valid() |> 
+sf::st_centroid()
+
+nbs_centroid <- cbind(nbs_centroid,
+                      sf::st_coordinates(nbs_centroid)) |>
+  as.data.frame() |>
+  dplyr::select(-geometry) |>
+  dplyr::rename(longitude = X,
+                latitude = Y,
+                stationid = STATIONID)
+
+read.csv(file = here::here("data", "unfinalized_nbs_2023.csv")) |>
+  dplyr::inner_join(nbs_centroid) |>
+  dplyr::bind_rows(
+  read.csv(file = nbs_ebs_csv_path)
+  ) |>
+  write.csv(file = nbs_ebs_csv_path)
+
+
 ```
 
 
@@ -68,7 +94,7 @@ Writes:
 interpolation_wrapper(temp_data_path = ebs_csv_path,
                       proj_crs = proj_crs,
                       cell_resolution = 5000, # 5x5 km grid resolution
-                      select_years = 1982:2022,
+                      select_years = 1982:2023,
                       interp_variable = "gear_temperature",
                       select_region = "sebs",
                       methods = "Ste") 
@@ -77,7 +103,7 @@ interpolation_wrapper(temp_data_path = ebs_csv_path,
 interpolation_wrapper(temp_data_path = ebs_csv_path,
                       proj_crs = proj_crs,
                       cell_resolution = 5000, # 5x5 km grid resolution
-                      select_years = 1982:2022,
+                      select_years = 1982:2023,
                       interp_variable = "surface_temperature",
                       select_region = "sebs",
                       methods = "Ste") 
@@ -88,7 +114,7 @@ interpolation_wrapper(temp_data_path = ebs_csv_path,
 interpolation_wrapper(temp_data_path = nbs_ebs_csv_path,
                       proj_crs = proj_crs,
                       cell_resolution = 5000, # 5x5 km grid resolution
-                      select_years = nbs_years,
+                      select_years = nbs_bt_years,
                       interp_variable = "gear_temperature",
                       select_region = "ebs",
                       methods = "Ste") # Full EBS+NBS
@@ -97,7 +123,7 @@ interpolation_wrapper(temp_data_path = nbs_ebs_csv_path,
 interpolation_wrapper(temp_data_path = nbs_ebs_csv_path,
                       proj_crs = proj_crs,
                       cell_resolution = 5000, # 5x5 km grid resolution
-                      select_years = nbs_years,
+                      select_years = nbs_sst_years,
                       interp_variable = "surface_temperature",
                       select_region = "ebs",
                       methods = "Ste") # Full EBS+NBS
@@ -189,13 +215,20 @@ nbs_mean_temperature <- data.frame(YEAR = numeric(length = length(nbs_ebs_bt_fil
 for(i in 1:length(nbs_ebs_bt_files)) {
   nbs_bt_raster <- terra::rast(nbs_ebs_bt_files[i]) |>
     terra::mask(nbs_area, touches = FALSE)
-  nbs_sst_raster <- terra::rast(nbs_ebs_sst_files[i]) |>
-    terra::mask(nbs_area, touches = FALSE)
   
-  nbs_mean_temperature$YEAR[i] <- as.numeric(gsub("[^0-9.-]", "", names(nbs_bt_raster))) # Extract year
-
-  nbs_mean_temperature$MEAN_GEAR_TEMPERATURE[i] <- mean(terra::values(nbs_bt_raster), na.rm = TRUE)
-  nbs_mean_temperature$MEAN_SURFACE_TEMPERATURE[i] <- mean(terra::values(nbs_sst_raster), na.rm = TRUE)
+    nbs_mean_temperature$YEAR[i] <- as.numeric(gsub("[^0-9.-]", "", names(nbs_bt_raster))) # Extract year
+    
+      nbs_mean_temperature$MEAN_GEAR_TEMPERATURE[i] <- mean(terra::values(nbs_bt_raster), na.rm = TRUE)
+  
+      # Don't calculate SST if NBS data haven't been finalized
+  if(file.exists(nbs_ebs_sst_files[i])) {
+      nbs_sst_raster <- terra::rast(nbs_ebs_sst_files[i]) |>
+    terra::mask(nbs_area, touches = FALSE)
+      
+    nbs_mean_temperature$MEAN_SURFACE_TEMPERATURE[i] <- mean(terra::values(nbs_sst_raster), na.rm = TRUE)
+  } else {
+    nbs_mean_temperature$MEAN_SURFACE_TEMPERATURE[i] <- NA
+  }
   
 }
 

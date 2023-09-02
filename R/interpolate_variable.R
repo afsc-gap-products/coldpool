@@ -14,6 +14,11 @@
 #' @param pre Prefix for file names in output (in development.)
 #' @param select.region Region for interpolation as a character string. Options = "ebs", "sebs", "nbs"
 #' @param methods To use as a character vector. Valid choices: "NN", "IDW", "IDW4", "Exp", "Sph", "Bes", "Gau", "Cir", "Mat", "Ste", "Tps"
+#' @param bbox Bounding box for the interpolated grid.  Can be either a string 
+#'    ("sebs", "bs.south", "nebs", "ebs", "bs.north", "bs.all") corresponding to 
+#'    specific bounds, or a 4-element named vector with values xmin, xmax, ymin, 
+#'    and ymax.
+#' @param return.raster Should a raster be returned?
 #' @return Returns a data frame containing cold pool areas estimated by interpolation methods, for cutoffs at zero degrees and two degrees C. If argument write.to.file = TRUE, also writes a GeoTIFF raster to output directory.
 #' @export
 
@@ -29,21 +34,9 @@ interpolate_variable <- function(dat,
                                  nm = Inf,
                                  pre = NA,
                                  select.region = "sebs",
-                                 methods = c("NN", "IDW", "IDW4", "Exp", "Sph", "Bes", "Gau", "Cir", "Mat", "Ste", "Tps"))
-{
-  
-  # dat = dplyr::filter(temperature_df, year == year_vec[ii])
-  # dat.year = year_vec[ii]
-  # in.crs = "EPSG:4326"
-  # interpolation.crs = proj_crs
-  # cell.resolution = cell_resolution
-  # lon.col = "longitude"
-  # lat.col = "latitude"
-  # var.col = interp_variable
-  # nm = Inf
-  # pre = paste0("_", toupper(interp_variable), "_", year_vec[ii])
-  # select.region = select_region
-  # methods = methods
+                                 methods = c("NN", "IDW", "IDW4", "Exp", "Sph", "Bes", "Gau", "Cir", "Mat", "Ste", "Tps"),
+                                 bbox = NULL,
+                                 return_raster = FALSE) {
   
   if(!all(tolower(methods) %in% c("nn", "idw", "idw4", "exp",  "sph", "bes", "gau", "cir", "mat",  "ste", "tps" ))) {
   
@@ -51,6 +44,10 @@ interpolate_variable <- function(dat,
 
     stop(paste0("interpolate_variable: Provided methods ", paste(invalid_method, collapse = ", "), " invalid. See documentation for valid methods (?interpolate_variable"))
       
+  }
+  
+  if(return_raster) {
+    stopifnot("interpolate_variable: Can only choose one method if the raster is returned" = length(methods) == 1)
   }
   
   if(!dir.exists(here::here("output", "raster", select.region, var.col))) {
@@ -76,41 +73,57 @@ interpolate_variable <- function(dat,
   
   # Set dimensions for raster cells ----
   
-  if(select.region %in% c("sebs", "bs.south")) {
-  # Make raster for interpolation ----
-    n_dim <- floor(abs(-1625000 - -35000))/cell.resolution
+  if(is.null(bbox)) {
     
-    interp_raster <- terra::rast(xmin = -1625000, 
-                                 xmax = -35000, 
-                                 ymin = 379500, 
-                                 ymax = 1969500, 
-                                 nrow = n_dim, 
-                                 ncol = n_dim,
-                                 crs = interpolation.crs)
-
+    if(select.region %in% c("sebs", "bs.south")) {
+      # Make raster for interpolation ----
+      n_dim <- floor(abs(-1625000 - -35000))/cell.resolution
+      
+      interp_raster <- terra::rast(xmin = -1625000, 
+                                   xmax = -35000, 
+                                   ymin = 379500, 
+                                   ymax = 1969500, 
+                                   nrow = n_dim, 
+                                   ncol = n_dim,
+                                   crs = interpolation.crs)
+      
+    } else {
+      
+      if(select.region %in% c("bs.north", "nbs")) {extrap.box = c(xmn = -179.5, xmx = -157, ymn = 50, ymx = 68)}
+      
+      if(select.region %in% c("bs.all", "ebs")) {extrap.box = c(xmn = -179.5, xmx = -157, ymn = 50, ymx = 68)}
+      
+      plot.boundary <- akgfmaps::transform_data_frame_crs(data.frame(x = c(extrap.box['xmn'], extrap.box['xmx']), 
+                                                                     y = c(extrap.box['ymn'], extrap.box['ymx'])), 
+                                                          out.crs = interpolation.crs)
+      
+      
+      
+      n_dim <- floor(abs(plot.boundary$x[1] - plot.boundary$x[2]))/cell.resolution
+      
+      interp_raster <- terra::rast(xmin = plot.boundary$x[1], 
+                                   xmax = plot.boundary$x[2], 
+                                   ymin = plot.boundary$y[1], 
+                                   ymax = plot.boundary$y[2], 
+                                   nrow = n_dim, 
+                                   ncol = n_dim,
+                                   crs = interpolation.crs)
+      
+    }
   } else {
     
-    if(select.region %in% c("bs.north", "nbs")) {extrap.box = c(xmn = -179.5, xmx = -157, ymn = 50, ymx = 68)}
-    
-    if(select.region %in% c("bs.all", "ebs")) {extrap.box = c(xmn = -179.5, xmx = -157, ymn = 50, ymx = 68)}
-
-    plot.boundary <- akgfmaps::transform_data_frame_crs(data.frame(x = c(extrap.box['xmn'], extrap.box['xmx']), 
-                                                                   y = c(extrap.box['ymn'], extrap.box['ymx'])), 
-                                                        out.crs = interpolation.crs)
-    
-
-    
-    n_dim <- floor(abs(plot.boundary$x[1] - plot.boundary$x[2]))/cell.resolution
-    
-    interp_raster <- terra::rast(xmin = plot.boundary$x[1], 
-                                 xmax = plot.boundary$x[2], 
-                                 ymin = plot.boundary$y[1], 
-                                 ymax = plot.boundary$y[2], 
-                                 nrow = n_dim, 
-                                 ncol = n_dim,
+    # Section to maintain backwards compatibility for data2raster
+    interp_raster <- terra::rast(xmin = bbox["xmin"],
+                                 xmax = bbox["xmax"],
+                                 ymin = bbox["ymin"],
+                                 ymax = bbox["ymax"],
+                                 nrows = floor((bbox["ymax"]-bbox["ymin"])/cell.resolution),
+                                 ncols = floor((bbox["xmax"]-bbox["xmin"])/cell.resolution),
                                  crs = interpolation.crs)
-  
+    
   }
+  
+  
 
   loc_df <- suppressWarnings(terra::crds(interp_raster, df = TRUE, na.rm = FALSE)) |>
     sf::st_as_sf(coords = c("x", "y"),
@@ -191,6 +204,11 @@ interpolate_variable <- function(dat,
        terra::values(interp_raster) <- fit$var1.pred
        fit <- interp_raster
     }
+    
+    # Added to maintain backwards compatibility with data2raster
+    if(return_raster) {
+      return(fit)
+    }
 
     # Write masked raster
     akgfmaps::rasterize_and_mask(sgrid = fit, 
@@ -205,5 +223,7 @@ interpolate_variable <- function(dat,
                                layer_name = dat.year)
      
   }
+  
+
   
 }

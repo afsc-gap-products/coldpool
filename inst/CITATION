@@ -1,0 +1,11 @@
+citHeader("Please cite Rohan, Barnett and Charriere (2022) if using this package")
+
+citEntry(entry = "TechReport",
+ title = "Evaluating approaches to estimating mean temperatures and cold pool area from AFSC bottom trawl surveys of the eastern Bering Sea",
+ year = "2022",
+ institution = "NOAA Fisheries Alaska Fisheries Science Center",
+ author = "S.K. Rohan, L.A.K. Barnett, and N. Charriere",
+ textVersion = "Rohan, S. K., L. A. K. Barnett, and N. Charriere. 2022. Evaluating approaches to estimating mean temperatures and cold pool area from Alaska Fisheries Science Center bottom trawl surveys of the eastern Bering Sea. U.S. Dep. Commer., NOAA Tech. Memo. NMFS-AFSC-456, 42 p.", 
+ url = "https://repository.library.noaa.gov/view/noaa/48006",
+ doi = "10.25923/1wwh-q418"
+)

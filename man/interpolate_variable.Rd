@@ -18,7 +18,9 @@ interpolate_variable(
   pre = NA,
   select.region = "sebs",
   methods = c("NN", "IDW", "IDW4", "Exp", "Sph", "Bes", "Gau", "Cir", "Mat", "Ste",
-    "Tps")
+    "Tps"),
+  bbox = NULL,
+  return_raster = FALSE
 )
 }
 \arguments{
@@ -45,6 +47,13 @@ interpolate_variable(
 \item{select.region}{Region for interpolation as a character string. Options = "ebs", "sebs", "nbs"}
 
 \item{methods}{To use as a character vector. Valid choices: "NN", "IDW", "IDW4", "Exp", "Sph", "Bes", "Gau", "Cir", "Mat", "Ste", "Tps"}
+
+\item{bbox}{Bounding box for the interpolated grid.  Can be either a string 
+("sebs", "bs.south", "nebs", "ebs", "bs.north", "bs.all") corresponding to 
+specific bounds, or a 4-element named vector with values xmin, xmax, ymin, 
+and ymax.}
+
+\item{return.raster}{Should a raster be returned?}
 }
 \value{
 Returns a data frame containing cold pool areas estimated by interpolation methods, for cutoffs at zero degrees and two degrees C. If argument write.to.file = TRUE, also writes a GeoTIFF raster to output directory.
