@@ -54,17 +54,17 @@ cold_pool_index
 
 <dl>
 <dt><b>cold_pool_index</b></dt>
-<dd><p>Data frame containing the total area of EBS waters with bottom temperatures less than or equal to 2, 1, 0, and -1 °C, mean bottom temperatures, and mean surface temperature during the EBS survey for 1982-2022 (excluding 2020 due to cancelled survey).</p></dd>
+<dd><p>Data frame containing the total area of EBS waters with bottom temperatures less than or equal to 2, 1, 0, and -1 °C, mean bottom temperatures, and mean surface temperature during the EBS survey for 1982-2023 (excluding 2020 due to cancelled survey).</p></dd>
 <dt><b>nbs_mean_bottom_temperature</b></dt>
-<dd><p>Data frame of mean bottom temperature in the NBS during years with a full EBS+NBS standardized survey (2010, 2017, 2019, 2021, 2022).</p></dd>
+<dd><p>Data frame of mean bottom temperature in the NBS during years with a full EBS+NBS standardized survey (2010, 2017, 2019, 2021, 2022, 2023).</p></dd>
 <dt><b>ebs_bottom_temperature</b></dt>
-<dd><p>Interpolated rasters of bottom temperature for the EBS survey area from 1982-2022 (excluding 2020 due to cancelled survey).</p></dd>
+<dd><p>Interpolated rasters of bottom temperature for the EBS survey area from 1982-2023 (excluding 2020 due to cancelled survey).</p></dd>
 <dt><b>ebs_surface_temperature</b></dt> 
-<dd><p>Interpolated rasters of sea surface temperature for the EBS survey area from 1982-2022 (excluding 2020 due to cancelled survey).</p></dd>
+<dd><p>Interpolated rasters of sea surface temperature for the EBS survey area from 1982-2023 (excluding 2020 due to cancelled survey).</p></dd>
 <dt><b>nbs_ebs_bottom_temperature</b></dt> 
-<dd><p>Interpolated rasters of bottom temperature for the full EBS and NBS survey area for years with a full EBS+NBS standardized survey (2010, 2017, 2019, 2021, 2022).</p></dd>
+<dd><p>Interpolated rasters of bottom temperature for the full EBS and NBS survey area for years with a full EBS+NBS standardized survey (2010, 2017, 2019, 2021, 2022, 2023).</p></dd>
 <dt><b>nbs_ebs_surface_temperature</b></dt> 
-<dd><p>Interpolated rasters of sea surface temperature for the full EBS and NBS survey area for years with a full EBS+NBS standardized survey (2010, 2017, 2019, 2021, 2022).</p></dd>
+<dd><p>Interpolated rasters of sea surface temperature for the full EBS and NBS survey area for years with a full EBS+NBS standardized survey (2010, 2017, 2019, 2021, 2022, 2023).</p></dd>
 <dt><b>cpa_pre2021</b></dt>
 <dd><p>Data frame of cold pool area and mean temperatures calculated using the interpolation method used prior to 2021.</p></dd>
 </dl>
@@ -94,18 +94,18 @@ Temperature data products in the coldpool package are updated on an annual basis
 
 
 # Cold pool area and temperature trends
-*Updated: September 2022*
+*Updated: September 5, 2023 (provisional data, subject to change)*
 
 Cold pool area and temperature trends are reported in the annual [Ecosystem Status Reports](https://www.fisheries.noaa.gov/alaska/ecosystems/ecosystem-status-reports-gulf-alaska-bering-sea-and-aleutian-islands) for the eastern Bering Sea and ecosystem and socioeconomic profiles for EBS stocks. Temperature products are also used as covariates in some [stock assessment](https://www.fisheries.noaa.gov/alaska/population-assessments/north-pacific-groundfish-stock-assessments-and-fishery-evaluation) models or their inputs (e.g. abundance indices).
 
-![Cold pool area from 1982-2022, based on interpolated survey bottom temperatures](./plots/2022_coldpool_with_area.png)
- <font size="2"><i>Figure 2. Cold pool extent in the eastern Bering Sea from 2003–2022, showing areas with bottom temperatures ≤ 2°C, ≤ 1°C, ≤ 0°C, and ≤ -1°C (upper panels), and proportion of the southeastern Bering Sea survey area with bottom temperatures ≤ 2°C, ≤ 1°C, ≤ 0°C, and ≤ -1°C (lower panel). Solid black lines in the interior of the surface represent the 50m and 100m isobaths.</i></font>
+![Cold pool area from 2004-2023, based on interpolated survey bottom temperatures](./plots/2023_coldpool_with_area.png)
+ <font size="2"><i>Figure 2. Cold pool extent in the eastern Bering Sea from 2004–2023, showing areas with bottom temperatures ≤ 2°C, ≤ 1°C, ≤ 0°C, and ≤ -1°C (upper panels), and proportion of the southeastern Bering Sea survey area with bottom temperatures ≤ 2°C, ≤ 1°C, ≤ 0°C, and ≤ -1°C (lower panel). Solid black lines in the interior of the surface represent the 50m and 100m isobaths.</i></font>
 
-![Mean bottom temperature in the eastern Bering Sea during 2022, based on interpolated survey bottom temperatures](./plots/2022_nbs_ebs_temperature_map_grid.png)
- <font size="2"><i>Figure 3. Contour map of bottom temperatures from the past four eastern and northern Bering Sea shelf bottom trawl surveys (2018-2022). Solid black contour lines denote stratum boundaries.</i></font>
+![Mean bottom temperature in the eastern Bering Sea during 2023, based on interpolated survey bottom temperatures](./plots/2023_nbs_ebs_temperature_map_grid.png)
+ <font size="2"><i>Figure 3. Contour map of bottom temperatures from the past four eastern and northern Bering Sea shelf bottom trawl surveys (2018-2023). Solid black contour lines denote stratum boundaries.</i></font>
 
-![Mean bottom and sea surface temperatures in the eastern Bering Sea from 1982-2022, based on interpolated survey temperatures](./plots/2022_average_temperature.png)
- <font size="2"><i>Figure 4. Average summer surface (green triangles) and bottom (blue circles) temperatures (°C) of the eastern Bering Sea (EBS) shelf and northern Bering Sea (NBS) shelf based on data collected during standardized summer bottom trawl surveys from 1982–2022. Dashed lines represent the time series mean for the EBS (1982–2022, except 2020) and NBS (2010, 2017, 2019, 2021, 2022).</i></font>
+![Mean bottom and sea surface temperatures in the eastern Bering Sea from 1982-2023, based on interpolated survey temperatures](./plots/2023_average_temperature.png)
+ <font size="2"><i>Figure 4. Average summer surface (green triangles) and bottom (blue circles) temperatures (°C) of the eastern Bering Sea (EBS) shelf and northern Bering Sea (NBS) shelf based on data collected during standardized summer bottom trawl surveys from 1982–2023. Dashed lines represent the time series mean for the EBS (1982–2023, except 2020) and NBS (2010, 2017, 2019, 2021, 2022, 2023).</i></font>
 
 # Citation
 
