@@ -53,3 +53,9 @@ vignettes/*.pdf
 /plots/cpchange
 /analysis/variability/
 /analysis/temperature_eof/
+
+/data/*.sbx
+/data/*.prj
+/data/*.shp.xml
+/data/*.cpg
+/data/*.sbn

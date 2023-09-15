@@ -12,7 +12,7 @@
 #' @param cell.resolution Dimensions of interpolation grid cell in meters.
 #' @param nm Maximum number of cells to use for interpolation. 
 #' @param pre Prefix for file names in output (in development.)
-#' @param select.region Region for interpolation as a character string. Options = "ebs", "sebs", "nbs"
+#' @param select.region Region for interpolation as a character string OR an sf object. Character options = "ebs", "sebs", "nbs". If select.region is an sf object, must provide bbox.
 #' @param methods To use as a character vector. Valid choices: "NN", "IDW", "IDW4", "Exp", "Sph", "Bes", "Gau", "Cir", "Mat", "Ste", "Tps"
 #' @param bbox Bounding box for the interpolated grid.  Can be either a string 
 #'    ("sebs", "bs.south", "nebs", "ebs", "bs.north", "bs.all") corresponding to 
@@ -50,10 +50,6 @@ interpolate_variable <- function(dat,
     stopifnot("interpolate_variable: Can only choose one method if the raster is returned" = length(methods) == 1)
   }
   
-  if(!dir.exists(here::here("output", "raster", select.region, var.col))) {
-    dir.create(here::here("output", "raster", select.region, var.col), recursive = TRUE)
-  }
-  
   names(dat)[which(names(dat) == var.col)] <- "var.col"
   names(dat)[which(names(dat) == lat.col)] <- "lat.col"
   names(dat)[which(names(dat) == lon.col)] <- "lon.col"
@@ -67,9 +63,29 @@ interpolate_variable <- function(dat,
       dplyr::filter(!is.na(var.col))
   }
   
-  # Load EBS survey exent for masking ----
-  region_layers <- akgfmaps::get_base_layers(select.region = select.region, 
-                                           set.crs = interpolation.crs)
+  
+  # When select.region is a character vector
+  if(is.character(select.region)) {
+    
+    fpath_subdir <- select.region
+    
+    # Load survey extent for masking ----
+    region_mask <- akgfmaps::get_base_layers(select.region = select.region, 
+                                               set.crs = interpolation.crs)$survey.area
+  } 
+  
+  # When select.region is an sf object
+  if(is.data.frame(select.region)) {
+    
+    fpath_subdir <- ifelse(is.na(pre), "var", pre)
+    
+    region_mask <- select.region
+    
+  }
+  
+  if(!dir.exists(here::here("output", "raster", fpath_subdir, var.col))) {
+    dir.create(here::here("output", "raster", fpath_subdir, var.col), recursive = TRUE)
+  }
   
   # Set dimensions for raster cells ----
   
@@ -212,12 +228,12 @@ interpolate_variable <- function(dat,
 
     # Write masked raster
     akgfmaps::rasterize_and_mask(sgrid = fit, 
-                                 amask = region_layers$survey.area) |>
+                                 amask = region_mask) |>
     coldpool::make_raster_file(filename = here::here("output", 
                                                      "raster", 
-                                                     select.region,
+                                                     fpath_subdir,
                                                      var.col, 
-                                                     paste0(select.region, "_", tolower(methods[ii]), "_", dat.year, "_", var.col, ".tif" )),
+                                                     paste0(fpath_subdir, "_", tolower(methods[ii]), "_", dat.year, "_", var.col, ".tif" )),
                                format = "GTiff",
                                overwrite = TRUE,
                                layer_name = dat.year)

@@ -44,7 +44,7 @@ interpolate_variable(
 
 \item{pre}{Prefix for file names in output (in development.)}
 
-\item{select.region}{Region for interpolation as a character string. Options = "ebs", "sebs", "nbs"}
+\item{select.region}{Region for interpolation as a character string OR an sf object. Character options = "ebs", "sebs", "nbs". If select.region is an sf object, must provide bbox.}
 
 \item{methods}{To use as a character vector. Valid choices: "NN", "IDW", "IDW4", "Exp", "Sph", "Bes", "Gau", "Cir", "Mat", "Ste", "Tps"}
 
