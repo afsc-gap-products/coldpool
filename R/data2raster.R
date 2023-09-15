@@ -53,21 +53,23 @@ data2raster <- function(dat,
 { 
   
   
- if(is.character(bbox)) {
-   in_bbox <- NULL
- }
+  mymask <- parseregion(select.region, interpolation.crs)
   
-  if(is.numeric(bbox)) {
-      bbox <- sf::st_bbox(st_buffer(mymask, cell.resolution*5))
-      bbox <- round(bbox/cell_resolution)*cell_resolution # round to align rows/cols
-      xshift <- ((-1625000/cell_resolution) - floor(-1625000/cell_resolution))*cell_resolution
-      yshift <- ((379500/cell_resolution) - floor(379500/cell_resolution))*cell_resolution
-      in_bbox <- bbox + c(xshift,yshift,xshift,yshift)
+  if(is.character(bbox)) {
+    in_bbox <- NULL
+  }
+  
+  if(is.null(bbox)) {
+    bbox <- sf::st_bbox(st_buffer(mymask, cell.resolution*5))
+    bbox <- round(bbox/cell_resolution)*cell_resolution # round to align rows/cols
+    xshift <- ((-1625000/cell_resolution) - floor(-1625000/cell_resolution))*cell_resolution
+    yshift <- ((379500/cell_resolution) - floor(379500/cell_resolution))*cell_resolution
+    in_bbox <- bbox + c(xshift,yshift,xshift,yshift)
   }
   
   
   for(ii in 1:length(fittypes)) {
-     fit_terra <- interpolate_variable(
+    fit_terra <- interpolate_variable(
       dat = dat,
       dat.year = dat.year,
       var.col = var.col,
@@ -92,8 +94,6 @@ data2raster <- function(dat,
       out <- c(out, fit_terra)
     }
   }
-  
-  mymask <- parseregion(select.region, interpolation.crs)
   
   out <- out |>
     akgfmaps::rasterize_and_mask(mymask)
@@ -366,6 +366,7 @@ calcindices_temp <- function (datafile,
                               bottomvar = "gear_temperature",
                               surfacevar = "surface_temperature") 
 {
+  
   # Read temperature data from .csv file
   
   print("Reading temperature data...")
@@ -445,7 +446,7 @@ calcindices_temp <- function (datafile,
         mean(na.rm = TRUE)
       
       lt100_temp <- terra::mask(ras, lt100_strata, touches = FALSE)
-      bt_df$MEAN_BT_LT100M[i] <- terra::values(lt100_temp ) |> 
+      bt_df$MEAN_BT_LT100M[i] <- terra::values(lt100_temp) |> 
         mean(na.rm = TRUE)
       
       for (it in 1:nthresh) {
