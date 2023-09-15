@@ -1,21 +1,52 @@
 # roms_level3_coldpool_part2.R
 #
 # This script is part of the post-processing suite for the Bering10K ROMS 
-# hindcast simulation.  It calculates the survey-based and survey-replicated 
-# cold pool indices and adds those to the existing cold pool index file 
-# (created by roms_level3_coldpool_part1.m)
+# hindcast simulation (see https://github.com/beringnpz/Bering10KPostprocessing).  
+# It calculates the survey-based and survey-replicated cold pool indices and 
+# adds those to the existing cold pool index file (created by 
+# roms_level3_coldpool_part1.m).
+#
+# Note: Because it interacts with some remotely-stored netCDF files (located on the 
+# UW mox-hyak HPC system and accessed via a very computer-specific path to a 
+# remote mount), this example will not run out of the box.
 
 library(coldpool)
 library(ncdf4)
 library(lubridate)
-# source('extended_utils.R') Functions are now included in the package
 
-# Index file
+#----------------
+# User setup
+#----------------
 
-moxdir = "~/Documents/Research/Working/mox_bumblereem/"
-fname <- file.path(moxdir, "roms_for_public", "B10K-K20_CORECFS", "Level3", "B10K-K20_CORECFS_coldpool.nc")
-# fname = here::here("test.nc")
-ncin <- nc_open(fname)
+# Cold pool index file: on UW mox-hyak at 
+# /gscratch/bumblereem/roms_for_public/B10K-K20_CORECFS/Level3/B10K-K20_CORECFS_coldpool.nc
+# Path below is the remote mount path via K. Kearney's computer.
+# I opt not to include a copy of this file in this repository to avoid problems
+# associated with regularly-updated binary files in git repositories.
+
+moxdir = "~/Documents/mox_bumblereem/" # Path to mox-hyak /gscratch/bumblereem remote mount
+hindcastcpoolfile <- file.path(moxdir, "roms_for_public", "B10K-K20_CORECFS", "Level3", "B10K-K20_CORECFS_coldpool.nc")
+
+# Survey-replicates data file.  File format is identical to data/index_hauls_temperature_data.csv
+# but with an extra column added for the model-based bottom temp values.  This
+# file is a copy of 
+#/gscratch/bumblereem/roms_for_public/B10K-K20_CORECFS/Level3/survey_replicates_B10K-K20_CORECFS.csv.
+
+srepdatafile <- here::here("data", "survey_replicates_B10K-K20_CORECFS.csv")
+
+# This shapefile indicates the portion of the Bering10K ROMS model shelf that is 
+# less than 200m (model shelf is narrower than real-world shelf due to 
+# numerically-necessary bathymetric smoothing).
+
+modelshelfpolyfile = here::here("data", "B10K_lte200m_polygon.shp")
+
+#----------------
+# Cold pool index
+# calculation for
+# model and obs
+#----------------
+
+ncin <- nc_open(hindcastcpoolfile)
 
 # Read existing data and parse years we need to calculate
 
@@ -28,7 +59,7 @@ thresh <- ncvar_get(ncin, "threshold")
 
 nc_close(ncin)
 
-ismiss <- meanbtmp[1,2,] > 1e36 # Don't know how to query fill value in R...
+ismiss <- is.na(meanbtmp[1,2,]) | meanbtmp[1,2,] > 1e36 # Don't know how to query fill value in R...
 
 select_years <- year(tdate[ismiss])
 select_years <- select_years[select_years >= 1982 & select_years != 2020]
@@ -43,7 +74,7 @@ cell_resolution <- 5000
 
 akSEBS <- akgfmaps::get_base_layers(select.region = "bs.south", set.crs = proj_crs)
 
-b10_lte_200 <- sf::st_read(here::here("data", "B10K_lte200m_polygon.shp"), quiet = TRUE) |>
+b10_lte_200 <- sf::st_read(modelshelfpolyfile, quiet = TRUE) |>
   st_set_crs("+proj=longlat") |>
   sf::st_transform(crs = sf::st_crs(proj_crs)) 
 
@@ -59,8 +90,6 @@ mymask <- list(akSEBSnonw,
 
 # Calculate indices using survey and survey-replicated data
 
-datafile <- here::here("data", "survey_replicates_B10K-K20_CORECFS.csv")
-
 cpname <- gsub("-", "m", sprintf("AREA_LTE_%.1f", thresh))
 
 yrmask <- year(tdate) %in% select_years
@@ -68,13 +97,13 @@ for (ii in 1:length(mymask)) {
   
   totarea <- as.numeric(st_area(mymask[[ii]]))/1e6 # m^2 to km^2
   
-  svy  <- calcindices_temp(datafile, mymask[[ii]],
+  svy  <- calcindices_temp(srepdatafile, mymask[[ii]],
                            select_years = select_years, 
                            bottomvar="gear_temperature", 
                            surfacevar=NULL, 
                            threshold=thresh)
   
-  srep <- calcindices_temp(datafile, mymask[[ii]],
+  srep <- calcindices_temp(srepdatafile, mymask[[ii]],
                            select_years = select_years, 
                            bottomvar="model_bottom_temp", 
                            surfacevar=NULL,
@@ -89,7 +118,7 @@ for (ii in 1:length(mymask)) {
 
 # Write to file
 
-ncout <- nc_open(fname, write=TRUE)
+ncout <- nc_open(hindcastcpoolfile, write=TRUE)
 
 ncvar_put(ncout, "average_bottom_temp", meanbtmp)
 ncvar_put(ncout, "cold_pool_index", cpindex)
