@@ -21,6 +21,7 @@ This document provides code for updating the annual summer Cold Pool Index and a
 
 ```{r setup, include=TRUE, message=FALSE, warning=FALSE, echo=FALSE}
 library(coldpool)
+library(akgfmaps)
 
 # Set global options ----
 fig_res <- 600
@@ -33,9 +34,8 @@ update_sysdata <- TRUE
 ebs_csv_path <- here::here("data", paste0("index_hauls_temperature_data.csv"))
 nbs_ebs_csv_path <- here::here("data", paste0("ebs_nbs_temperature_full_area.csv"))
 
-### UPDATE!!! ###
 nbs_bt_years <- c(2010, 2017, 2018, 2019, 2021, 2022, 2023)
-nbs_sst_years <- c(2010, 2017, 2018, 2019, 2021, 2022)
+nbs_sst_years <- c(2010, 2017, 2018, 2019, 2021, 2022, 2023)
 ```
 
 # 2. Retrieve temperature data
@@ -55,28 +55,28 @@ if(update_sysdata) {
   coldpool:::get_data(channel = channel, include_preliminary_data = NULL)
 }
 
-# Temporarily add unfinalized NBS data -- REMOVE WHEN 2023 NBS DATA ARE FINALIZED
+# Temporarily add unfinalized NBS data -- COMMENT OUT WHEN 2023 NBS DATA ARE FINALIZED
 
-nbs_layers <- get_base_layers(select.region = "nbs", set.crs = "EPSG:4269")
-
-nbs_centroid <- nbs_layers$survey.grid |>
-sf::st_make_valid() |> 
-sf::st_centroid()
-
-nbs_centroid <- cbind(nbs_centroid,
-                      sf::st_coordinates(nbs_centroid)) |>
-  as.data.frame() |>
-  dplyr::select(-geometry) |>
-  dplyr::rename(longitude = X,
-                latitude = Y,
-                stationid = STATIONID)
-
-read.csv(file = here::here("data", "unfinalized_nbs_2023.csv")) |>
-  dplyr::inner_join(nbs_centroid) |>
-  dplyr::bind_rows(
-  read.csv(file = nbs_ebs_csv_path)
-  ) |>
-  write.csv(file = nbs_ebs_csv_path)
+# nbs_layers <- get_base_layers(select.region = "nbs", set.crs = "EPSG:4269")
+# 
+# nbs_centroid <- nbs_layers$survey.grid |>
+# sf::st_make_valid() |> 
+# sf::st_centroid()
+# 
+# nbs_centroid <- cbind(nbs_centroid,
+#                       sf::st_coordinates(nbs_centroid)) |>
+#   as.data.frame() |>
+#   dplyr::select(-geometry) |>
+#   dplyr::rename(longitude = X,
+#                 latitude = Y,
+#                 stationid = STATIONID)
+# 
+# read.csv(file = here::here("data", "unfinalized_nbs_2023.csv")) |>
+#   dplyr::inner_join(nbs_centroid) |>
+#   dplyr::bind_rows(
+#   read.csv(file = nbs_ebs_csv_path)
+#   ) |>
+#   write.csv(file = nbs_ebs_csv_path)
 
 
 ```

@@ -74,7 +74,7 @@ plot_cpi_timeseries <- ggplot(data = cpi_df,
         strip.background = element_rect(fill = "#0055a4",
                                         color = NA))
 
-png(filename = here::here("plots", paste0(max_year, "_cold_pool_index.png")), 
+ragg::agg_png(filename = here::here("plots", paste0(max_year, "_cold_pool_index.png")), 
     width = 6,
     height = 3, 
     units = "in",
@@ -129,7 +129,7 @@ stacked_area_plot <- ggplot() +
         legend.position = c(0.2, 0.8),
         legend.title = element_blank())
 
-png(file = here::here("plots", paste0(max_year, "_stacked_temperature.png")), height = 4, width = 6, units = "in", res = 600)
+ragg::agg_png(file = here::here("plots", paste0(max_year, "_stacked_temperature.png")), height = 4, width = 6, units = "in", res = 600)
 print(stacked_area_plot)
 dev.off()
 
@@ -161,7 +161,7 @@ stacked_area_simple_label_plot <- ggplot() +
         legend.position = c(0.1, 0.8),
         legend.title = element_blank())
 
-png(file = here::here("plots", paste0(max_year, "_stacked_temperature_simple_label.png")), height = 4, width = 6, units = "in", res = 600)
+ragg::agg_png(file = here::here("plots", paste0(max_year, "_stacked_temperature_simple_label.png")), height = 4, width = 6, units = "in", res = 600)
 print(stacked_area_simple_label_plot)
 dev.off()
 
@@ -315,11 +315,11 @@ coldpool_with_area <-
     rel_widths = c(0.9,0.2)
   )
 
-png(file = here::here("plots", paste0(max_year, "_coldpool_with_area.png")), height = 8, width = 6, units = "in", res = fig_res)
+ragg::agg_png(file = here::here("plots", paste0(max_year, "_coldpool_with_area.png")), height = 8, width = 6, units = "in", res = fig_res)
 print(coldpool_with_area)
 dev.off()
 
-png(file = here::here("plots", paste0(max_year, "_coldpool.png")), height = 6, width = 6, units = "in", res = fig_res)
+ragg::agg_png(file = here::here("plots", paste0(max_year, "_coldpool.png")), height = 6, width = 6, units = "in", res = fig_res)
 print(cold_pool_grid)
 graphics.off()
 ```
@@ -446,7 +446,7 @@ ebs_nbs_map <- cowplot::plot_grid(ebs_nbs_temperature_map,
                    nrow = 2,
                    rel_heights = c(0.8,0.2))
 
-png(filename = here::here("plots", paste0(max_year, "_nbs_ebs_temperature_map.png")), width = 6, height = 6, units = "in", res = fig_res)
+ragg::agg_png(filename = here::here("plots", paste0(max_year, "_nbs_ebs_temperature_map.png")), width = 6, height = 6, units = "in", res = fig_res)
 print(ebs_nbs_map)
 dev.off()
 
@@ -525,35 +525,35 @@ for(ii in 1:length(plot_years)) {
     
   sel_bt_layer_df$year <- plot_years[ii]
   
-  # sel_sst_layer_df <- as.data.frame(terra::rast(coldpool:::nbs_ebs_surface_temperature)[[names(terra::rast(coldpool:::nbs_ebs_surface_temperature)) == plot_years[ii]]], 
-  #                               na.rm = FALSE, 
-  #                               xy = TRUE) |>
-  #   tidyr::pivot_longer(cols = 3) |>
-  #   sf::st_as_sf(coords = c("x", "y"),
-  #                crs = coldpool:::ebs_proj_crs) |>
-  #   dplyr::rename(year = name,
-  #                 temperature = value)  |>
-  #   stars::st_rasterize()
-  # 
-  #   sel_sst_layer_df$temperature <- cut(sel_sst_layer_df$temperature, 
-  #                                 breaks = nbs_ebs_temp_breaks)
-  # 
-  #   sel_sst_layer_df <- sel_sst_layer_df |>
-  #     sf::st_as_sf() |>
-  #     dplyr::group_by(temperature) |>
-  #     dplyr::summarise(n = n()) |>
-  #     dplyr::select(-n) |>
-  #     dplyr::ungroup() |>
-  #     sf::st_intersection(nbs_ebs_layers$survey.area)
-  #   
-  # sel_sst_layer_df$year <- plot_years[ii]
+  sel_sst_layer_df <- as.data.frame(terra::rast(coldpool:::nbs_ebs_surface_temperature)[[names(terra::rast(coldpool:::nbs_ebs_surface_temperature)) == plot_years[ii]]],
+                                na.rm = FALSE,
+                                xy = TRUE) |>
+    tidyr::pivot_longer(cols = 3) |>
+    sf::st_as_sf(coords = c("x", "y"),
+                 crs = coldpool:::ebs_proj_crs) |>
+    dplyr::rename(year = name,
+                  temperature = value)  |>
+    stars::st_rasterize()
+
+    sel_sst_layer_df$temperature <- cut(sel_sst_layer_df$temperature,
+                                  breaks = nbs_ebs_temp_breaks)
+
+    sel_sst_layer_df <- sel_sst_layer_df |>
+      sf::st_as_sf() |>
+      dplyr::group_by(temperature) |>
+      dplyr::summarise(n = n()) |>
+      dplyr::select(-n) |>
+      dplyr::ungroup() |>
+      sf::st_intersection(nbs_ebs_layers$survey.area)
+
+  sel_sst_layer_df$year <- plot_years[ii]
   
   if(ii == 1) {
     bt_year_df <- sel_bt_layer_df
-    # sst_year_df <- sel_sst_layer_df
+    sst_year_df <- sel_sst_layer_df
   } else {
     bt_year_df <- dplyr::bind_rows(bt_year_df, sel_bt_layer_df) 
-    # sst_year_df <- dplyr::bind_rows(sst_year_df, sel_sst_layer_df)
+    sst_year_df <- dplyr::bind_rows(sst_year_df, sel_sst_layer_df)
     
   }
 
@@ -626,69 +626,69 @@ ebs_nbs_bt_map_grid <- cowplot::plot_grid(ebs_nbs_bt_temperature_map,
                                   nrow = 2,
                                   rel_heights = c(0.85,0.15))
 
-png(filename = here::here("plots", paste0(max_year, "_nbs_ebs_temperature_map_grid.png")), width = 6, height = 6, units = "in", res = fig_res)
+ragg::agg_png(filename = here::here("plots", paste0(max_year, "_nbs_ebs_temperature_map_grid.png")), width = 6, height = 6, units = "in", res = fig_res)
 print(ebs_nbs_bt_map_grid)
 dev.off()
 
-# ebs_nbs_sst_temperature_map <- ggplot2::ggplot() +
-#   ggplot2::geom_sf(data = nbs_ebs_layers$akland, 
-#                    fill = "grey70", 
-#                    color = "black") +
-#     ggplot2::geom_sf(data = nbs_ebs_layers$survey.area, 
-#                    fill = "grey85", 
-#                    color = "black") +
-#     ggplot2::geom_sf(data = sst_year_df,
-#                    mapping = aes(fill = temperature),
-#                    color = NA) +
-#   ggplot2::facet_wrap(~year, ncol = grid_layout[1], nrow = grid_layout[2]) +
-#   ggplot2::geom_sf(data = nbs_ebs_agg_strata, 
-#                    fill = NA,
-#                    color = "black") +
-#   ggplot2::geom_sf(data = nbs_ebs_layers$graticule,
-#                    alpha = 0.3) +
-#   ggplot2::coord_sf(xlim = nbs_ebs_layers$plot.boundary$x, 
-#                     ylim = nbs_ebs_layers$plot.boundary$y) +
-#   ggplot2::scale_x_continuous(name = "Longitude", 
-#                               breaks = nbs_ebs_layers$lon.breaks) + 
-#   ggplot2::scale_y_continuous(name = "Latitude", 
-#                               breaks = nbs_ebs_layers$lat.breaks) +
-#   ggplot2::scale_fill_manual(values = viridis_pal(option = nbs_ebs_viridis_option)(length(nbs_ebs_temp_breaks)-1),
-#                              na.value = NA,
-#                              drop = FALSE) +
-#   coldpool::theme_multi_map_blue_strip() +
-#   theme(legend.position = "none",
-#         plot.margin = unit(c(5,5,-5,5), units = "mm"),
-#         axis.title = element_blank(),
-#         axis.text = element_text(size = 9))
-# 
-# sst_map_cbar <- coldpool::legend_discrete_cbar(breaks = nbs_ebs_temp_breaks,
-#                                                 colors = viridis::viridis_pal(option = nbs_ebs_viridis_option),
-#                                                 legend_direction = "horizontal",
-#                                                 font_size = 3,
-#                                                 width = 0.1,
-#                                                 expand_size.x = 0.3,
-#                                                 expand_size.y = 0.3,
-#                                                 expand.x = 0.3,
-#                                                 expand.y = 0.9,
-#                                                 spacing_scaling = 1.2,
-#                                                 text.hjust = 0.5,
-#                                                 font.family = "sans",
-#                                                 neat.labels = FALSE) + 
-#   annotate("text", 
-#            x = 1.15, 
-#            y = 3.5, 
-#            label =  expression(bold("Surface Temperature"~(degree*C))), 
-#            size = rel(3.2)) + 
-#   theme(plot.margin = unit(c(0,0, 0, 5), units = "mm"))
-# 
-# ebs_nbs_sst_map_grid <- cowplot::plot_grid(ebs_nbs_sst_temperature_map,
-#                                            sst_map_cbar,
-#                                            nrow = 2,
-#                                            rel_heights = c(0.85,0.15))
-# 
-# png(filename = here::here("plots", paste0(max_year, "_nbs_ebs_sst_map_grid.png")), width = 6, height = 6, units = "in", res = fig_res)
-# print(ebs_nbs_sst_map_grid)
-# dev.off()
+ebs_nbs_sst_temperature_map <- ggplot2::ggplot() +
+  ggplot2::geom_sf(data = nbs_ebs_layers$akland,
+                   fill = "grey70",
+                   color = "black") +
+    ggplot2::geom_sf(data = nbs_ebs_layers$survey.area,
+                   fill = "grey85",
+                   color = "black") +
+    ggplot2::geom_sf(data = sst_year_df,
+                   mapping = aes(fill = temperature),
+                   color = NA) +
+  ggplot2::facet_wrap(~year, ncol = grid_layout[1], nrow = grid_layout[2]) +
+  ggplot2::geom_sf(data = nbs_ebs_agg_strata,
+                   fill = NA,
+                   color = "black") +
+  ggplot2::geom_sf(data = nbs_ebs_layers$graticule,
+                   alpha = 0.3) +
+  ggplot2::coord_sf(xlim = nbs_ebs_layers$plot.boundary$x,
+                    ylim = nbs_ebs_layers$plot.boundary$y) +
+  ggplot2::scale_x_continuous(name = "Longitude",
+                              breaks = nbs_ebs_layers$lon.breaks) +
+  ggplot2::scale_y_continuous(name = "Latitude",
+                              breaks = nbs_ebs_layers$lat.breaks) +
+  ggplot2::scale_fill_manual(values = viridis_pal(option = nbs_ebs_viridis_option)(length(nbs_ebs_temp_breaks)-1),
+                             na.value = NA,
+                             drop = FALSE) +
+  coldpool::theme_multi_map_blue_strip() +
+  theme(legend.position = "none",
+        plot.margin = unit(c(5,5,-5,5), units = "mm"),
+        axis.title = element_blank(),
+        axis.text = element_text(size = 9))
+
+sst_map_cbar <- coldpool::legend_discrete_cbar(breaks = nbs_ebs_temp_breaks,
+                                                colors = viridis::viridis_pal(option = nbs_ebs_viridis_option),
+                                                legend_direction = "horizontal",
+                                                font_size = 3,
+                                                width = 0.1,
+                                                expand_size.x = 0.3,
+                                                expand_size.y = 0.3,
+                                                expand.x = 0.3,
+                                                expand.y = 0.9,
+                                                spacing_scaling = 1.2,
+                                                text.hjust = 0.5,
+                                                font.family = "sans",
+                                                neat.labels = FALSE) +
+  annotate("text",
+           x = 1.15,
+           y = 3.5,
+           label =  expression(bold("Surface Temperature"~(degree*C))),
+           size = rel(3.2)) +
+  theme(plot.margin = unit(c(0,0, 0, 5), units = "mm"))
+
+ebs_nbs_sst_map_grid <- cowplot::plot_grid(ebs_nbs_sst_temperature_map,
+                                           sst_map_cbar,
+                                           nrow = 2,
+                                           rel_heights = c(0.85,0.15))
+
+ragg::agg_png(filename = here::here("plots", paste0(max_year, "_nbs_ebs_sst_map_grid.png")), width = 6, height = 6, units = "in", res = fig_res)
+print(ebs_nbs_sst_map_grid)
+dev.off()
 
 ```
 
@@ -806,11 +806,11 @@ plot_sebs_average_temperature <- ggplot(data = all_temperatures |>
         strip.background = element_rect(fill = "#0055a4",
                                         color = NA))
 
-png(file = here::here("plots", paste0(max_year, "_average_temperature.png")), width = 6, height = 3, units = "in", res = fig_res)
+ragg::agg_png(file = here::here("plots", paste0(max_year, "_average_temperature.png")), width = 6, height = 3, units = "in", res = fig_res)
 print(plot_average_temperature)
 dev.off()
 
-png(file = here::here("plots", paste0(max_year, "_plot_sebs_average_temperature.png")), width = 6, height = 3, units = "in", res = fig_res)
+ragg::agg_png(file = here::here("plots", paste0(max_year, "_plot_sebs_average_temperature.png")), width = 6, height = 3, units = "in", res = fig_res)
 print(plot_sebs_average_temperature)
 dev.off()
 ```
@@ -878,7 +878,7 @@ zscore_plot <- ggplot(data = cp_summary,
                                         color = NA),
         legend.position = "none")
 
-png(file = here::here("plots", paste0(max_year, "_anomaly.png")), width = 6, height = 6, units = "in", res = fig_res)
+ragg::agg_png(file = here::here("plots", paste0(max_year, "_anomaly.png")), width = 6, height = 6, units = "in", res = fig_res)
 print(zscore_plot)
 dev.off()
 ```
@@ -1027,7 +1027,7 @@ for(ii in 1:length(year_vec)) {
                        nrow = 2,
                        rel_heights = c(0.8,0.2))
   
-  png(filename = here::here("plots", "annual_bt", paste0(year_vec[ii], "_ebs_bt_map.png")), 
+  ragg::agg_png(filename = here::here("plots", "annual_bt", paste0(year_vec[ii], "_ebs_bt_map.png")), 
       width = 6, height = 6, units = "in", res = fig_res)
   print(temp_map_grid)
   dev.off()
@@ -1039,26 +1039,34 @@ for(ii in 1:length(year_vec)) {
 Contributed by Sean Rohan^1^ and Lewis Barnett^1^   
 ^1^ Resource Assessment and Conservation Engineering Division, Alaska Fisheries Science Center, National Marine Fisheries Service, NOAA  
 **Contact**: sean.rohan@noaa.gov
-**Last updated**:  October 2023
+**Last updated**:  September 2023
 
 ```{r fig.height=3,fig.width=6,fig.cap="\\label{fig:figs}Figure 1. Area of the cold pool in the eastern Bering Sea (EBS) shelf bottom trawl survey area, as measured using observations from the EBS bottom trawl survey (including northwest strata 82 and 90) from 1982–2022. Dashed line denotes the grand mean of the time series and dotted lines show ±1 standard deviation.", message=FALSE, warning=FALSE, echo=FALSE}
 print(plot_cpi_timeseries)
 ```
 
-**Trend**: Cold pool extent is defined as the area of the eastern Bering Sea continental shelf with bottom temperatures $\leq$ 2&deg;C, in square kilometers (km^2^), as observed during the Alaska Fisheries Science Center’s annual summer bottom trawl survey of the eastern Bering Sea. In 2023, the areal extent of the cold pool (178,625 km^2^) was near the time series average (181,018 km^2^) from 1982 to 2023 (Fig. 1). The average cold pool extent in 2022 represents a major change from the three prior surveys (2018, 2019, 2021) that observed the four smallest cold pool extents in the 40-year time series.
+Summer SST and Bottom Temperatures
+Contributed by Sean Rohan, sean.rohan@noaa.gov, and Lewis Barnett, lewis.barnett@noaa.gov
+Mean surface and bottom temperatures are calculated from spatially interpolated data collected during AFSC summer bottom trawl surveys of the EBS shelf (1982-2023, except 2020) and NBS (2010, 2017–2019, 2021–2023). Temperature data are not adjusted for effects of seasonal heating. Temperature data are interpolated using ordinary kriging with Stein's parameterization of the Matern semivariogram model (Rohan et al., 2022). Code, figures, and data products presented in this contribution are provided in the coldpool R package [https://github.com/afsc-gap-products/coldpool](https://github.com/afsc-gap-products/coldpool).
 
-The spatial footprint of the cold pool in 2022 was similar to the most recent near-average years in 2011 and 2017 (Fig. 2). North of ~57&deg;C, the cold pool covered nearly the entire middle domain of the survey area between 50-m and 100-m isobaths. The extents of the $\leq$ -1&deg;C (12,075 km^2^), $\leq$ 0&deg;C (45,000 km^2^), and $\leq$ 1&deg;C (107,300 km^2^) isotherms were larger than during the three prior surveys and near their time-series averages (23,505 km^2^, 53,951 km^2^, and 102,706  km^2^, respectively).
+In the EBS, the mean surface temperature (6.34&deg;C) was near the time series average (6.75&deg;C) and 1.12&deg;C colder than in 2022. The 2023 mean bottom temperature in the EBS (2.28&deg;C) was near the time series mean of 2.49&deg;C and 0.28&deg;C colder than the mean bottom temperature in 2022 (Figure 24). The near-average bottom temperatures in 2022 and 2023 are a departure from extremely warm conditions in 2016-2021 that had four of the five warmest years in the times series. In the NBS, the mean surface temperature (8.05oC) was slightly below the time series average (9.18oC) and the mean bottom temperature (3.92oC) was near the time series average (3.94oC). However, the time series for the NBS is extremely short compared to the EBS.
 
-Similar to cold pool extent, the mean bottom temperature in the eastern Bering Sea (2.56&deg;C) was near the time series mean (2.50&deg;C) in 2022 (Fig. 3). The near average bottom temperature in 2022 represents a change from recent years (2016–2021) with four of the five warmest years in the times series. The mean surface temperature in the eastern Bering Sea (7.46&deg;C) was 0.2&deg;C° higher than in 2021, but near the time series average (6.76&deg;C). In the northern Bering Sea, mean bottom temperature (3.92&deg;C) was near the time series average (3.94&deg;C) and mean surface temperature (8.05&deg;C) was slightly below the time series average (9.18&deg;C). However, the time series for the northern Bering Sea is extremely short compared to the eastern Bering Sea.
+In 2023, bottom temperatures $\leq$ -1&deg;C were observed south of St. Matthew Island for the first time since 2015 (Figure 25). The average bottom temperature in the inner domain of the EBS survey area (2.17&deg;C) was the coldest observed since 2013 (1.64&deg;C). The coldest bottom temperatures ($\leq$ -1&deg;C) within the combined EBS shelf and NBS survey areas were in the middle shelf (between 50 and 100 m isobaths), extending from south of St. Matthew Island at ~61.5&deg;N to the U.S.-Russia maritime boundary. This area of cold water was considerably larger than in 2019 and 2021, when bottom temperatures $\leq$ 0&deg;C were confined to a small area along the U.S.-Russia Convention Line.
 
-In 2022, bottom temperatures were lower throughout the eastern Bering Sea and northern Bering Sea survey areas compared to the three previous surveys in 2018, 2019, and 2021 (Fig. 4). The coldest bottom temperatures ($\leq$ -1&deg;C) within the combined eastern Bering Sea shelf and northern Bering Sea survey areas were along the U.S.-Russia maritime boundary between St. Matthew Island and St. Lawrence Island. In 2018 and 2019, extremely cold bottom temperatures ($\leq$ 0&deg;C) were confined to a small area along the U.S.-Russia Convention Line, but the size of this area increased in 2021 and again in 2022. The warmest bottom temperatures were along the coast of the Alaska mainland between Nunivak Island and Norton Sound. However, the area north of Nunivak Island at 60.5&deg;N is sampled at the end of the survey and reflects seasonal warming since sampling occurs 35 to 45 days later than in the area directly south.
+The warmest bottom temperatures were along the coast of the Alaska mainland between Nunivak Island and Norton Sound. However, the area north of Nunivak Island at 60.5&deg;N is sampled at the end of the survey and reflects seasonal warming since sampling occurs 35-45 days later than in the area directly south.
+
+
+Cold Pool Extent - AFSC Bottom Trawl Survey
+Contributed by Sean Rohan, sean.rohan@noaa gov, and Lewis Barnett, lewis.barnett@noaa gov
+The cold pool extent is calculated from spatially interpolated bottom temperature data collected during AFSC summer bottom trawl surveys of the EBS shelf (1982-2023, except 2020). See 'Summer SST and Bottom Temperatures' contribution above for more details.
+
+The spatial footprint of the cold pool in 2023 was similar to the most recent near-average years in 2011, 2017, and 2022 (Figure 33). North of ∼57.5&deg;N, the cold pool covered nearly the entire middle domain of the survey area between the 50m and 100m isobaths. The extents of the $\leq$ -1&deg;C (26,550 km^2^) and $\leq$ 0&deg;C (62,400 km^2^) isotherms were larger than they have been since the 2015 survey. The extent of the $\leq$ 1&deg;C isotherm (110,875 km^2^) was the largest it’s been since 2013. The extents of the $\leq$ -1&deg;C, $\leq$ 0&deg;C, and $\leq$ 1&deg;C isotherms were all larger than their time series averages of 23,579 km^2^, 54,158 km^2^, and 102,906 km^2^, respectively.
 
 
 ```{r fig.cap="\\label{fig:figs}Figure 2. Cold pool extent in the eastern Bering Sea (EBS), as measured using observations from the EBS bottom trawl survey. Upper panels: Maps of cold pool extent in the EBS shelf survey area from 2002–2021. Lower panel: Extent of the cold pool in proportion to the total EBS shelf survey area from 1982–2022. Fill colors denote bottom temperatures $\\leq$ 2&deg;C, $\\leq$ 1&deg;C, $\\leq$ 0&deg;C, and $\\leq$ -1&deg;C.", fig.height=8, fig.width=6, message=FALSE, warning=FALSE, echo=FALSE}
 print(coldpool_with_area)
 ```
 
-**Method**: Cold pool extent, mean bottom temperature, and mean surface temperature are calculated from spatially interpolated bottom and surface temperature data collected during AFSC summer bottom trawl surveys of the eastern Bering Sea shelf (1982 to 2022; except 2020) and northern Bering Sea (2010, 2017, 2018, 2019, 2021). Temperature data are not adjusted for effects of seasonal heating. Temperature data are interpolated using ordinary kriging with Stein's parameterization of the Matérn semivariogram model [@Rohan2022]. Code, figures, and data products presented in this contribution are provided in the coldpool R package [https://github.com/afsc-gap-products/coldpool](https://github.com/afsc-gap-products/coldpool).
 
 ```{r fig.height=3,fig.width=6,fig.cap="\\label{fig:figs}Figure 3. Average summer surface (green triangles) and bottom (blue circles) temperatures (&deg;C) on the eastern Bering Sea (EBS) shelf based on data collected during standardized summer bottom trawl surveys from 1982–2022. Dashed lines represent the time series mean.", message=FALSE, warning=FALSE, echo=FALSE}
 print(plot_sebs_average_temperature)
@@ -1067,8 +1075,3 @@ print(plot_sebs_average_temperature)
 ```{r fig.height=6,fig.width=6,fig.cap="\\label{fig:figs}Figure 4. Contour maps of bottom temperatures from the 2018, 2019, 2021, and 2022 eastern Bering Sea shelf and northern Bering Sea bottom trawl surveys.", message=FALSE, warning=FALSE, echo=FALSE}
 print(ebs_nbs_bt_map_grid)
 ```
-
-
-**Implications**: The cold pool has a strong influence on the thermal stratification, and overall, changes in surface and bottom temperature influence the spatial structure of the demersal community [@Kotwicki2013; @Stevenson2019; @Thorson2020], trophic structure of the eastern Bering Sea food web [@Mueter2008; @Spencer2016], and demographic processes of fish populations [@Gruss2021]. When the cold pool is small, species with warm-water affinity (e.g., arrowtooth flounder *Atheresthes stomias*) are distributed more widely over the eastern Bering Sea shelf and expand across the shelf and to the north because there is no thermal barrier to migration. In contrast, the distribution of species with cold water affinity (e.g., Arctic cod *Boreogadus saida* Bering flounder *Hippoglossoides robustus*) contracts to the north when the cold pool is small. 
-
-While the cold pool area is defined based on the 2&deg;C isotherm, recent studies suggest that a more ecologically relevant temperature for several subarctic fishes and crabs is the 1&deg;C isotherm [@Kotwicki2013] or the 0&deg;C isotherm for walleye pollock *Gadus chalcogrammus* and Pacific cod *Gadus macrocephalus* [@Eisner2020a; @Baker2021]. Similar to the most recent near-average cold pool extent year in 2017 [@Stevenson2019], the northern Bering Sea bottom trawl survey encountered considerable densities of adult walleye pollock and Pacific cod in the northern Bering Sea in 2022, which suggests the larger cold pool and extents of $\leq$ 0&deg;C and $\leq$ 1&deg;C isotherms may not have posed a significant barrier to northward migration for these species.
