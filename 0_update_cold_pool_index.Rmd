@@ -232,6 +232,9 @@ for(i in 1:length(nbs_ebs_bt_files)) {
   
 }
 
+ nbs_mean_temperature <- nbs_mean_temperature |>
+  dplyr::filter(YEAR != 2018)
+
 nbs_mean_temperature$LAST_UPDATE <- Sys.Date()
 
 ```
