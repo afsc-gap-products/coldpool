@@ -142,11 +142,12 @@ kriging_loocv <- function(x,
       
       x_mod <- mod_idw
       
-      anisotropy_parameters <- optim(par = anisotropy_parameters,
+      anisotropy_parameters <- try(optim(par = anisotropy_parameters,
                                      fn = coldpool:::fit_anisotropy_mse, 
                                      method = "L-BFGS-B",
                                      lower = c(0,0.01),
                                      upper = c(180,1),
+                                     contol = list(parscale = c(1,0.1)),
                                      x_mod = mod_idw, 
                                      dat = x,
                                      vgm_width = vgm_width,
@@ -156,11 +157,17 @@ kriging_loocv <- function(x,
                                      kriging_method = kriging_methods[ii], 
                                      vgm_directions = c(0, 45, 90, 135), 
                                      kfold = anisotropy_kfold, 
-                                     seed = seed)$par
+                                     seed = seed)$par, 
+                                   silent = TRUE)
       
       # Internal use, for estimating anisotropy
       if(only_return_anisotropy) {
         return(anisotropy_parameters)
+      }
+      
+      if(class(anisotropy_parameters) == "try-error") {
+        warning("kriging_loocv: Anisotropy estimation error. Assuming no anisotropy.")
+        anisotropy_parameters <- NULL
       }
       
     }

@@ -32,10 +32,11 @@ estimate_anisotropy <- function(x,
                                 nm = Inf,
                                 seed = 19673) {
   
-  stopifnot("estimate_2d_anisotropy: Length of interpolation method must be 1." = length(interpolation_method) == 1)
-  stopifnot("estimate_2d_anisotropy: variogram_model must be one of 'Exp', 'Cir', 'Gau', 'Sph', 'Mat', 'Bes', 'Ste'")
+  stopifnot("estimate_2d_anisotropy: Length of interpolation method must be 1." = length(variogram_model) == 1)
+  stopifnot("estimate_2d_anisotropy: variogram_model must be one of 'Exp', 'Cir', 'Gau', 'Sph', 'Mat', 'Bes', 'Ste'" = tolower(variogram_model) %in% c('exp', 'cir', 'gau', 'sph', 'mat', 'bes', 'ste'))
   
-  pars <- coldpool::kriging_loocv(variable_name = variable_name,
+  pars <- coldpool::kriging_loocv(x = x,
+                                  variable_name = variable_name,
                                   latitude_name = latitude_name,
                                   longitude_name = longitude_name,
                                   elevation_name = NULL,
