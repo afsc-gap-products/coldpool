@@ -17,7 +17,7 @@
 #' @param kriging_formula Formula to use for kriging. Default (kriging_formula = variable_name ~ 1) is ordinary kriging without covariates. Formula for the gstat interface (see ?gstat::gstat). Covariate example: kriging_formula = variable_name ~ BOTTOM_DEPTH
 #' @param interplation_methods Interpolation methods to use. Valid options are nearest-neighbor, inverse distance weighting, inverse distance weighting using the closest nm stations (idw_nmax), and kriging with and exponential (exp), circular (cir), gaussian (gau), Bessel (bes), Matern (mat), or Stein's Matern (ste) variogram model.
 #' @param seed RNG seed (set.seed(seed)) to use for anisotropy estimation based on cross-validation.
-#' @param only_return_anisotropy For internal use. Defualt = FALSE
+#' @param only_return_anisotropy For internal use. Default = FALSE
 #' @export 
 
 kriging_loocv <- function(x,
@@ -142,23 +142,24 @@ kriging_loocv <- function(x,
       
       x_mod <- mod_idw
       
-      anisotropy_parameters <- try(optim(par = anisotropy_parameters,
-                                     fn = coldpool:::fit_anisotropy_mse, 
-                                     method = "L-BFGS-B",
-                                     lower = c(0,0.01),
-                                     upper = c(180,1),
-                                     contol = list(parscale = c(1,0.1)),
-                                     x_mod = mod_idw, 
-                                     dat = x,
-                                     vgm_width = vgm_width,
-                                     kriging_formula = kriging_formula,
-                                     location_formula = location_formula,
-                                     nm = nm,
-                                     kriging_method = kriging_methods[ii], 
-                                     vgm_directions = c(0, 45, 90, 135), 
-                                     kfold = anisotropy_kfold, 
-                                     seed = seed)$par, 
-                                   silent = TRUE)
+      anisotropy_parameters <- try(
+        optim(par = anisotropy_parameters,
+              fn = coldpool:::fit_anisotropy_mse, 
+              method = "L-BFGS-B",
+              lower = c(0,0.01),
+              upper = c(180,1),
+              control = list(parscale = c(1, 0.1)),
+              x_mod = mod_idw, 
+              dat = x,
+              vgm_width = vgm_width,
+              kriging_formula = kriging_formula,
+              location_formula = location_formula,
+              nm = nm,
+              kriging_method = kriging_methods[ii], 
+              vgm_directions = c(0, 45, 90, 135), 
+              kfold = anisotropy_kfold, 
+              seed = seed)$par, 
+        silent = TRUE)
       
       # Internal use, for estimating anisotropy
       if(only_return_anisotropy) {
@@ -176,12 +177,20 @@ kriging_loocv <- function(x,
                                                      width = vgm_width), 
                                     gstat::vgm(kriging_methods[ii]))
     
-    vgm_mod <- gstat::fit.variogram(gstat::variogram(mod_idw, 
-                                                     width = vgm_width,
-                                                     alpha = c(0, 45, 90, 135)), 
-                                    gstat::vgm(model = kriging_methods[ii],
-                                               anis = anisotropy_parameters,
-                                               nugget = vgm_mod$psill[1]))
+    if(!is.null(anisotropy_parameters)) {
+      vgm_mod <- gstat::fit.variogram(gstat::variogram(mod_idw, 
+                                                       width = vgm_width,
+                                                       alpha = c(0, 45, 90, 135)), 
+                                      gstat::vgm(model = kriging_methods[ii],
+                                                 anis = anisotropy_parameters,
+                                                 nugget = vgm_mod$psill[1]))
+    } else {
+      vgm_mod <- gstat::fit.variogram(gstat::variogram(mod_idw, 
+                                                       width = vgm_width), 
+                                      gstat::vgm(model = kriging_methods[ii],
+                                                 nugget = vgm_mod$psill[1]))
+    }
+
     
     mod <- gstat::gstat(formula = kriging_formula, 
                         locations = location_formula,
