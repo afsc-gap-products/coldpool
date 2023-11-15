@@ -7,6 +7,7 @@
 #' @param latitude_name 1L character vector indicating the name of the latitude column (e.g., 'LATITUDE')
 #' @param longitude_name 1L character vector indicating the name of the longitude column (e.g., 'LONGITUDE')
 #' @param elevation_name Optional. 1L character vector indicating the name of the elevation/depth column. Only used for 3D kriging.
+#' @param cv_index_name Optional. Character vector indicating which column contains numeric values designating folds to use for cross validation (see 'nfold' argument in ?gstat::gstat).
 #' @param input_crs Character vector indicating the coordinate reference system for x (default = "WGS84")
 #' @param interpolation_crs Coordinate reference system to use for interpolation
 #' @param anisotopy_parameters Optional. Anisotropy parameters to use for ordinary kriging as a 2L vector. See: ?gstat::vgm. If NULL and estimate_anisotropy, anisotropy is estimated.
@@ -25,6 +26,7 @@ kriging_loocv <- function(x,
                           latitude_name,
                           longitude_name,
                           elevation_name = NULL,
+                          cv_index_name = NULL,
                           input_crs,
                           interpolation_crs,
                           anisotropy_parameters = NULL,
@@ -68,8 +70,32 @@ kriging_loocv <- function(x,
   location_formula <- ~ longitude_name + latitude_name
   
   if(!is.null(elevation_name)) {
-    names(x)[which(names(x) == variable_name)] <- "elevation_name"
+    
+    if(!is.null(anisotropy_parameters)) {
+      stopifnot("kriging_loocv: anisotropy_parameters must be NULL (no anisotropy) or a 5L numeric vector when elevation_name is not NULL." = length(anisotropy_parameters) == 5)
+    }
+    
+    names(x)[which(names(x) == elevation_name)] <- "elevation_name"
+    
     location_formula <- ~ longitude_name + latitude_name + elevation_name
+    
+  }
+  
+  # Setup cross validation
+  if(!is.null(cv_index_name)) {
+    
+    stopifnot("kriging_loocv: cv_index_name column not found in x." = cv_index_name %in% names(x))
+    
+    names(x)[which(names(x) == cv_index_name)] <- "cv_index_name"
+    
+    cv_index <- x$cv_index_name
+    
+    stopifnot("kriging_loocv: cv_index_name column must be numeric." = is.numeric(cv_index))
+    
+  } else {
+    
+    cv_index <- 1:nrow(x)
+    
   }
   
   x <- sf::st_as_sf(x, 
@@ -101,6 +127,7 @@ kriging_loocv <- function(x,
                         nmax = nm)
     
     mod_fit <- gstat::gstat.cv(object = mod, 
+                               nfold = cv_index,
                                verbose = FALSE, 
                                debug.level = 0, 
                                remove.all = TRUE)
@@ -111,6 +138,7 @@ kriging_loocv <- function(x,
   if("idw" %in% interpolation_methods) {
     
     mod_fit <- gstat::gstat.cv(object = mod_idw, 
+                               nfold = cv_index,
                                verbose = FALSE, 
                                debug.level = 0, 
                                remove.all = TRUE)
@@ -125,6 +153,7 @@ kriging_loocv <- function(x,
                         nmax = nm)
     
     mod_fit <- gstat::gstat.cv(object = mod, 
+                               nfold = cv_index,
                                verbose = FALSE, 
                                debug.level = 0, 
                                remove.all = TRUE)
@@ -198,7 +227,10 @@ kriging_loocv <- function(x,
                         model = vgm_mod, 
                         nmax = nm)
     
-    mod_fit <- gstat::gstat.cv(object = mod, verbose = FALSE, debug.level = 0)
+    mod_fit <- gstat::gstat.cv(object = mod, 
+                               nfold = cv_index, 
+                               verbose = FALSE, 
+                               debug.level = 0)
     interpolation_fits[[kriging_methods_lowercase[ii]]] <- mod_fit$var1.pred
     
   }
