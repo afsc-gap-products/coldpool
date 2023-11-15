@@ -59,6 +59,8 @@ vignettes/*.pdf
 /data/*.shp.xml
 /data/*.cpg
 /data/*.sbn
+/data/*.nc
 /analysis/temp3d/data
 /analysis/temp3d/output
 /analysis/temp3d/R/archive
+/analysis/temp3d/plots
