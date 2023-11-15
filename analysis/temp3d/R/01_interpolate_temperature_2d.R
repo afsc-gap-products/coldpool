@@ -1,5 +1,4 @@
 # library(coldpool)
-# library(akgfmaps)
 # library(gapctd)
 # library(navmaps)
 # library(lubridate)
@@ -131,20 +130,6 @@ temperature_2d_cv <- function(region) {
   
 }
 
-saveRDS(loocv_fits, here::here("output", paste0("2d_interp_cv_", region, ".rds")))
-
-rmse <- loocv_fits |>
-  dplyr::select(-DEPTH, -START_TIME, -LOG_GEAR_DEPTH) |>
-  tidyr::pivot_longer(cols = c(ste, idw, exp, cir, gau, sph, mat, bes)) |>
-  dplyr::mutate(square_error = (TEMPERATURE-value)^2) |>
-  dplyr::group_by(MODEL, YEAR) |>
-  dplyr::summarise(RMSE = sqrt(mean(square_error)))
-
-loocv_long <- loocv_fits |>
-  dplyr::select(-DEPTH, -START_TIME, -LOG_GEAR_DEPTH) |>
-  tidyr::pivot_longer(cols = c(ste, idw, exp, cir, gau, sph, mat, bes)) 
-
-ggplot() +
-  geom_violin(data = loocv_long,
-               mapping = aes(x = MODEL, 
-                             y = TEMPERATURE-value))
+temperature_2d_cv(region = "EBS")
+temperature_2d_cv(region = "AI")
+temperature_2d_cv(region = "GOA")

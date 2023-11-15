@@ -10,6 +10,7 @@ kriging_loocv(
   latitude_name,
   longitude_name,
   elevation_name = NULL,
+  cv_index_name = NULL,
   input_crs,
   interpolation_crs,
   anisotropy_parameters = NULL,
@@ -35,6 +36,8 @@ kriging_loocv(
 
 \item{elevation_name}{Optional. 1L character vector indicating the name of the elevation/depth column. Only used for 3D kriging.}
 
+\item{cv_index_name}{Optional. Character vector indicating which column contains numeric values designating folds to use for cross validation (see 'nfold' argument in ?gstat::gstat).}
+
 \item{input_crs}{Character vector indicating the coordinate reference system for x (default = "WGS84")}
 
 \item{interpolation_crs}{Coordinate reference system to use for interpolation}
@@ -51,7 +54,7 @@ kriging_loocv(
 
 \item{seed}{RNG seed (set.seed(seed)) to use for anisotropy estimation based on cross-validation.}
 
-\item{only_return_anisotropy}{For internal use. Defualt = FALSE}
+\item{only_return_anisotropy}{For internal use. Default = FALSE}
 
 \item{anisotopy_parameters}{Optional. Anisotropy parameters to use for ordinary kriging as a 2L vector. See: ?gstat::vgm. If NULL and estimate_anisotropy, anisotropy is estimated.}
 
