@@ -6,11 +6,6 @@
 \usage{
 estimate_anisotropy(
   x,
-  variable_name,
-  latitude_name,
-  longitude_name,
-  input_crs,
-  interpolation_crs,
   kriging_formula = variable_name ~ 1,
   folds = 10,
   variogram_model,
@@ -22,16 +17,6 @@ estimate_anisotropy(
 }
 \arguments{
 \item{x}{A data.frame containing variables to be interpolated and latitude and longitude coordinates.}
-
-\item{variable_name}{1L character vector indicating which varible to interpolate (e.g. 'TEMPERATURE')}
-
-\item{latitude_name}{1L character vector indicating the name of the latitude column (e.g., 'LATITUDE')}
-
-\item{longitude_name}{1L character vector indicating the name of the longitude column (e.g., 'LONGITUDE')}
-
-\item{input_crs}{Character vector indicating the coordinate reference system for x (default = "WGS84")}
-
-\item{interpolation_crs}{Coordinate reference system to use for interpolation.}
 
 \item{kriging_formula}{Formula to use for kriging. Default (kriging_formula = variable_name ~ 1) is ordinary kriging without covariates. Formula for the gstat interface (see ?gstat::gstat). Covariate example: kriging_formula = variable_name ~ BOTTOM_DEPTH}
 
@@ -46,6 +31,16 @@ estimate_anisotropy(
 \item{nm}{Maximum number of nearest neighbor observations to use for interpolation.}
 
 \item{seed}{RNG seed (set.seed(seed)) to use for anisotropy estimation based on cross-validation.}
+
+\item{variable_name}{1L character vector indicating which varible to interpolate (e.g. 'TEMPERATURE')}
+
+\item{latitude_name}{1L character vector indicating the name of the latitude column (e.g., 'LATITUDE')}
+
+\item{longitude_name}{1L character vector indicating the name of the longitude column (e.g., 'LONGITUDE')}
+
+\item{input_crs}{Character vector indicating the coordinate reference system for x (default = "WGS84")}
+
+\item{interpolation_crs}{Coordinate reference system to use for interpolation.}
 
 \item{only_return_anisotropy}{For internal use. Default = FALSE}
 }

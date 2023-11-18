@@ -19,11 +19,6 @@
 #' @export 
 
 estimate_anisotropy <- function(x,
-                                variable_name,
-                                latitude_name,
-                                longitude_name,
-                                input_crs,
-                                interpolation_crs,
                                 kriging_formula = variable_name ~ 1,
                                 folds = 10,
                                 variogram_model, 
@@ -36,17 +31,12 @@ estimate_anisotropy <- function(x,
   stopifnot("estimate_2d_anisotropy: variogram_model must be one of 'Exp', 'Cir', 'Gau', 'Sph', 'Mat', 'Bes', 'Ste'" = tolower(variogram_model) %in% c('exp', 'cir', 'gau', 'sph', 'mat', 'bes', 'ste'))
   
   pars <- coldpool::kriging_loocv(x = x,
-                                  variable_name = variable_name,
-                                  latitude_name = latitude_name,
-                                  longitude_name = longitude_name,
-                                  elevation_name = NULL,
-                                  input_crs = input_crs,
-                                  interpolation_crs = interpolation_crs,
                                   anisotropy_parameters = starting_values,
                                   estimate_anisotropy = TRUE,
                                   nm = nm,
                                   vgm_width = vgm_width,
                                   kriging_formula = kriging_formula,
+                                  location_formula = location_formula,
                                   interpolation_methods = variogram_model,
                                   seed = 19673,
                                   only_return_anisotropy = TRUE)

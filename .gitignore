@@ -64,3 +64,4 @@ vignettes/*.pdf
 /analysis/temp3d/output
 /analysis/temp3d/R/archive
 /analysis/temp3d/plots
+/analysis/temp3d/paper

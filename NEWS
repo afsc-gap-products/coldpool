@@ -3,9 +3,10 @@ coldpool 3.3-1 (November 13, 2023)
 
 NEW FEATURE
 
-- Added kriging_loocv() function to compare kriging methods 
-  using leave-one-out cross-validation for ordinary kriging, 
-  co-kriging, and regression kriging methods, with or without
-  anisotropy. 
+- Added kriging_cv() function to compare kriging methods 
+  using cross-validation for ordinary kriging,co-kriging, and 
+  regression kriging.
+- Added estimate_z_expansion() function to estimate the vertical
+  expansion factors for 3D kriging based on cross-validation.
 - Added estimate_anisotropy() function for estimating 2D
-  anisotropy in variograms using k-fold cross-validation.
+  anisotropy in variograms using cross-validation.
