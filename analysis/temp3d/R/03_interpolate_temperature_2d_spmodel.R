@@ -82,5 +82,3 @@ for(ii in 1:nrow(crs_by_region)) {
   
 }
 
-aicc_table |>
-  dplyr::arrange(AICc)
