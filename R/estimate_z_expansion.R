@@ -10,7 +10,7 @@
 #' @param anisotopy_parameters Anisotropy parameters to use for ordinary kriging as a 5L vector. See: ?gstat::vgm. If NULL and estimate_anisotropy, anisotropy is estimated.
 #' @param vgm_width Optional.
 #' @param variogram_model Character vector indicating which variogram model to use for interpolation. Valid options are exponential (exp), circular (cir), gaussian (gau), Bessel (bes), Matern (mat), or Stein's Matern (ste).
-#' @param use_for_rmse Logical vector indicating whether to use an observation to calculate RMSE for cross-validation.
+#' @param use_for_mse Logical vector indicating whether to use an observation to calculate MSE for cross-validation.
 #' @param z_limits Upper and lower bounds for z_expansion, for optimization.
 #' @param nm Maximum number of nearest neighbor observations to use for interpolation.
 #' @export
@@ -25,7 +25,7 @@ estimate_z_expansion <- function(x,
                                  vgm_width,
                                  nm = Inf,
                                  maxdist = Inf,
-                                 use_for_rmse = rep(TRUE, length(cv_index)),
+                                 use_for_mse = rep(TRUE, length(cv_index)),
                                  z_limits = c(10, 500000)) {
   
   
@@ -38,7 +38,7 @@ estimate_z_expansion <- function(x,
                      kriging_formula,
                      vgm_width,
                      model,
-                     use_for_rmse) {
+                     use_for_mse) {
     
     dat[all.vars(location_formula)[3]] <- dat[all.vars(location_formula)[3]] * exp(log_z_mult)
     
@@ -66,9 +66,9 @@ estimate_z_expansion <- function(x,
                                   verbose = FALSE, 
                                   debug.level = 2)
     
-    rmse <- sqrt(mean(cv_results$residual[use_for_rmse]^2))
+    mse <- mean(cv_results$residual[use_for_mse]^2)
     
-    return(rmse)
+    return(mse)
     
   }
   
@@ -85,7 +85,7 @@ estimate_z_expansion <- function(x,
                    cv_index = cv_index,
                    vgm_width = vgm_width,
                    model = model,
-                   use_for_rmse = use_for_rmse
+                   use_for_mse = use_for_mse
   )
   
   results$par <- exp(results$par)

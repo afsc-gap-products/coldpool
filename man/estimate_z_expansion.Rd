@@ -15,7 +15,7 @@ estimate_z_expansion(
   vgm_width,
   nm = Inf,
   maxdist = Inf,
-  use_for_rmse = rep(TRUE, length(cv_index)),
+  use_for_mse = rep(TRUE, length(cv_index)),
   z_limits = c(10, 5e+05)
 )
 }
@@ -34,7 +34,7 @@ estimate_z_expansion(
 
 \item{nm}{Maximum number of nearest neighbor observations to use for interpolation.}
 
-\item{use_for_rmse}{Logical vector indicating whether to use an observation to calculate RMSE for cross-validation.}
+\item{use_for_mse}{Logical vector indicating whether to use an observation to calculate MSE for cross-validation.}
 
 \item{z_limits}{Upper and lower bounds for z_expansion, for optimization.}
 

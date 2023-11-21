@@ -96,6 +96,7 @@ kriging_cv <- function(x,
     return(cbind(x, 
                  as.data.frame(interpolation_fits)))
   }
+
   
   for(ii in 1:length(kriging_methods)) {
     
@@ -122,13 +123,15 @@ kriging_cv <- function(x,
                                                            fold = fold)
         }
         
-        anisotropy_parameters <- as.numeric(anis_ssq[which.min(anis_ssq$ssq), 1:2])
+        anis_pars <- as.numeric(anis_ssq[which.min(anis_ssq$ssq), 1:2])
         
-        message("kriging_cv: Anisotropy starting parameters: ", paste(anisotropy_parameters, collapse = ", "))
+        message("kriging_cv: Anisotropy starting parameters: ", paste(anis_pars, collapse = ", "))
         
+      } else {
+        anis_pars <- anisotropy_parameters
       }
       
-      anis_fit <- optim(par = anisotropy_parameters,
+      anis_fit <- optim(par = anis_pars,
                         fn = coldpool:::fit_anisotropy_cv, 
                         method = "L-BFGS-B",
                         lower = c(0, 1e-5),
@@ -145,6 +148,8 @@ kriging_cv <- function(x,
                         fold = fold, 
                         seed = seed)
       
+      anis_pars <- anis_fit$par
+      
       # Internal use, for estimating anisotropy
       if(only_return_anisotropy) {
         return(anisotropy_parameters)
@@ -155,25 +160,33 @@ kriging_cv <- function(x,
         anisotropy_parameters <- NULL
       }
       
+    } else {
+      
+      if(is.null(anisotropy_parameters)) {
+        
+        if(length(all.vars(~ location_formula)) == 3) {
+          
+          anis_pars <- c(0, 0, 0, 1, 1)
+          
+        }
+        
+      } else {
+        
+        anis_pars <- anisotropy_parameters
+        
+      }
     }
     
     vgm_mod <- gstat::fit.variogram(gstat::variogram(mod_idw, 
                                                      width = vgm_width), 
                                     gstat::vgm(kriging_methods[ii]))
     
-    if(!is.null(anisotropy_parameters)) {
-      vgm_mod <- gstat::fit.variogram(gstat::variogram(mod_idw, 
-                                                       width = vgm_width,
-                                                       alpha = c(0, 45, 90, 135)), 
-                                      gstat::vgm(model = kriging_methods[ii],
-                                                 anis = anisotropy_parameters,
-                                                 nugget = vgm_mod$psill[1]))
-    } else {
-      vgm_mod <- gstat::fit.variogram(gstat::variogram(mod_idw, 
-                                                       width = vgm_width), 
-                                      gstat::vgm(model = kriging_methods[ii],
-                                                 nugget = vgm_mod$psill[1]))
-    }
+    vgm_mod <- gstat::fit.variogram(gstat::variogram(mod_idw, 
+                                                     width = vgm_width,
+                                                     alpha = c(0, 45, 90, 135)), 
+                                    gstat::vgm(model = kriging_methods[ii],
+                                               anis = anis_pars,
+                                               nugget = vgm_mod$psill[1]))
     
     mod <- gstat::gstat(formula = kriging_formula, 
                         locations = location_formula,

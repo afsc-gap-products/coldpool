@@ -160,15 +160,17 @@ kriging_cv <- function(x,
                                               fold = fold)
         }
         
-        anisotropy_parameters <- as.numeric(anis_ssq[which.min(anis_ssq$ssq), 1:2])
+        anis_pars <- as.numeric(anis_ssq[which.min(anis_ssq$ssq), 1:2])
         
         dplyr::arrange(anis_ssq, ssq)
         
-        message("kriging_cv: Anisotropy starting parameters: ", anisotropy_parameters)
+        message("kriging_cv: Anisotropy starting parameters: ", anis_pars)
         
+      } else{
+        anis_pars <- anisotropy_parameters
       }
       
-      anis_fit <- optim(par = anisotropy_parameters,
+      anis_fit <- optim(par = anis_pars,
                         fn = coldpool:::fit_anisotropy_cv, 
                         method = "L-BFGS-B",
                         lower = c(0, 1e-5),
@@ -184,21 +186,6 @@ kriging_cv <- function(x,
                         vgm_directions = c(0, 45, 90, 135), 
                         fold = fold, 
                         seed = seed)
-      
-      ggplot() +
-        geom_tile(data = anis_ssq,
-                  mapping = aes(x = angle, y = ratio, fill = ssq))
-      
-      ggplot() +
-        geom_path(data = anis_ssq,
-                  mapping = aes(x = ratio, 
-                                y = log10(ssq), 
-                                color = factor(angle),
-                                group = angle)) +
-        geom_point(data = anis_ssq[which.min(anis_ssq$ssq),],
-                   mapping = aes(x = ratio,
-                                 y = log10(ssq),
-                                 color = factor(angle)))
 
       vgm_mod <- gstat::fit.variogram(gstat::variogram(mod_idw, 
                                                        width = vgm_width), 
