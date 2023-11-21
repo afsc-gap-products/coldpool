@@ -61,6 +61,13 @@ estimate_z_expansion <- function(x,
                                                  anis = anisotropy_parameters,
                                                  nugget = vario_nugget$psill[1]))
     
+    mod <- gstat::gstat(formula = kriging_formula, 
+                        locations = location_formula,
+                        data = dat,
+                        nmax = nm,
+                        model = vario_fit,
+                        maxdist = maxdist)
+    
     cv_results <- gstat::gstat.cv(object = mod, 
                                   nfold = cv_index, 
                                   verbose = TRUE, 
