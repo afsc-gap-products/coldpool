@@ -4,7 +4,7 @@ library(doParallel)
 library(foreach)
 
 
-est_vertical_expansion <- function(region) {
+est_vertical_expansion <- function(region, vgm_width) {
   
   profile_dat <- readRDS(list.files(here::here("data", region), full.names = TRUE, pattern = "cv_data")) |>
     dplyr::mutate(cv_index = CAST == "bottom")
@@ -47,7 +47,7 @@ est_vertical_expansion <- function(region) {
                                                   z_start = 5000,
                                                   cv_index = sel_profile$fold,
                                                   anisotropy_parameters = c(best_model$anis_rotate,0,0,best_model$anis_scale,1),
-                                                    vgm_width = 11000,
+                                                    vgm_width = vgm_width,
                                                   nm = Inf,
                                                   maxdist = Inf,
                                                   use_for_mse = sel_profile$cv_index,
@@ -61,20 +61,11 @@ est_vertical_expansion <- function(region) {
     
   }
 }
-    
-    
   
-  # for(ii in 1:length(file_paths_aicc)) {
-    
-    
-    
-  # }
-  
-}
 
-est_vertical_expansion(region = "AI")
-est_vertical_expansion(region = "GOA")
-est_vertical_expansion(region = "EBS")
+est_vertical_expansion(region = "AI", vgm_width = 11000)
+est_vertical_expansion(region = "GOA", vgm_width = 11000)
+est_vertical_expansion(region = "EBS", vgm_width = 38000)
 
 
 # x = sel_profile
