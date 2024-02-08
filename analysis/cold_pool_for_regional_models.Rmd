@@ -1,0 +1,208 @@
+---
+title: "Bottom temperature and Cold Pool Index for regional models"
+author: 
+- affiliation: 
+  description: 
+  email: Kelly.Kearney@noaa.gov
+  name: Kelly Kearney
+output: html_document
+fontsize: 12pt
+addr: 
+  l1: 7600 Sand Point Way NE
+  l2: NMFS RACE Division, Groundfish Assessment Program
+  l3: Seattle, WA 98115
+---
+
+# Introduction
+
+This document provides code and documentation related to regional model-based versions of the cold pool indices and interpolated bottom temperature rasters.
+
+TODO: more detail once finished
+
+## Setup
+
+```{r setup, include=TRUE, message=FALSE, warning=FALSE, echo = TRUE}
+library(coldpool)
+library(akgfmaps)
+
+# Global options, mirroring primary 0_update_cold_pool_index.Rmd
+fig_res <- 600
+proj_crs <- coldpool:::ebs_proj_crs
+```
+
+## Survey-replicated data
+
+We can perform a rough comparison of the model output and the survey data by simply extracting the model bottom temperature field on a specific date of each year.
+
+TODO: describe survey-replicated data, and how I build it.
+
+```{r sim_paths, include=TRUE, message=FALSE, warning=FALSE, echo = TRUE}
+# Path to mox-hyak /gscratch/bumblereem remote mount
+# Note: this is computer-specific, and will need to be changed by any user 
+# trying to run this.
+
+moxdir = "~/Documents/mox_bumblereem" 
+
+# Survey-replicated model data, in .csv table format
+
+#simname = "B10K-K20_CORECFS"
+simname = "B10K-K20nobio_CORECFS_daily"
+
+srepcsv_path <- file.path(moxdir, "roms_for_public", simname, "Level3", sprintf("survey_replicates_%s.csv", simname))
+
+```
+## Masks
+
+The primary cold pool index calculations from this package rely on predefined masks from the akgfmaps R package.  For our model-based indices, we use the southeastern Bering Sea (SEBS) mask from that package as well as a few variants:
+- The SEBS region without the northwest strata (i.e. strata 82 and 90).  These strata were added to the sampling a few years later than most of the EBS, and for some projects we ignore that region to maintain data continuity.
+- The SEBS region (with and without the NW parts) with the shelf break set based on model bathymetry rather than real-world bathymetry. The shelf slope in the Bering10K ROMS model is smoothed in order to avoid numerical errors in the horizontal pressure gradient that are characteristic of sigma-coordinate models like ROMS in areas of steep topography.  This results in the model having a slightly narrower shelf than the real world.  This variant allows for better comparison between model and observations because it eliminates the area where we expect the two to disagree due to mismatched bottom depth.
+
+```{r masks, include=TRUE, message=FALSE, warning=FALSE, echo = TRUE}
+# The default SEBS mask
+
+akSEBS <- akgfmaps::get_base_layers(select.region = "bs.south", set.crs = proj_crs)
+
+# Read polygon defining the Bering10K shelf (i.e. <200m depth)
+
+modelshelfpolyfile = here::here("data", "B10K_lte200m_polygon.shp")
+
+b10k_lte_200 <- sf::st_read(modelshelfpolyfile, quiet = TRUE) |>
+  st_set_crs("+proj=longlat") |>
+  sf::st_transform(crs = sf::st_crs(proj_crs)) 
+
+# SEBS without northwest strata (i.e. strata ID <= 62)
+
+akSEBSnonw <- akSEBS$survey.strata |>
+  dplyr::filter(Stratum <= 62) |>
+  dplyr::group_by(SURVEY) |>
+  dplyr::summarise()
+
+# Build 4 masks: SEBS w/o northwest, 
+#                SEBS
+#                SEBS w/o northwest and trimmed to model shelf
+#                SEBS trimmed to model shelf
+# (Note: order reflects that in the cold pool index .nc file)
+
+mymask <- list(akSEBSnonw, 
+               "sebs",
+               st_intersection(akSEBSnonw, b10k_lte_200), 
+               st_intersection(akSEBS$survey.area, b10k_lte_200))
+
+maskname <- c("SEBS-noNW", "SEBS", "SEBS-noNW-modelshelf", "SEBS-modelshelf")
+
+```
+
+## Cold pool index netCDF file
+
+TODO: Describe the coldpool.nc file
+
+```{r netcdfpath, include=TRUE, message=FALSE, warning=FALSE, echo = TRUE}
+cpoolnc_path <- file.path(moxdir, "roms_for_public", simname, "Level3",
+                          sprintf("%s_coldpool.nc", simname))
+```
+
+# Generate bottom temperature rasters
+
+These rasters will form the base for many of the following calculations.
+
+```{r raster_calculations, include=TRUE, message=FALSE, warning=FALSE, echo = TRUE, results='hide'}
+
+# Years: Start with all years in file
+
+temperature_df <- read.csv(file = srepcsv_path,
+                           stringsAsFactors = FALSE)
+    
+names(temperature_df) <- tolower(names(temperature_df))
+year_vec <- sort(unique(temperature_df$year))
+
+# Interpolation parameters
+
+cell_resolution = 5000 # m, i.e. 5km
+methods = "Ste" # Stein's Matern kriging
+
+# Create one interpolated raster per year per mask per data source
+
+outpath = file.path(moxdir, "roms_for_public", simname, "Level3", "coldpool_tifs");
+
+for (ii in 1:length(year_vec)) {
+
+  for (im in 1:length(mymask)) {
+  
+    # File-naming convention
+    
+    outfilefun = function(mask, year, method, variable) file.path(outpath, sprintf("%s_%s_%s_%d.tif", maskname[im], method, variable, year))  
+
+    print(sprintf("Creating rasters: mask #%d, %d", im, year_vec[ii]))
+    
+    # Create rasters
+    
+    if (!file.exists(outfilefun(NULL, year_vec[ii], methods, "gear_temperature"))) {
+
+      # ... for survey data
+    
+      interpolate_variable(dat = dplyr::filter(temperature_df, year == year_vec[ii]),
+                                   dat.year = year_vec[ii],
+                                   in.crs = "EPSG:4326",
+                                   interpolation.crs = proj_crs,
+                                   cell.resolution = cell_resolution,
+                                   lon.col = "longitude",
+                                   lat.col = "latitude",
+                                   var.col = "gear_temperature",
+                                   nm = Inf,
+                                   outputfilefun = outfilefun,
+                                   select.region = mymask[[im]],
+                                   methods = methods)
+    }
+    
+    if (!file.exists(outfilefun(NULL, year_vec[ii], methods, "model_bottom_temp"))) {
+    
+      # ... for model data
+      
+      interpolate_variable(dat = dplyr::filter(temperature_df, year == year_vec[ii]),
+                                   dat.year = year_vec[ii],
+                                   in.crs = "EPSG:4326",
+                                   interpolation.crs = proj_crs,
+                                   cell.resolution = cell_resolution,
+                                   lon.col = "longitude",
+                                   lat.col = "latitude",
+                                   var.col = "model_bottom_temp",
+                                   nm = Inf,
+                                   outputfilefun = outfilefun,
+                                   select.region = mymask[[im]],
+                                   methods = methods)
+    }
+  }
+}
+
+```
+# Calculate cold pool and mean bottom temperature annual indices
+
+Metrics of mean bottom temperature and cold pool fractions are calculated for both the survey-based and model-based rasters.  The resulting survey-based time series using the SEBS mask should be identical to the one included within the coldpool package.  
+
+The resulting metrics are saved to an existing netCDF file that also includes corresponding metrics based on the model values on July 1 of each simulation year (those metrics use the same masks as in this example but do not involve any interpolation; instead, metrics are averaged across the model's native grid cells.)
+
+```{r}
+
+system(paste('ncdump -h', cpoolnc_path))
+
+# for(i in 1:length(bottom_temp_files)) {
+#   bt_raster <- terra::rast(bottom_temp_files[i])
+#   bt_df$YEAR[i] <- as.numeric(gsub("[^0-9.-]", "", names(bt_raster))) # Extract year
+#   bt_df$AREA_LTE2_KM2[i] <- bt_raster |> 
+#     cpa_from_raster(raster_units = "m", temperature_threshold = 2)
+#   bt_df$AREA_LTE1_KM2[i] <- bt_raster |> 
+#     cpa_from_raster(raster_units = "m", temperature_threshold = 1)
+#   bt_df$AREA_LTE0_KM2[i] <- bt_raster |> 
+#     cpa_from_raster(raster_units = "m", temperature_threshold = 0)
+#   bt_df$AREA_LTEMINUS1_KM2[i] <- bt_raster |> 
+#     cpa_from_raster(raster_units = "m", temperature_threshold = -1)
+#   bt_df$MEAN_GEAR_TEMPERATURE[i] <- mean(terra::values(bt_raster), na.rm = TRUE)
+#   lt100_temp <- terra::mask(bt_raster, 
+#                             lt100_strata,
+#                             touches = FALSE)
+#   bt_df$MEAN_BT_LT100M[i] <- mean(terra::values(lt100_temp), na.rm = TRUE) 
+```
+}
+
+
+    
