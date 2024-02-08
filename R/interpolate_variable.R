@@ -19,6 +19,7 @@
 #'    specific bounds, or a 4-element named vector with values xmin, xmax, ymin, 
 #'    and ymax.
 #' @param return.raster Should a raster be returned?
+#' @param outputfilefun Function of the form f(mask, year, method, var) that returns a string holding the full path name where the output raster should be stored
 #' @return Returns a data frame containing cold pool areas estimated by interpolation methods, for cutoffs at zero degrees and two degrees C. If argument write.to.file = TRUE, also writes a GeoTIFF raster to output directory.
 #' @export
 
@@ -36,7 +37,12 @@ interpolate_variable <- function(dat,
                                  select.region = "sebs",
                                  methods = c("NN", "IDW", "IDW4", "Exp", "Sph", "Bes", "Gau", "Cir", "Mat", "Ste", "Tps"),
                                  bbox = NULL,
-                                 return_raster = FALSE) {
+                                 return_raster = FALSE,
+                                 outputfilefun = NULL) {
+  
+  #---------------------
+  # Input checks
+  #---------------------
   
   if(!all(tolower(methods) %in% c("nn", "idw", "idw4", "exp",  "sph", "bes", "gau", "cir", "mat",  "ste", "tps" ))) {
   
@@ -64,11 +70,12 @@ interpolate_variable <- function(dat,
   }
   
   
+  #---------------------
+  # Raster setup
+  #---------------------
+  
   # When select.region is a character vector
   if(is.character(select.region)) {
-    
-    fpath_subdir <- select.region
-    
     # Load survey extent for masking ----
     region_mask <- akgfmaps::get_base_layers(select.region = select.region, 
                                                set.crs = interpolation.crs)$survey.area
@@ -76,59 +83,66 @@ interpolate_variable <- function(dat,
   
   # When select.region is an sf object
   if(is.data.frame(select.region)) {
-    
-    fpath_subdir <- ifelse(is.na(pre), "var", pre)
-    
     region_mask <- select.region
-    
-  }
-  
-  if(!dir.exists(here::here("output", "raster", fpath_subdir, var.col))) {
-    dir.create(here::here("output", "raster", fpath_subdir, var.col), recursive = TRUE)
   }
   
   # Set dimensions for raster cells ----
   
   if(is.null(bbox)) {
+    if (is.character(select.region)) { # Default interpolation bounds for named regions
     
-    if(select.region %in% c("sebs", "bs.south")) {
-      # Make raster for interpolation ----
-      n_dim <- floor(abs(-1625000 - -35000))/cell.resolution
+      if(select.region %in% c("sebs", "bs.south")) {
+        # Make raster for interpolation ----
+        n_dim <- floor(abs(-1625000 - -35000))/cell.resolution
       
-      interp_raster <- terra::rast(xmin = -1625000, 
-                                   xmax = -35000, 
-                                   ymin = 379500, 
-                                   ymax = 1969500, 
-                                   nrow = n_dim, 
-                                   ncol = n_dim,
+        interp_raster <- terra::rast(xmin = -1625000, 
+                                     xmax = -35000, 
+                                     ymin = 379500, 
+                                     ymax = 1969500, 
+                                     nrow = n_dim, 
+                                     ncol = n_dim,
+                                     crs = interpolation.crs)
+      
+      } else {
+      
+        if(select.region %in% c("bs.north", "nbs")) {extrap.box = c(xmn = -179.5, xmx = -157, ymn = 50, ymx = 68)}
+      
+        if(select.region %in% c("bs.all", "ebs")) {extrap.box = c(xmn = -179.5, xmx = -157, ymn = 50, ymx = 68)}
+      
+        plot.boundary <- akgfmaps::transform_data_frame_crs(data.frame(x = c(extrap.box['xmn'], extrap.box['xmx']), 
+                                                                       y = c(extrap.box['ymn'], extrap.box['ymx'])), 
+                                                            out.crs = interpolation.crs)
+      
+      
+      
+        n_dim <- floor(abs(plot.boundary$x[1] - plot.boundary$x[2]))/cell.resolution
+      
+        interp_raster <- terra::rast(xmin = plot.boundary$x[1], 
+                                     xmax = plot.boundary$x[2], 
+                                     ymin = plot.boundary$y[1], 
+                                     ymax = plot.boundary$y[2], 
+                                     nrow = n_dim, 
+                                     ncol = n_dim,
+                                     crs = interpolation.crs)
+      
+      }
+    } else { # Default interpolation bounds for sf object regions
+      bbox <- sf::st_bbox(st_buffer(region_mask, cell.resolution*5))
+      bbox <- round(bbox/cell_resolution)*cell_resolution # round to align rows/cols
+      xshift <- ((-1625000/cell_resolution) - floor(-1625000/cell_resolution))*cell_resolution
+      yshift <- ((379500/cell_resolution) - floor(379500/cell_resolution))*cell_resolution
+      bbox <- bbox + c(xshift,yshift,xshift,yshift)
+      
+      interp_raster <- terra::rast(xmin = bbox["xmin"],
+                                   xmax = bbox["xmax"],
+                                   ymin = bbox["ymin"],
+                                   ymax = bbox["ymax"],
+                                   nrows = floor((bbox["ymax"]-bbox["ymin"])/cell.resolution),
+                                   ncols = floor((bbox["xmax"]-bbox["xmin"])/cell.resolution),
                                    crs = interpolation.crs)
-      
-    } else {
-      
-      if(select.region %in% c("bs.north", "nbs")) {extrap.box = c(xmn = -179.5, xmx = -157, ymn = 50, ymx = 68)}
-      
-      if(select.region %in% c("bs.all", "ebs")) {extrap.box = c(xmn = -179.5, xmx = -157, ymn = 50, ymx = 68)}
-      
-      plot.boundary <- akgfmaps::transform_data_frame_crs(data.frame(x = c(extrap.box['xmn'], extrap.box['xmx']), 
-                                                                     y = c(extrap.box['ymn'], extrap.box['ymx'])), 
-                                                          out.crs = interpolation.crs)
-      
-      
-      
-      n_dim <- floor(abs(plot.boundary$x[1] - plot.boundary$x[2]))/cell.resolution
-      
-      interp_raster <- terra::rast(xmin = plot.boundary$x[1], 
-                                   xmax = plot.boundary$x[2], 
-                                   ymin = plot.boundary$y[1], 
-                                   ymax = plot.boundary$y[2], 
-                                   nrow = n_dim, 
-                                   ncol = n_dim,
-                                   crs = interpolation.crs)
-      
     }
-  } else {
+  } else { # User-customized interpolation bounds
     
-    # Section to maintain backwards compatibility for data2raster
     interp_raster <- terra::rast(xmin = bbox["xmin"],
                                  xmax = bbox["xmax"],
                                  ymin = bbox["ymin"],
@@ -136,7 +150,6 @@ interpolate_variable <- function(dat,
                                  nrows = floor((bbox["ymax"]-bbox["ymin"])/cell.resolution),
                                  ncols = floor((bbox["xmax"]-bbox["xmin"])/cell.resolution),
                                  crs = interpolation.crs)
-    
   }
   
   
@@ -150,6 +163,10 @@ interpolate_variable <- function(dat,
     sf::st_as_sf(coords = c("lon.col", "lat.col"), crs = in.crs) |>
     sf::st_transform(crs = interpolation.crs)
   
+  
+  #---------------------
+  # Interpolate
+  #---------------------
   
   for(ii in 1:length(methods)) {
     
@@ -226,14 +243,38 @@ interpolate_variable <- function(dat,
       return(fit)
     }
 
-    # Write masked raster
+    #---------------------
+    # Write raster to file
+    #---------------------
+    
+    # Output folder and filename setup
+  
+    if (is.character(select.region)) {
+      maskname <- select.region
+    } else if (is.data.frame(select.region)) {
+      maskname <- ifelse(is.na(pre), "var", pre)
+    }
+  
+    if (is.null(outputfilefun)) {
+      # Default location: [coldpool]/output/raster/[mask]/[var]/[mask]_[method]_[year]_[var].tif
+      outfolder <- here::here("output", "raster", maskname, var.col)
+      outfile <- paste0(maskname, "_", tolower(methods[ii]), "_", dat.year, "_", var.col, ".tif" )
+    } else {
+      # User-customized location
+      outfile <- outputfilefun(maskname, dat.year, methods[ii], var.col)
+      outfolder <- dirname(outfile)
+      outfile  <- basename(outfile)
+    }
+  
+    if (!dir.exists(outfolder)) {
+      dir.create(outfolder, recursive = TRUE)
+    }
+    
+    # Rasterize and save to geotiff
+    
     akgfmaps::rasterize_and_mask(sgrid = fit, 
                                  amask = region_mask) |>
-    coldpool::make_raster_file(filename = here::here("output", 
-                                                     "raster", 
-                                                     fpath_subdir,
-                                                     var.col, 
-                                                     paste0(fpath_subdir, "_", tolower(methods[ii]), "_", dat.year, "_", var.col, ".tif" )),
+    coldpool::make_raster_file(filename = file.path(outfolder, outfile),
                                format = "GTiff",
                                overwrite = TRUE,
                                layer_name = dat.year)
