@@ -1,7 +1,7 @@
 ---
 title: "Bottom temperature and Cold Pool Index for regional models"
 author: 
-- affiliation: 
+- affiliation: NOAA Alaska Fisheries Science Center
   description: 
   email: Kelly.Kearney@noaa.gov
   name: Kelly Kearney
@@ -15,41 +15,66 @@ addr:
 
 # Introduction
 
-This document provides code and documentation related to regional model-based versions of the cold pool indices and interpolated bottom temperature rasters.
+This document provides code and documentation related to regional model-based versions of the cold pool indices and interpolated bottom temperature rasters.  These model-based indices are used in a variety of research and management contexts to complement the survey-based indices.  This example demonstrates how to use the utilities in this package to develop these products.
 
-TODO: more detail once finished
+This script was developed with the ROMS Bering10K hindcast in mind; see Kearney et al. (2020) for more information regarding this specific model.  However, the code presented here is model agnostic, and can in theory be applied to any output that covers the eastern Bering Sea shelf region.
+
+The following files must be in place prior to running this example:
+
+- survey-replicated data file, .csv format.  See "Survey-replicated data", below.
+- cold pool indices file, .nc format.  See "Annual indices", below.
 
 ## Setup
 
-```{r setup, include=TRUE, message=FALSE, warning=FALSE, echo = TRUE}
+The following packages are used in this script, and should be loaded prior to running:
+
+- coldpool
+- akfgmaps
+- lubridate
+- ncdf4
+
+We start with some general setup that sets output figure resolution and the map projection to use for our calculations.
+
+```{r setup_nodevel, eval=FALSE}
 library(coldpool)
+```
+```{r setup_devel, include=FALSE}
+devtools::load_all()
+```
+```{r setup, include=TRUE, message=FALSE, warning=FALSE, echo = TRUE}
 library(akgfmaps)
+library(lubridate)
+library(ncdf4)
 
 # Global options, mirroring primary 0_update_cold_pool_index.Rmd
 fig_res <- 600
 proj_crs <- coldpool:::ebs_proj_crs
 ```
 
-## Survey-replicated data
 
-We can perform a rough comparison of the model output and the survey data by simply extracting the model bottom temperature field on a specific date of each year.
-
-TODO: describe survey-replicated data, and how I build it.
+All model-related files (both input and output) will be placed in a folder outside this repo, alongside other model output.  Here, we choose the Level 3 folder associated with the operational hindcast simulation of the Bering10K ROMS model (see the [Bering10K Dataset Docs](https://beringnpz.github.io/roms-bering-sea/B10K-dataset-docs/) for more information).  These details should be modified as needed for other users, computing locations, and/or models.
 
 ```{r sim_paths, include=TRUE, message=FALSE, warning=FALSE, echo = TRUE}
-# Path to mox-hyak /gscratch/bumblereem remote mount
-# Note: this is computer-specific, and will need to be changed by any user 
-# trying to run this.
 
-moxdir = "~/Documents/mox_bumblereem" 
+# Path to local mount of UW HPC folder mox.hyak.uw.edu:/gscratch/bumblereem/
+moxdir = "~/Documents/mox_bumblereem" # Note: computer-specific, change as needed
 
-# Survey-replicated model data, in .csv table format
+# Specific simulation
+simname = "B10K-K20_CORECFS" # weekly-archived "operational" hindcast
+#simname = "B10K-K20nobio_CORECFS_daily" # daily-archived variant
 
-#simname = "B10K-K20_CORECFS"
-simname = "B10K-K20nobio_CORECFS_daily"
+# Model's Level 3 folder path
+lev3path <- file.path(moxdir, "roms_for_public", simname, "Level3")
+```
 
-srepcsv_path <- file.path(moxdir, "roms_for_public", simname, "Level3", sprintf("survey_replicates_%s.csv", simname))
+## Survey-replicated data
 
+We can perform a rough comparison of model output and the survey data by simply extracting the model bottom temperature field on a specific date of each year, for example, a mid-summer date like July 1.  However, the groundfish survey temperature data are collected over a 2-3 month period rather than on a single day, so the rasters built by this package likewise reflect that non-synoptic nature, with regions in the southeast section typically more representative of early summer and the northern regions reflecting late summer conditions.  To provide a true one:one comparison between model and observations, we need to build model-derived rasters that reflect a similar pattern.
+
+The first step of this process is to build a survey-replicated dataset.  We do this by sampling the model at the closest grid cell and archived output time step to each point in the survey dataset.  The data is saved in a file that is identical to the [colpool]/data/index_hauls_temperature_data.csv file but with an additional column added for model bottom temperature. The file is generated external to this script.
+
+```{r csv_path, include=TRUE, message=FALSE, warning=FALSE, echo = TRUE}
+srepcsv_path <- file.path(lev3path, sprintf("survey_replicates_%s.csv", simname))
 ```
 ## Masks
 
@@ -64,7 +89,7 @@ akSEBS <- akgfmaps::get_base_layers(select.region = "bs.south", set.crs = proj_c
 
 # Read polygon defining the Bering10K shelf (i.e. <200m depth)
 
-modelshelfpolyfile = here::here("data", "B10K_lte200m_polygon.shp")
+modelshelfpolyfile = here::here("inst", "extdata", "B10K_lte200m_polygon.shp")
 
 b10k_lte_200 <- sf::st_read(modelshelfpolyfile, quiet = TRUE) |>
   st_set_crs("+proj=longlat") |>
@@ -94,16 +119,15 @@ maskname <- c("SEBS-noNW", "SEBS", "SEBS-noNW-modelshelf", "SEBS-modelshelf")
 
 ## Cold pool index netCDF file
 
-TODO: Describe the coldpool.nc file
+Model-based indices will be saved to a prexisting netCDF file.
 
 ```{r netcdfpath, include=TRUE, message=FALSE, warning=FALSE, echo = TRUE}
-cpoolnc_path <- file.path(moxdir, "roms_for_public", simname, "Level3",
-                          sprintf("%s_coldpool.nc", simname))
+cpoolnc_path <- file.path(lev3path, sprintf("%s_coldpool.nc", simname))
 ```
 
 # Generate bottom temperature rasters
 
-These rasters will form the base for many of the following calculations.
+With our datasets in place, we first generate raster images with bottom temperature (from both survey and survey-replicated model) interpolated to 5-km grid.  These rasters will form the base for many of the following calculations.  Note that the survey-derived rasters should be identical to those created as part of the annual coldpool updates.
 
 ```{r raster_calculations, include=TRUE, message=FALSE, warning=FALSE, echo = TRUE, results='hide'}
 
@@ -130,7 +154,9 @@ for (ii in 1:length(year_vec)) {
   
     # File-naming convention
     
-    outfilefun = function(mask, year, method, variable) file.path(outpath, sprintf("%s_%s_%s_%d.tif", maskname[im], method, variable, year))  
+    outfilefun = function(mask, year, method, variable) 
+      file.path(outpath, 
+                sprintf("%s_%s_%s_%d.tif", maskname[im], method, variable, year))  
 
     print(sprintf("Creating rasters: mask #%d, %d", im, year_vec[ii]))
     
@@ -175,34 +201,101 @@ for (ii in 1:length(year_vec)) {
 }
 
 ```
-# Calculate cold pool and mean bottom temperature annual indices
+# Annual indices: calculate and save cold pool and mean bottom temperature metrics to file
 
 Metrics of mean bottom temperature and cold pool fractions are calculated for both the survey-based and model-based rasters.  The resulting survey-based time series using the SEBS mask should be identical to the one included within the coldpool package.  
 
 The resulting metrics are saved to an existing netCDF file that also includes corresponding metrics based on the model values on July 1 of each simulation year (those metrics use the same masks as in this example but do not involve any interpolation; instead, metrics are averaged across the model's native grid cells.)
 
-```{r}
+We include some quick checks in this section to make sure we don't overwrite data already in the file, and to flag if our most recent calculations diverge from any previously-saved values.
 
-system(paste('ncdump -h', cpoolnc_path))
+```{r annualindices, include=TRUE, message=FALSE, warning=FALSE, echo = TRUE}
 
-# for(i in 1:length(bottom_temp_files)) {
-#   bt_raster <- terra::rast(bottom_temp_files[i])
-#   bt_df$YEAR[i] <- as.numeric(gsub("[^0-9.-]", "", names(bt_raster))) # Extract year
-#   bt_df$AREA_LTE2_KM2[i] <- bt_raster |> 
-#     cpa_from_raster(raster_units = "m", temperature_threshold = 2)
-#   bt_df$AREA_LTE1_KM2[i] <- bt_raster |> 
-#     cpa_from_raster(raster_units = "m", temperature_threshold = 1)
-#   bt_df$AREA_LTE0_KM2[i] <- bt_raster |> 
-#     cpa_from_raster(raster_units = "m", temperature_threshold = 0)
-#   bt_df$AREA_LTEMINUS1_KM2[i] <- bt_raster |> 
-#     cpa_from_raster(raster_units = "m", temperature_threshold = -1)
-#   bt_df$MEAN_GEAR_TEMPERATURE[i] <- mean(terra::values(bt_raster), na.rm = TRUE)
-#   lt100_temp <- terra::mask(bt_raster, 
-#                             lt100_strata,
-#                             touches = FALSE)
-#   bt_df$MEAN_BT_LT100M[i] <- mean(terra::values(lt100_temp), na.rm = TRUE) 
-```
+# Open netCDF file
+
+nc <- nc_open(cpoolnc_path)
+
+# Read relevant coordinate data
+
+thresh    <- ncvar_get(nc, "threshold")
+tdaysince <- ncvar_get(nc, "time")
+tyear <- year(tdaysince + as.Date("1900-01-01"))
+
+# Read existing data
+
+btfile <- ncvar_get(nc, "average_bottom_temp", start=c(1,2,1))
+cpfile <- ncvar_get(nc, "cold_pool_index", start=c(1,1,2,1))
+
+# Loop over new rasters and add data to file as needed
+
+for (ii in 1:length(year_vec)) {
+  
+  yidx = which(year_vec[ii] == tyear)
+  
+  filemissingdata <- all(is.na(btfile[,,yidx])) | all(is.na(cpfile[,,,yidx]))
+  
+  if (!filemissingdata & (any(is.na(btfile[,,yidx])) | any(is.na(cpfile[,,,yidx])))) {
+    warning(sprintf("Data for year %d includes some missing; check this!", year_vec[ii]))
+  }
+  
+  if (filemissingdata) {
+  
+    for (im in 1:length(mymask)) {
+  
+      print(sprintf("Saving data to file: %d mask %d:", year_vec[ii], im));
+    
+      # Raster files for this year/mask
+    
+      svyraster = terra::rast(file.path(outpath, 
+                                      sprintf("%s_%s_%s_%d.tif", 
+                                              maskname[im], 
+                                              "Ste", 
+                                              "gear_temperature",  
+                                              year_vec[ii])))  
+      modraster = terra::rast(file.path(outpath, 
+                                      sprintf("%s_%s_%s_%d.tif", 
+                                              maskname[im], 
+                                              "Ste", 
+                                              "model_bottom_temp", 
+                                              year_vec[ii]))) 
+    
+      # Calculate average bottom temperature and save to file
+    
+      btsvy <- mean(terra::values(svyraster), na.rm = TRUE)
+      btmod <- mean(terra::values(modraster), na.rm = TRUE)
+      
+      ncvar_put(nc, "average_bottom_temp", btsvy, start=c(im,2,yidx), count=c(1,1,1))
+      ncvar_put(nc, "average_bottom_temp", btmod, start=c(im,3,yidx), count=c(1,1,1))
+    
+      # Calculate and save cold pool indices
+      
+      totarea <- svyraster |>
+        cpa_from_raster(raster_units = "m", temperature_threshold = 100)
+      
+      for (ith in 1:length(thresh)) {
+        
+        cpsvy <- (svyraster |> 
+                    cpa_from_raster(raster_units = "m", temperature_threshold = thresh[ith]))/totarea
+        cpmod <- (modraster |> 
+                    cpa_from_raster(raster_units = "m", temperature_threshold = thresh[ith]))/totarea
+        
+        ncvar_put(nc, "cold_pool_index", cpsvy, start=c(ith,im,2,yidx), count=c(1,1,1,1))
+        ncvar_put(nc, "cold_pool_index", cpmod, start=c(ith,im,3,yidx), count=c(1,1,1,1))
+        
+      }
+    }
+    
+    # Update history attribute
+    
+    hisold = ncatt_get(nc, 0, "history")
+    hisnew = paste(format(Sys.time(), "%a %b %d %H:%M:%S %Y:"),
+                   "Survey and survey-replicated data added for year", 
+                   year_vec[ii])
+    ncattput(nc, 0, "history", paste(hisnew, hisold$value, sep="\n"))
+    
+  }
 }
+```
 
 
     

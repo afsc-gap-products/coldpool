@@ -20,7 +20,8 @@ interpolate_variable(
   methods = c("NN", "IDW", "IDW4", "Exp", "Sph", "Bes", "Gau", "Cir", "Mat", "Ste",
     "Tps"),
   bbox = NULL,
-  return_raster = FALSE
+  return_raster = FALSE,
+  outputfilefun = NULL
 )
 }
 \arguments{
@@ -52,6 +53,8 @@ interpolate_variable(
 ("sebs", "bs.south", "nebs", "ebs", "bs.north", "bs.all") corresponding to 
 specific bounds, or a 4-element named vector with values xmin, xmax, ymin, 
 and ymax.}
+
+\item{outputfilefun}{Function of the form f(mask, year, method, var) that returns a string holding the full path name where the output raster should be stored.  If not included, default is [coldpool_dir]/output/raster/[mask]/[var]/[mask]_[method]_[year]_[var].tif}
 
 \item{return.raster}{Should a raster be returned?}
 }

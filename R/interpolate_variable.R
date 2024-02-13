@@ -19,7 +19,7 @@
 #'    specific bounds, or a 4-element named vector with values xmin, xmax, ymin, 
 #'    and ymax.
 #' @param return.raster Should a raster be returned?
-#' @param outputfilefun Function of the form f(mask, year, method, var) that returns a string holding the full path name where the output raster should be stored
+#' @param outputfilefun Function of the form f(mask, year, method, var) that returns a string holding the full path name where the output raster should be stored.  If not included, default is [coldpool_dir]/output/raster/[mask]/[var]/[mask]_[method]_[year]_[var].tif
 #' @return Returns a data frame containing cold pool areas estimated by interpolation methods, for cutoffs at zero degrees and two degrees C. If argument write.to.file = TRUE, also writes a GeoTIFF raster to output directory.
 #' @export
 
