@@ -360,7 +360,7 @@ Center<br><a class="author_email" href="mailto:#"><a href="mailto:Kelly.Kearney@
 
 
 <div id="introduction" class="section level1">
-<h1>Introduction</h1>
+<h1>1.0 Introduction</h1>
 <p>This document provides code and documentation related to regional
 model-based versions of the cold pool indices and interpolated bottom
 temperature rasters. These model-based indices are used in a variety of
@@ -372,16 +372,28 @@ see Kearney et al. (2020) for more information regarding this specific
 model. However, the code presented here is model agnostic, and can in
 theory be applied to any output that covers the eastern Bering Sea shelf
 region.</p>
-<p>The following files must be in place prior to running this
-example:</p>
+<p>The calculation of these survey-based cold pool metrics is part of
+the annual hindcast update procedure that is run every summer. This
+script is dependent on two files that are generated as part of that
+update process prior to running:</p>
 <ul>
 <li>survey-replicated data file, .csv format. See “Survey-replicated
 data”, below.</li>
 <li>cold pool indices file, .nc format. See “Annual indices”,
 below.</li>
 </ul>
+<p>For details regarding how those files are built, see the <a href="https://github.com/beringnpz/Bering10KPostprocessing">beringnpz/Bering10KPostprocessing</a>
+repo (specifically, the surveyreplicatedbtemp.m, buildcoldpoolncfile.m,
+and addjul1btemp.m functions). The current coldpool-based code should be
+run after that process is complete in order to add survey and
+survey-replicated indices to the cold pool indices file.</p>
+<p>While this script is written similar to a vignette, we note that the
+current paths to these files will not be accessible to most users.
+Therefore, the script is meant to be used by the regional modeling team
+to run periodic updates, and otherwise is provided here as documentation
+only.</p>
 <div id="setup" class="section level2">
-<h2>Setup</h2>
+<h2>1.1 Setup</h2>
 <p>The following packages are used in this script, and should be loaded
 prior to running:</p>
 <ul>
@@ -390,8 +402,9 @@ prior to running:</p>
 <li>lubridate</li>
 <li>ncdf4</li>
 </ul>
-<p>We start with some general setup that sets output figure resolution
-and the map projection to use for our calculations.</p>
+<p>We start with some general setup that loads these packages and sets
+output figure resolution and the map projection to use for our
+calculations.</p>
 <pre class="r"><code>library(coldpool)</code></pre>
 <pre class="r"><code>library(akgfmaps)
 library(lubridate)
@@ -417,7 +430,7 @@ simname = &quot;B10K-K20_CORECFS&quot; # weekly-archived &quot;operational&quot;
 lev3path &lt;- file.path(moxdir, &quot;roms_for_public&quot;, simname, &quot;Level3&quot;)</code></pre>
 </div>
 <div id="survey-replicated-data" class="section level2">
-<h2>Survey-replicated data</h2>
+<h2>1.2 Survey-replicated data</h2>
 <p>We can perform a rough comparison of model output and the survey data
 by simply extracting the model bottom temperature field on a specific
 date of each year, for example, a mid-summer date like July 1. However,
@@ -438,7 +451,7 @@ generated external to this script.</p>
 <pre class="r"><code>srepcsv_path &lt;- file.path(lev3path, sprintf(&quot;survey_replicates_%s.csv&quot;, simname))</code></pre>
 </div>
 <div id="masks" class="section level2">
-<h2>Masks</h2>
+<h2>1.3 Masks</h2>
 <p>The primary cold pool index calculations from this package rely on
 predefined masks from the akgfmaps R package. For our model-based
 indices, we use the southeastern Bering Sea (SEBS) mask from that
@@ -488,13 +501,13 @@ mymask &lt;- list(akSEBSnonw,
 maskname &lt;- c(&quot;SEBS-noNW&quot;, &quot;SEBS&quot;, &quot;SEBS-noNW-modelshelf&quot;, &quot;SEBS-modelshelf&quot;)</code></pre>
 </div>
 <div id="cold-pool-index-netcdf-file" class="section level2">
-<h2>Cold pool index netCDF file</h2>
+<h2>1.4 Cold pool index netCDF file</h2>
 <p>Model-based indices will be saved to a prexisting netCDF file.</p>
 <pre class="r"><code>cpoolnc_path &lt;- file.path(lev3path, sprintf(&quot;%s_coldpool.nc&quot;, simname))</code></pre>
 </div>
 </div>
 <div id="generate-bottom-temperature-rasters" class="section level1">
-<h1>Generate bottom temperature rasters</h1>
+<h1>2.0 Generate bottom temperature rasters</h1>
 <p>With our datasets in place, we first generate raster images with
 bottom temperature (from both survey and survey-replicated model)
 interpolated to 5-km grid. These rasters will form the base for many of
@@ -570,21 +583,12 @@ for (ii in 1:length(year_vec)) {
   }
 }</code></pre>
 </div>
-<div id="annual-indices-calculate-and-save-cold-pool-and-mean-bottom-temperature-metrics-to-file" class="section level1">
-<h1>Annual indices: calculate and save cold pool and mean bottom
-temperature metrics to file</h1>
+<div id="annual-indices" class="section level1">
+<h1>3.0 Annual indices</h1>
 <p>Metrics of mean bottom temperature and cold pool fractions are
 calculated for both the survey-based and model-based rasters. The
 resulting survey-based time series using the SEBS mask should be
 identical to the one included within the coldpool package.</p>
-<p>The resulting metrics are saved to an existing netCDF file that also
-includes corresponding metrics based on the model values on July 1 of
-each simulation year (those metrics use the same masks as in this
-example but do not involve any interpolation; instead, metrics are
-averaged across the model’s native grid cells.)</p>
-<p>We include some quick checks in this section to make sure we don’t
-overwrite data already in the file, and to flag if our most recent
-calculations diverge from any previously-saved values.</p>
 <pre class="r"><code># Open netCDF file
 
 nc &lt;- nc_open(cpoolnc_path)
