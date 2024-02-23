@@ -29,5 +29,6 @@ RoxygenNote: 7.2.3
 Imports: colorspace,
     viridis,
     raster,
-    here
+    here,
+    tidyr
 Suggests: knitr, rmarkdown, RODBC, getPass, readr, testthat, cowplot, metR
