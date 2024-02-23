@@ -1,7 +1,7 @@
-coldpool 3.3-1 (November 13, 2023)
+coldpool 3.3-1 (February 23, 2023)
 ----------------------------------------------------------------
 
-NEW FEATURE
+NEW FEATURES
 
 - Added kriging_cv() function to compare kriging methods 
   using cross-validation for ordinary kriging,co-kriging, and 
@@ -10,3 +10,6 @@ NEW FEATURE
   expansion factors for 3D kriging based on cross-validation.
 - Added estimate_anisotropy() function for estimating 2D
   anisotropy in variograms using cross-validation.
+- Added new file naming conventions and masking options to
+  interpolate_variable(), which should deprecate data2raster()
+  in a future release.
