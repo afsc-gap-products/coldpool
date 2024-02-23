@@ -378,3 +378,5 @@ theme_multi_map_blue_strip <- function() {
 convert_ddm_to_dd <- function(x) {
   return(floor(x/100) + x%%100/60)
 }
+
+
