@@ -1,0 +1,1084 @@
+---
+title: "Summer Bottom and Surface Temperatures, and the Cold Pool Index"
+author: 
+- affiliation: RACE
+  description: Research Fish Biologist
+  email: Sean.Rohan@noaa.gov
+  name: Sean Rohan
+output: word_document
+fontsize: 12pt
+bibliography: coldpool_refs.bib
+csl: fish-and-fisheries.csl
+addr: 
+  l1: 7600 Sand Point Way NE
+  l2: NMFS RACE Division, Groundfish Assessment Program
+  l3: Seattle, WA 98115
+---
+
+```{r setup, message=FALSE, warning=FALSE, include=FALSE}
+library(coldpool)
+library(akgfmaps)
+
+if(!dir.exists("plots")) {dir.create("plots")}
+
+fig_res <- 600
+cpa_palette <- c("#21dae7", "#0071ff", "#0000e3", "#000040")
+max_year <- 2024
+min_year <- max_year - 19 # Default for 20 panel cold pool maps
+
+coldpool:::cold_pool_index$YEAR[order(coldpool:::cold_pool_index$AREA_LTE2_KM2)]
+coldpool:::cold_pool_index$YEAR[order(-1*coldpool:::cold_pool_index$MEAN_GEAR_TEMPERATURE)]
+coldpool:::cold_pool_index$YEAR[order(-1*coldpool:::cold_pool_index$MEAN_SURFACE_TEMPERATURE)]
+```
+
+```{r fig1_cold_pool_index, message=FALSE, warning=FALSE, include=FALSE}
+
+cpi_df <- coldpool:::cold_pool_index |>
+  dplyr::filter(YEAR <= max_year) |>
+  dplyr::mutate(group = YEAR < 2020,
+                var = "Cold Pool Index",
+                cpi_rank = rank(AREA_LTE2_KM2))
+
+cpi_sd <- sd(cpi_df$AREA_LTE2_KM2/1000)
+cpi_mean <- mean(cpi_df$AREA_LTE2_KM2/1000)
+
+plot_cpi_timeseries <- ggplot(data = cpi_df,
+                              mapping = aes(x = YEAR,
+                                            y = AREA_LTE2_KM2/1000,
+                                            group = group,
+                                            label = cpi_rank)) +
+  geom_point(size = rel(2),
+             color = "#000040") +
+  geom_line(color = "#000040") +
+  geom_hline(yintercept = cpi_mean,
+             linetype = 2,
+             color = "#000040") +
+  geom_hline(yintercept = cpi_mean + c(cpi_sd, -1*cpi_sd),
+             linetype = 3,
+             color = "#000040") +
+  scale_y_continuous(name = expression(bold("Cold Pool Extent"~("thousand"~km^2)))) +
+  scale_x_continuous(name = "Year",
+                     breaks = seq(1980,2020,4)) +
+  facet_wrap(~var) +
+  theme_bw() +
+  theme(axis.title = element_text(color = "black", face = "bold"),
+        axis.text = element_text(color = "black"),
+        axis.ticks = element_line(color = "black"),
+        panel.grid = element_blank(),
+        legend.title = element_blank(),
+        legend.position = "bottom",
+        strip.text = element_text(size = 9,
+                                  color = "white",
+                                  face = "bold",
+                                  margin = margin(0.5, 0, 0.5, 0, "mm")),
+        strip.background = element_rect(fill = "#0055a4",
+                                        color = NA))
+
+ragg::agg_png(filename = here::here("plots", paste0(max_year, "_cold_pool_index.png")), 
+    width = 6,
+    height = 3, 
+    units = "in",
+    res = 300)
+print(plot_cpi_timeseries)
+dev.off()
+```
+
+
+```{r fig2_cpa_stacked_area, message=FALSE, warning=FALSE, include=FALSE}
+sebs_layers <- akgfmaps::get_base_layers(select.region = "sebs",
+                                         set.crs = coldpool:::ebs_proj_crs)
+
+area_df <- coldpool:::cold_pool_index |>
+  dplyr::filter(YEAR <= max_year) |>
+  dplyr::mutate(lteminus1 = AREA_LTEMINUS1_KM2,
+                lte0 = AREA_LTE0_KM2 - AREA_LTEMINUS1_KM2,
+                lte1 = AREA_LTE1_KM2 - AREA_LTE0_KM2,
+                lte2 = AREA_LTE2_KM2 - AREA_LTE1_KM2) |>
+  dplyr::select(YEAR, lteminus1, lte0, lte1, lte2) |>
+  reshape2::melt(id.vars = "YEAR") |>
+  dplyr::mutate(variable = factor(variable, 
+                                  levels = c( "lte2", "lte1", "lte0", "lteminus1"),
+                                  labels = c("\u22642 \u00b0C", "\u22641 \u00b0C", "\u22640 \u00b0C", "\u2264-1 \u00b0C")),
+                proportion = value/sebs_layers$survey.area$AREA_KM2)
+
+stacked_area_plot <- ggplot() +
+    geom_area(data = filter(area_df, YEAR < 2020),
+            mapping = aes(x = YEAR,
+                          y = proportion,
+                          fill = variable)) +
+    geom_area(data = filter(area_df, YEAR > 2020),
+            mapping = aes(x = YEAR,
+                          y = proportion,
+                          fill = variable)) +
+  scale_fill_manual(name = "Temperature", 
+                    values = cpa_palette) +
+  scale_y_continuous(name = "Proportion of EBS Shelf (Plus NW) Survey Area",
+                     limits = c(0, 1),
+                     expand = c(0, 0),
+                     breaks = seq(0,1,0.1)) +
+  scale_x_continuous(name = "Year", 
+                     limits = c(1982, max_year + 0.25),
+                     expand = c(0, 0),
+                     breaks = seq(1982, max_year, 4)) +
+  theme_bw() +
+  theme(panel.grid.minor = element_blank(),
+        axis.title = element_text(face = "bold"),
+        axis.ticks = element_line(color = "black"),
+        panel.border = element_rect(color = "black", fill = NA),
+        panel.background = element_rect(color = "black", fill = NA),
+        legend.position = c(0.2, 0.8),
+        legend.title = element_blank())
+
+ragg::agg_png(file = here::here("plots", paste0(max_year, "_stacked_temperature.png")), height = 4, width = 6, units = "in", res = 600)
+print(stacked_area_plot)
+dev.off()
+
+stacked_area_simple_label_plot <- ggplot() +
+    geom_area(data = filter(area_df, YEAR < 2020),
+            mapping = aes(x = YEAR,
+                          y = proportion,
+                          fill = variable)) +
+    geom_area(data = filter(area_df, YEAR > 2020),
+            mapping = aes(x = YEAR,
+                          y = proportion,
+                          fill = variable)) +
+  scale_fill_manual(name = "Temperature", 
+                    values = viridis::mako(5, direction = -1, end = .8)) +
+  scale_y_continuous(name = "Proportion of EBS Shelf Survey Area",
+                     limits = c(0, 1),
+                     expand = c(0, 0),
+                     breaks = seq(0,1,0.1)) +
+  scale_x_continuous(name = "Year", 
+                     limits = c(1982, max_year + 0.25),
+                     expand = c(0, 0),
+                     breaks = seq(1982, max_year,4)) +
+  theme_bw() +
+  theme(panel.grid.minor = element_blank(),
+        axis.title = element_text(face = "bold"),
+        axis.ticks = element_line(color = "black"),
+        panel.border = element_rect(color = "black", fill = NA),
+        panel.background = element_rect(color = "black", fill = NA),
+        legend.position = c(0.1, 0.8),
+        legend.title = element_blank())
+
+ragg::agg_png(file = here::here("plots", paste0(max_year, "_stacked_temperature_simple_label.png")), height = 4, width = 6, units = "in", res = 600)
+print(stacked_area_simple_label_plot)
+dev.off()
+
+year_vec <- as.numeric(gsub("[^0-9.-]", "", names(terra::rast(coldpool:::ebs_bottom_temperature))))
+start_year <- which(year_vec == min_year)
+end_year <- which(year_vec == max_year)
+
+for(i in start_year:end_year) {
+  
+  sel_layer_df <- as.data.frame(terra::rast(coldpool:::ebs_bottom_temperature)[[i]], 
+                                na.rm = FALSE, 
+                                xy = TRUE) |>
+    tidyr::pivot_longer(cols = 3) |>
+    sf::st_as_sf(coords = c("x", "y"),
+                 crs = coldpool:::ebs_proj_crs) |>
+    dplyr::rename(year = name,
+                  temperature = value)  |>
+    stars::st_rasterize()
+  
+    sel_layer_df$temperature <- cut(sel_layer_df$temperature, 
+                                  breaks = c(-2, -1, 0, 1, 2))
+  
+    sel_layer_df <- sel_layer_df |>
+      sf::st_as_sf() |>
+      dplyr::group_by(temperature) |>
+      dplyr::summarise(n = n()) |>
+      dplyr::select(-n) |>
+      dplyr::ungroup() |>
+      sf::st_intersection(sebs_layers$survey.area)
+
+  sel_layer_df$year <- year_vec[i]
+  
+  if(i == start_year) {
+    bt_year_df <- sel_layer_df
+  } else{
+    bt_year_df <- dplyr::bind_rows(bt_year_df, sel_layer_df)
+  }
+}
+
+cpa_palette <- c("#21dae7", "#0071ff", "#0000e3", "#000040")
+
+panel_extent <- data.frame(y = c(52, 64),
+                           x = c(-175, -156)) |>
+  akgfmaps::transform_data_frame_crs(out.crs = coldpool:::ebs_proj_crs)
+
+label_2020 <- data.frame(x = mean(panel_extent$x),
+                         y = mean(panel_extent$y),
+                         label = "No\nSurvey",
+                         year = 2020) |> 
+  dplyr::filter(year <= max_year)
+
+cold_pool_cbar <- coldpool::legend_discrete_cbar(breaks = c(-Inf, -1, 0, 1, 2),
+                                                 colors = rev(cpa_palette),
+                                                 legend_direction = "vertical",
+                                                 font_size = 3.5,
+                                                 width = 0.1,
+                                                 expand_size.x = 0.3,
+                                                 expand_size.y = 0.3,
+                                                 expand.x = 0.2,
+                                                 expand.y = 0.9,
+                                                 spacing_scaling = 1,
+                                                 text.hjust = 0,
+                                                 font.family = "sans",
+                                                 neat.labels = FALSE) + 
+  annotate("text", 
+           x = 1.1, 
+           y = 2.05, 
+           label =  expression(bold("Bottom\nTemperature"~(degree*C))), 
+           size = rel(3.2)) + 
+  theme(plot.margin = unit(c(-25, 0,0,-10), units = "pt"))
+
+cold_pool_panels <- ggplot() +
+  geom_sf(data = sebs_layers$akland, fill = "black", 
+          color = NA) +
+  geom_sf(data = sebs_layers$survey.area, fill = "grey75") +
+  geom_sf(data = bt_year_df,
+          mapping = aes(fill = temperature),
+          color = NA) +
+  geom_sf(data = sebs_layers$survey.area, 
+          fill = NA, 
+          color = "black") +
+  geom_sf(data = sebs_layers$bathymetry) +
+  geom_polygon(data = data.frame(x = panel_extent$x[c(1,2,2,1,1)],
+                                 y = panel_extent$y[c(1,1,2,2,1)],
+                                 year = 2020) |> dplyr::filter(year <= max_year),
+               aes(x = x,
+                   y = y),
+               fill = "white") +
+  geom_label(data = label_2020,
+             aes(x = x,
+                 y = y,
+                 label = label),
+             label.size = NA) +
+  coord_sf(xlim = panel_extent$x, 
+           ylim = panel_extent$y,
+           expand = FALSE) +
+  scale_x_continuous(name = "Longitude", 
+                     breaks = c(-180, -170, -160)) + 
+  scale_y_continuous(name = "Latitude", 
+                     breaks = c(54, 58, 62)) +
+  scale_fill_manual(name = expression("T"~(degree*C)),
+                    values = rev(cpa_palette), 
+                    drop = FALSE,
+                    na.value = NA) +
+  theme_bw() +
+  theme(axis.title = element_blank(),
+        axis.text = element_text(color = "black"),
+        axis.ticks = element_line(color = "black"),
+        panel.border = element_rect(color = "black", fill = NA),
+        panel.background = element_rect(color = "black", fill = NA),
+        strip.text = element_text(size = 9,
+                                  color = "white",
+                                  face = "bold",
+                                  margin = margin(0.5, 0, 0.5, 0, "mm")),
+        strip.background = element_rect(fill = "#0055a4",
+                                        color = NA),
+        legend.position = "none") +
+  facet_wrap(~year, ncol = 4)
+
+cold_pool_grid <- cowplot::plot_grid(
+  cold_pool_panels,
+  cowplot::plot_grid(NA, cold_pool_cbar, NA,
+                     nrow = 3),
+  rel_widths = c(0.9,0.2)
+)
+
+coldpool_with_area <-
+  cowplot::plot_grid(
+    cowplot::plot_grid(
+      cold_pool_panels,
+      stacked_area_plot +
+        facet_wrap(~"Proportion of EBS Shelf Survey Area") +
+        scale_y_continuous(name = "Proportion",
+                           limits = c(0, 1),
+                           expand = c(0, 0),
+                           breaks = seq(0,1,0.1)) +
+        theme(legend.position = "none", 
+              plot.margin = unit(c(-5,5,5,5), units = "pt"),
+              strip.text = element_text(size = 9,
+                                        color = "white",
+                                        face = "bold",
+                                        margin = margin(0.5, 0, 0.5, 0, "mm")),
+              strip.background = element_rect(fill = "#0055a4",
+                                              color = NA)),
+      rel_heights = c(0.75, 0.25),
+      align = "h",
+      nrow = 2),
+    cowplot::plot_grid(NA, cold_pool_cbar, NA,
+                       nrow = 3,
+                       rel_heights = c(0.2, 0.6, 0.2)),
+    rel_widths = c(0.9,0.2)
+  )
+
+ragg::agg_png(file = here::here("plots", paste0(max_year, "_coldpool_with_area.png")), height = 8, width = 6, units = "in", res = fig_res)
+print(coldpool_with_area)
+dev.off()
+
+ragg::agg_png(file = here::here("plots", paste0(max_year, "_coldpool.png")), height = 6, width = 6, units = "in", res = fig_res)
+print(cold_pool_grid)
+graphics.off()
+```
+
+```{r fig3_nbs_ebs_map, message=FALSE, warning=FALSE, include=FALSE}
+nbs_ebs_temp_breaks <- c(-Inf, seq(-1,8,1), Inf)
+nbs_ebs_viridis_option <- "H" # viridis turbo palette
+
+nbs_ebs_layers <- akgfmaps::get_base_layers(select.region = "ebs",
+                                            set.crs = coldpool:::ebs_proj_crs)
+
+year_vec_nbs <- as.numeric(gsub("[^0-9.-]", "", names(terra::rast(coldpool:::nbs_ebs_bottom_temperature))))
+
+year_vec_sbs <- as.numeric(gsub("[^0-9.-]", "", names(terra::rast(coldpool:::ebs_bottom_temperature))))
+
+year_vec_grid <- tail(sort(unique(c(year_vec_nbs, year_vec_sbs))), 4)
+
+end_nbs_year <- which.min(abs(year_vec_nbs - max_year))
+
+max_nbs_year <- year_vec_nbs[end_nbs_year]
+
+if(max_year %in% year_vec_nbs) {
+  bt_year <- terra::rast(coldpool:::nbs_ebs_bottom_temperature)[[length(year_vec_nbs)]]
+} else {
+  bt_year <- terra::rast(coldpool:::ebs_bottom_temperature)[[length(year_vec_sbs)]]
+}
+
+
+bt_year_df <- as.data.frame(bt_year, 
+                            na.rm = FALSE, 
+                            xy = TRUE) |>
+  tidyr::pivot_longer(cols = 3) |>
+  sf::st_as_sf(coords = c("x", "y"),
+               crs = coldpool:::ebs_proj_crs) |>
+  dplyr::rename(year = name,
+                temperature = value)  |>
+  stars::st_rasterize()
+
+bt_year_df$temperature <- cut(bt_year_df$temperature, 
+                                breaks = nbs_ebs_temp_breaks)
+
+bt_year_df <- bt_year_df |>
+  sf::st_as_sf() |>
+  dplyr::group_by(temperature) |>
+  dplyr::summarise(n = n()) |>
+  dplyr::select(-n) |>
+  dplyr::ungroup() |>
+  sf::st_intersection(nbs_ebs_layers$survey.area)
+
+# Union to combine strata 31, 32 into 30, etc.
+nbs_ebs_agg_strata <- nbs_ebs_layers$survey.strata |>
+  dplyr::mutate(agg_stratum = Stratum) |>
+  dplyr::mutate(agg_stratum = replace(agg_stratum, agg_stratum %in% c(31,32), 30),
+                agg_stratum = replace(agg_stratum, agg_stratum %in% c(41,42,43), 40),
+                agg_stratum = replace(agg_stratum, agg_stratum %in% c(61,62), 60)) |> 
+  dplyr::group_by(agg_stratum) |> 
+  dplyr::summarise()
+
+
+# Format and layout
+
+panel_extent <- data.frame(y = c(53, 67),
+                           x = c(-174, -156)) |>
+  akgfmaps::transform_data_frame_crs(out.crs = coldpool:::ebs_proj_crs)
+
+n_temp_breaks <- length(nbs_ebs_temp_breaks)-1
+
+
+temp_map_cbar <- coldpool::legend_discrete_cbar(breaks = nbs_ebs_temp_breaks,
+                                                colors = viridis::viridis_pal(option = nbs_ebs_viridis_option)(n_temp_breaks),
+                                                legend_direction = "horizontal",
+                                                font_size = 3,
+                                                width = 0.1,
+                                                expand_size.x = 0.3,
+                                                expand_size.y = 0.3,
+                                                expand.x = 0.3,
+                                                expand.y = 0.9,
+                                                spacing_scaling = 1,
+                                                text.hjust = 0.5,
+                                                font.family = "sans",
+                                                neat.labels = FALSE) + 
+  annotate("text", 
+           x = 1.15, 
+           y = 3.5, 
+           label =  expression(bold("Bottom Temperature"~(degree*C))), 
+           size = rel(3.2)) + 
+  theme(plot.margin = unit(c(0,0, 0, 5), units = "mm"))
+
+# Make map
+ebs_nbs_temperature_map <- ggplot2::ggplot() +
+  ggplot2::geom_sf(data = nbs_ebs_layers$akland, 
+                   fill = "grey70", 
+                   color = "black") +
+  ggplot2::geom_sf(data = nbs_ebs_layers$survey.area, 
+                   fill = "grey85") +
+  ggplot2::geom_sf(data =  bt_year_df,
+                   mapping = aes(fill = temperature),
+                   color = NA) +
+  ggplot2::geom_sf(data = nbs_ebs_agg_strata,
+                   fill = NA,
+                   color = "black") +
+  ggplot2::geom_text(data = data.frame(x = -158.5, 
+                                       y = 62.4, 
+                                       lab = "Alaska") |>
+                       akgfmaps::transform_data_frame_crs(out.crs = coldpool:::ebs_proj_crs),
+                     mapping = aes(x = x,
+                                   y = y,
+                                   label = lab),
+                     size = rel(8)) +
+  ggplot2::coord_sf(xlim = panel_extent$x, 
+                    ylim = panel_extent$y) +
+  ggplot2::scale_x_continuous(name = "Longitude", 
+                              breaks = nbs_ebs_layers$lon.breaks) + 
+  ggplot2::scale_y_continuous(name = "Latitude", 
+                              breaks = nbs_ebs_layers$lat.breaks) +
+  ggplot2::scale_fill_manual(values = viridis_pal(option = nbs_ebs_viridis_option)(n_temp_breaks),
+                             drop = FALSE) +
+  theme_bw() +
+  ggplot2::theme(axis.title = element_blank(),
+                 axis.text = element_text(color = "black"),
+                 axis.ticks = element_line(color = "black"),
+                 panel.border = element_rect(color = "black", fill = NA),
+                 panel.background = element_rect(color = "black", fill = NA),
+                 legend.key.width = unit(12, "mm"),
+                 legend.position = "none",
+                 legend.direction = "horizontal", 
+                 plot.margin = unit(c(5.5, 5.5,-25,5.5), units = "pt"))
+
+ebs_nbs_map <- cowplot::plot_grid(ebs_nbs_temperature_map,
+                                  temp_map_cbar,
+                                  nrow = 2,
+                                  rel_heights = c(0.8,0.2))
+
+ragg::agg_png(filename = here::here("plots", paste0(max_year, "_nbs_ebs_temperature_map.png")), width = 6, height = 6, units = "in", res = fig_res)
+print(ebs_nbs_map)
+dev.off()
+
+nbs_ebs_bt_stack <- terra::rast(coldpool:::nbs_ebs_bottom_temperature)
+ebs_bt_stack <- terra::rast(coldpool:::ebs_bottom_temperature)
+
+template_rast <- nbs_ebs_bt_stack[[1]]
+
+template_sbs <- nbs_ebs_layers$survey.area |>
+  dplyr::filter(SURVEY == "EBS_SHELF")
+
+for(i in 1:length(year_vec_grid)) {
+  
+  if(all(tail(year_vec_grid, 4) %in% year_vec_nbs)) {
+    
+    sel_layer_df <- nbs_ebs_bt_stack[[i]]
+    
+  } else if(any(tail(year_vec_grid, 4) %in% year_vec_nbs)) {
+    
+    if(year_vec_grid[i] %in% names(nbs_ebs_bt_stack)) {
+      
+      sel_layer_df <- nbs_ebs_bt_stack[[which(names(nbs_ebs_bt_stack) == year_vec_grid[i])]]
+      
+    } else {
+      
+      sel_layer_df <- ebs_bt_stack[[which(names(ebs_bt_stack) == year_vec_grid[i])]] |>
+        terra::resample(template_rast) |>
+        terra::mask(template_sbs, touches = FALSE)
+      
+    }
+    
+    sel_layer_df <- sel_layer_df |>
+      as.data.frame(na.rm = FALSE, 
+                    xy = TRUE) |>
+      tidyr::pivot_longer(cols = 3) |>
+      sf::st_as_sf(coords = c("x", "y"),
+                   crs = coldpool:::ebs_proj_crs) |>
+      dplyr::rename(year = name,
+                    temperature = value)  |>
+      stars::st_rasterize()
+    
+    sel_layer_df$temperature <- cut(sel_layer_df$temperature, 
+                                    breaks = nbs_ebs_temp_breaks)
+    
+    sel_layer_df <- sel_layer_df |>
+      sf::st_as_sf() |>
+      dplyr::group_by(temperature) |>
+      dplyr::summarise(n = n()) |>
+      dplyr::select(-n) |>
+      dplyr::ungroup() |>
+      sf::st_intersection(nbs_ebs_layers$survey.area)
+    
+    
+  }
+  
+  sel_layer_df$year <- year_vec_grid[i]
+  
+  if(i == 1) {
+    bt_year_df <- sel_layer_df
+  } else{
+    bt_year_df <- dplyr::bind_rows(bt_year_df, sel_layer_df)
+  }
+}
+
+
+
+nbs_ebs_st_stack <- terra::rast(coldpool:::nbs_ebs_surface_temperature)
+ebs_st_stack <- terra::rast(coldpool:::ebs_surface_temperature)
+
+template_rast <- nbs_ebs_st_stack[[1]]
+
+template_sbs <- nbs_ebs_layers$survey.area |>
+  dplyr::filter(SURVEY == "EBS_SHELF")
+
+for(i in 1:length(year_vec_grid)) {
+  
+  if(all(tail(year_vec_grid, 4) %in% year_vec_nbs)) {
+    
+    sel_layer_df <- nbs_ebs_st_stack[[i]]
+    
+  } else if(any(tail(year_vec_grid, 4) %in% year_vec_nbs)) {
+    
+    if(year_vec_grid[i] %in% names(nbs_ebs_st_stack)) {
+      
+      sel_layer_df <- nbs_ebs_st_stack[[which(names(nbs_ebs_st_stack) == year_vec_grid[i])]]
+      
+    } else {
+      
+      sel_layer_df <- ebs_st_stack[[which(names(ebs_st_stack) == year_vec_grid[i])]] |>
+        terra::resample(template_rast) |>
+        terra::mask(template_sbs, touches = FALSE)
+      
+    }
+    
+    sel_layer_df <- sel_layer_df |>
+      as.data.frame(na.rm = FALSE, 
+                    xy = TRUE) |>
+      tidyr::pivot_longer(cols = 3) |>
+      sf::st_as_sf(coords = c("x", "y"),
+                   crs = coldpool:::ebs_proj_crs) |>
+      dplyr::rename(year = name,
+                    temperature = value)  |>
+      stars::st_rasterize()
+    
+    sel_layer_df$temperature <- cut(sel_layer_df$temperature, 
+                                    breaks = nbs_ebs_temp_breaks)
+    
+    sel_layer_df <- sel_layer_df |>
+      sf::st_as_sf() |>
+      dplyr::group_by(temperature) |>
+      dplyr::summarise(n = n()) |>
+      dplyr::select(-n) |>
+      dplyr::ungroup() |>
+      sf::st_intersection(nbs_ebs_layers$survey.area)
+    
+    
+  }
+  
+  sel_layer_df$year <- year_vec_grid[i]
+  
+  if(i == 1) {
+    sst_year_df <- sel_layer_df
+  } else{
+    sst_year_df <- dplyr::bind_rows(sst_year_df, sel_layer_df)
+  }
+}
+
+
+# Four panel bottom and surface temperature maps
+
+# Union to combine strata 31, 32 into 30, etc.
+nbs_ebs_agg_strata <- nbs_ebs_layers$survey.strata |>
+  dplyr::mutate(agg_stratum = Stratum) |>
+  dplyr::mutate(agg_stratum = replace(agg_stratum, agg_stratum %in% c(31, 32), 30),
+                agg_stratum = replace(agg_stratum, agg_stratum %in% c(41, 42, 43), 40),
+                agg_stratum = replace(agg_stratum, agg_stratum %in% c(61, 62), 60)) |> 
+  dplyr::group_by(agg_stratum) |> 
+  dplyr::summarise()
+
+ebs_nbs_bt_temperature_map <- ggplot2::ggplot() +
+  ggplot2::geom_sf(data = nbs_ebs_layers$akland, 
+                   fill = "grey70", 
+                   color = "black") +
+  ggplot2::geom_sf(data = nbs_ebs_layers$survey.area, 
+                   fill = "grey85", 
+                   color = "black") +
+  ggplot2::geom_sf(data = bt_year_df,
+                   mapping = aes(fill = temperature),
+                   color = NA) +
+  ggplot2::geom_sf(data = nbs_ebs_layers$survey.area, 
+                   fill = NA, 
+                   color = "black") +
+  ggplot2::facet_wrap(~year, ncol = 2, nrow = 2) +
+  ggplot2::geom_sf(data = nbs_ebs_agg_strata, 
+                   fill = NA,
+                   color = "black") +
+  ggplot2::geom_sf(data = nbs_ebs_layers$graticule,
+                   alpha = 0.3) +
+  ggplot2::coord_sf(xlim = nbs_ebs_layers$plot.boundary$x, 
+                    ylim = nbs_ebs_layers$plot.boundary$y) +
+  ggplot2::scale_x_continuous(name = "Longitude", 
+                              breaks = nbs_ebs_layers$lon.breaks) + 
+  ggplot2::scale_y_continuous(name = "Latitude", 
+                              breaks = nbs_ebs_layers$lat.breaks) +
+  ggplot2::scale_fill_manual(values = viridis_pal(option = nbs_ebs_viridis_option)(length(nbs_ebs_temp_breaks)-1),
+                             na.value = NA) +
+  coldpool::theme_multi_map_blue_strip() +
+  theme(legend.position = "none",
+        plot.margin = unit(c(5,5,-5,5), units = "mm"),
+        axis.title = element_blank(),
+        axis.text = element_text(size = 9))
+
+ebs_nbs_bt_map_grid <- cowplot::plot_grid(ebs_nbs_bt_temperature_map,
+                                          temp_map_cbar,
+                                          nrow = 2,
+                                          rel_heights = c(0.85,0.15))
+
+ragg::agg_png(filename = here::here("plots", paste0(max_year, "_nbs_ebs_temperature_map_grid.png")), width = 6, height = 6, units = "in", res = fig_res)
+print(ebs_nbs_bt_map_grid)
+dev.off()
+
+ebs_nbs_sst_temperature_map <- ggplot2::ggplot() +
+  ggplot2::geom_sf(data = nbs_ebs_layers$akland,
+                   fill = "grey70",
+                   color = "black") +
+  ggplot2::geom_sf(data = nbs_ebs_layers$survey.area,
+                   fill = "grey85",
+                   color = "black") +
+  ggplot2::geom_sf(data = sst_year_df,
+                   mapping = aes(fill = temperature),
+                   color = NA) +
+  ggplot2::facet_wrap(~year, ncol = 2, nrow = 2) +
+  ggplot2::geom_sf(data = nbs_ebs_agg_strata,
+                   fill = NA,
+                   color = "black") +
+  ggplot2::geom_sf(data = nbs_ebs_layers$graticule,
+                   alpha = 0.3) +
+  ggplot2::coord_sf(xlim = nbs_ebs_layers$plot.boundary$x,
+                    ylim = nbs_ebs_layers$plot.boundary$y) +
+  ggplot2::scale_x_continuous(name = "Longitude",
+                              breaks = nbs_ebs_layers$lon.breaks) +
+  ggplot2::scale_y_continuous(name = "Latitude",
+                              breaks = nbs_ebs_layers$lat.breaks) +
+  ggplot2::scale_fill_manual(values = viridis_pal(option = nbs_ebs_viridis_option)(length(nbs_ebs_temp_breaks)-1),
+                             na.value = NA,
+                             drop = FALSE) +
+  coldpool::theme_multi_map_blue_strip() +
+  theme(legend.position = "none",
+        plot.margin = unit(c(5,5,-5,5), units = "mm"),
+        axis.title = element_blank(),
+        axis.text = element_text(size = 9))
+
+sst_map_cbar <- coldpool::legend_discrete_cbar(breaks = nbs_ebs_temp_breaks,
+                                               colors = viridis::viridis_pal(option = nbs_ebs_viridis_option),
+                                               legend_direction = "horizontal",
+                                               font_size = 3,
+                                               width = 0.1,
+                                               expand_size.x = 0.3,
+                                               expand_size.y = 0.3,
+                                               expand.x = 0.3,
+                                               expand.y = 0.9,
+                                               spacing_scaling = 1.2,
+                                               text.hjust = 0.5,
+                                               font.family = "sans",
+                                               neat.labels = FALSE) +
+  annotate("text",
+           x = 1.15,
+           y = 3.5,
+           label =  expression(bold("Surface Temperature"~(degree*C))),
+           size = rel(3.2)) +
+  theme(plot.margin = unit(c(0,0, 0, 5), units = "mm"))
+
+ebs_nbs_sst_map_grid <- cowplot::plot_grid(ebs_nbs_sst_temperature_map,
+                                           sst_map_cbar,
+                                           nrow = 2,
+                                           rel_heights = c(0.85,0.15))
+
+ragg::agg_png(filename = here::here("plots", paste0(max_year, "_nbs_ebs_sst_map_grid.png")), width = 6, height = 6, units = "in", res = fig_res)
+print(ebs_nbs_sst_map_grid)
+dev.off()
+
+```
+
+```{r fig4_mean_temperature, message=FALSE, warning=FALSE, include=FALSE}
+sebs_temperatures <- coldpool:::cold_pool_index |>
+    dplyr::filter(YEAR <= max_year) |>
+  dplyr::select(YEAR, MEAN_GEAR_TEMPERATURE, MEAN_SURFACE_TEMPERATURE) |>
+  dplyr::rename(Bottom = MEAN_GEAR_TEMPERATURE, 
+                Surface = MEAN_SURFACE_TEMPERATURE) |>
+  dplyr::mutate(group = YEAR < 2020,
+                region = "Eastern Bering Sea (summer BT survey)") |>
+  reshape2::melt(id.vars = c("YEAR", "group", "region"))
+
+nbs_temperatures <- coldpool:::nbs_mean_temperature |>
+    dplyr::filter(YEAR <= max_year) |>
+  dplyr::select(YEAR, MEAN_GEAR_TEMPERATURE, MEAN_SURFACE_TEMPERATURE) |>
+  dplyr::rename(Bottom = MEAN_GEAR_TEMPERATURE, 
+                Surface = MEAN_SURFACE_TEMPERATURE) |>
+  dplyr::mutate(group = YEAR,
+                region = "Northern Bering Sea (summer BT survey)") |>
+  reshape2::melt(id.vars = c("YEAR", "group", "region"))
+
+all_temperatures <- dplyr::bind_rows(sebs_temperatures,
+                                     nbs_temperatures)
+
+sebs_sst_mean <- mean(sebs_temperatures$value[sebs_temperatures$variable == "Surface"])
+sebs_bt_mean <- mean(sebs_temperatures$value[sebs_temperatures$variable == "Bottom"])
+nbs_sst_mean <- mean(nbs_temperatures$value[nbs_temperatures$variable == "Surface"])
+nbs_bt_mean <- mean(nbs_temperatures$value[nbs_temperatures$variable == "Bottom"])
+
+color_sst <- "darkgreen"
+color_bt <- "darkblue"
+
+ebs_mean_temp_df <- data.frame(region = c(rep("Eastern Bering Sea (summer BT survey)", 2),
+                                          rep("Northern Bering Sea (summer BT survey)", 2)),
+                               variable = rep(c("Bottom", "Surface"), 2),
+                               value = c(sebs_bt_mean,
+                                         sebs_sst_mean,
+                                         nbs_bt_mean,
+                                         nbs_sst_mean))
+
+plot_average_temperature <- ggplot(data = all_temperatures,
+                                   mapping = aes(x = YEAR,
+                                                 y = value,
+                                                 color = variable,
+                                                 shape = variable, 
+                                                 group = paste0(group, variable))) +
+  geom_point(size = rel(2)) +
+  geom_line() +
+  geom_hline(data = ebs_mean_temp_df,
+             aes(yintercept = value,
+             color = variable),
+             linetype = 2) +
+  scale_color_manual(values = c(color_bt, color_sst),
+                     drop = FALSE) +
+  scale_y_continuous(name = expression(bold("Average Temperature"~(degree*C))), 
+                     limits = c(0,11.2),
+                     breaks = seq(0,12,2),
+                     expand = c(0,0)) +
+  scale_x_continuous(name = "Year",
+                     breaks = seq(1980,2020,10)) +
+  facet_wrap(~region, scales = "free") +
+  theme_bw() +
+  theme(axis.title = element_text(color = "black", face = "bold"),
+        axis.text = element_text(color = "black"),
+        axis.ticks = element_line(color = "black"),
+        panel.border = element_rect(color = "black", fill = NA),
+        panel.background = element_rect(color = "black", fill = NA),
+        panel.grid = element_blank(),
+        legend.title = element_blank(),
+        legend.position = "bottom",
+        legend.key = element_rect(color = NA),
+        strip.text = element_text(size = 9,
+                                  color = "white",
+                                  face = "bold",
+                                  margin = margin(0.5, 0, 0.5, 0, "mm")),
+        strip.background = element_rect(fill = "#0055a4",
+                                        color = NA))
+
+plot_sebs_average_temperature <- ggplot(data = all_temperatures |>
+               dplyr::filter(region == "Eastern Bering Sea (summer BT survey)"),
+                                   mapping = aes(x = YEAR,
+                                                 y = value,
+                                                 color = variable,
+                                                 shape = variable, 
+                                                 group = paste0(group, variable))) +
+  geom_point(size = rel(2)) +
+  geom_line() +
+  geom_hline(data = ebs_mean_temp_df |>
+               dplyr::filter(region == "Eastern Bering Sea (summer BT survey)"),
+             aes(yintercept = value,
+             color = variable),
+             linetype = 2) +
+  scale_color_manual(values = c(color_bt, color_sst),
+                     drop = FALSE) +
+  scale_y_continuous(name = expression(bold("Average Temperature"~(degree*C))), 
+                     limits = c(0,11.2),
+                     breaks = seq(0,12,2),
+                     expand = c(0,0)) +
+  scale_x_continuous(name = "Year",
+                     breaks = seq(1980,2020,10)) +
+  facet_wrap(~region, scales = "free") +
+  theme_bw() +
+  theme(axis.title = element_text(color = "black", face = "bold"),
+        axis.text = element_text(color = "black"),
+        axis.ticks = element_line(color = "black"),
+        panel.border = element_rect(color = "black", fill = NA),
+        panel.background = element_rect(color = "black", fill = NA),
+        panel.grid = element_blank(),
+        legend.title = element_blank(),
+        legend.key = element_rect(color = NA),
+        legend.position = "bottom",
+        strip.text = element_text(size = 9,
+                                  color = "white",
+                                  face = "bold",
+                                  margin = margin(0.5, 0, 0.5, 0, "mm")),
+        strip.background = element_rect(fill = "#0055a4",
+                                        color = NA))
+
+ragg::agg_png(file = here::here("plots", paste0(max_year, "_average_temperature.png")), width = 6, height = 3, units = "in", res = fig_res)
+print(plot_average_temperature)
+dev.off()
+
+ragg::agg_png(file = here::here("plots", paste0(max_year, "_plot_sebs_average_temperature.png")), width = 6, height = 3, units = "in", res = fig_res)
+print(plot_sebs_average_temperature)
+dev.off()
+```
+
+```{r zscore_temperature, message=FALSE, warning=FALSE, include=FALSE}
+cp_summary <- dplyr::bind_rows(
+  dplyr::mutate(cold_pool_index, 
+                diff = MEAN_GEAR_TEMPERATURE - mean(MEAN_GEAR_TEMPERATURE)) |> 
+    dplyr::mutate(sign = sign(diff),
+                  z = diff/sd(MEAN_GEAR_TEMPERATURE)) |>
+    dplyr::inner_join(data.frame(sign = c(-1,1),
+                                 symbol = c("-","+"),
+                                 col = c(1,2))) |>
+    dplyr::select(YEAR, diff, symbol, z, col) |>
+    dplyr::mutate(var = "Bottom temperature"),
+  dplyr::mutate(cold_pool_index, 
+                diff = MEAN_SURFACE_TEMPERATURE - mean(MEAN_SURFACE_TEMPERATURE)) |> 
+    dplyr::mutate(sign = sign(diff),
+                  z = diff/sd(MEAN_SURFACE_TEMPERATURE)) |>
+    dplyr::inner_join(data.frame(sign = c(-1,1),
+                                 symbol = c("-","+"),
+                                 col = c(1,2))) |>
+    dplyr::select(YEAR, diff, symbol, z, col) |>
+    dplyr::mutate(var = "Sea surface temperature"),
+  dplyr::mutate(cold_pool_index, 
+                diff = AREA_LTE2_KM2 - mean(AREA_LTE2_KM2)) |> 
+    dplyr::mutate(sign = sign(diff),
+                  z = diff/sd(AREA_LTE2_KM2)) |>
+    dplyr::inner_join(data.frame(sign = c(-1,1),
+                                 symbol = c("-","+"),
+                                 col = c(2,1))) |>
+    dplyr::select(YEAR, diff, symbol, z, col) |>
+    dplyr::mutate(var = "Cold pool area")) |>
+  dplyr::mutate(group = YEAR < 2020,
+                var = factor(var, 
+                             levels = c("Bottom temperature",
+                                        "Sea surface temperature",
+                                        "Cold pool area")))
+
+zscore_plot <- ggplot(data = cp_summary, 
+       aes(x = YEAR, 
+           y = z, 
+           group = group)) +
+  geom_hline(yintercept = c(0), linetype = 1) +
+  geom_hline(yintercept = c(-1,1), linetype = 2) +
+  geom_hline(yintercept = c(-2,2), linetype = 3) +
+  geom_point() +
+  geom_line() +
+  geom_text(data = cp_summary,
+            aes(x = YEAR, y = 2.5, label = symbol, color = factor(col))) +
+  facet_wrap(~var, nrow = 3) +
+  scale_x_continuous(name = "Year") +
+  scale_y_continuous(name = "Anomaly") +
+  scale_color_manual(values = c("blue", "red")) +
+  theme_bw() +
+  theme(axis.text = element_text(color = "black"),
+        axis.ticks = element_line(color = "black"),
+        panel.border = element_rect(color = "black", fill = NA),
+        panel.background = element_rect(color = "black", fill = NA),
+        strip.text = element_text(size = 9,
+                                  color = "white",
+                                  face = "bold",
+                                  margin = margin(0.5, 0, 0.5, 0, "mm")),
+        strip.background = element_rect(fill = "#0055a4",
+                                        color = NA),
+        legend.position = "none")
+
+ragg::agg_png(file = here::here("plots", paste0(max_year, "_anomaly.png")), width = 6, height = 6, units = "in", res = fig_res)
+print(zscore_plot)
+dev.off()
+```
+
+```{r maps_by_year, message=FALSE, warning=FALSE, include=FALSE}
+year_vec <- c(1982:2019, 2021:2023)
+
+nbs_years <- c(2010, 2017, 2019, 2021:2023)
+
+temp_breaks <- c(-Inf, seq(-1,8,1), Inf)
+color_pal <- "H"
+fig_res <- 300
+
+dir.create(here::here("plots", "annual_bt"))
+
+sebs_layers <- akgfmaps::get_base_layers(select.region = "sebs",
+                                         set.crs = coldpool:::ebs_proj_crs)
+
+nbs_layers <- akgfmaps::get_base_layers(select.region = "ebs",
+                                         set.crs = coldpool:::ebs_proj_crs, use.survey.bathymetry = TRUE)
+
+bt_raster_sebs <- terra::rast(coldpool::ebs_bottom_temperature)
+
+bt_raster_nbs <- terra::rast(coldpool::nbs_ebs_bottom_temperature)
+
+bt_raster_2018 <- terra::mask(bt_raster_nbs[[names(bt_raster_nbs) == 2018]],
+                              dplyr::filter(nbs_layers$survey.grid,
+                                            STATIONID %in% c("V-01", "U-01", "T-01", "S-01", "R-01",
+                                                             "V-02", "U-02", "T-02", "S-02", "R-02",
+                                                             "DD-03", "ZZ-03", "Y-03", "X-03", "W-03", "V-03", "U-03", "T-03", "S-03", "R-03",
+                                                             "DD-04", "CC-04", "BB-04", "AA-04", "ZZ-04", "Y-04", "X-04", "W-04", "V-04", "U-04", "T-04", "S-04", "R-04",
+                                                             "DD-05", "CC-05", "BB-05", "AA-05", "ZZ-05", "Y-05", "X-05", "W-05", "V-05", "U-05", "T-05", "S-05", "R-05",
+                                                             "DD-06", "CC-06", "BB-06", "AA-06", "ZZ-06", "Y-06", "X-06", "W-06", "V-06", "U-06", "T-06", "S-06", "R-06",
+                                                             "DD-07", "CC-07", "BB-07", "AA-07", "ZZ-07", "Y-07", "X-07", "W-07", "V-07", "U-07", "T-07", "S-07", "R-07",
+                                                             "DD-08", "CC-08", "BB-08", "AA-08", "ZZ-08", "Y-08", "X-08", "W-08", "V-08", "U-08", "T-08", "S-08", "R-08",
+                                                             "DD-09", "CC-09", "BB-09", "AA-09", "ZZ-09", "Y-09", "X-09", "W-09", "V-09", "U-09", "T-09", "S-09", "R-09",
+                                                             "DD-10", "CC-10", "BB-10", "AA-10", "ZZ-10", "Y-10", "X-10", "W-10", "V-10", "U-10", "T-10", "S-10", "R-10")),
+                              inverse = TRUE,
+                              touches = TRUE)
+
+
+
+
+for(ii in 1:length(year_vec)) {
+  
+  if(year_vec[ii] == 2018) {
+     sel_raster <- bt_raster_2018
+     mask_layer <- nbs_layers$survey.area
+  } else {
+    if(year_vec[ii] %in% nbs_years) {
+      sel_raster <- bt_raster_nbs
+      mask_layer <- nbs_layers$survey.area
+    } else {
+      sel_raster <- bt_raster_sebs
+      mask_layer <- sebs_layers$survey.area
+    }
+  
+  }
+  
+  bt_df <- as.data.frame(sel_raster[[names(sel_raster) == year_vec[ii]]],
+                         xy = TRUE,
+                         na.rm = FALSE) |>
+    tidyr::pivot_longer(cols = 3) |>
+    sf::st_as_sf(coords = c("x", "y"),
+                 crs = coldpool:::ebs_proj_crs) |>
+    dplyr::rename(year = name,
+                  temperature = value)  |>
+    stars::st_rasterize()
+  
+  bt_df$temperature <- cut(bt_df$temperature,
+                           breaks = temp_breaks)
+  
+  bt_df <- bt_df |>
+    sf::st_as_sf() |>
+    dplyr::group_by(temperature) |>
+    dplyr::summarise(n = n()) |>
+    dplyr::select(-n) |>
+    dplyr::ungroup() |>
+    sf::st_intersection(mask_layer)
+    
+  bt_df$year <- year_vec[ii]
+  
+  if(ii == 1) {
+    bt_year_df <- bt_df
+  } else {
+    bt_year_df <- dplyr::bind_rows(bt_year_df, bt_df) 
+  }
+
+}
+
+temp_map_cbar <- coldpool::legend_discrete_cbar(breaks = temp_breaks,
+                                                colors = viridis::viridis_pal(option = color_pal)(length(temp_breaks)-1),
+                                                legend_direction = "horizontal",
+                                                font_size = 3,
+                                                width = 0.1,
+                                                expand_size.x = 0.3,
+                                                expand_size.y = 0.3,
+                                                expand.x = 0.3,
+                                                expand.y = 0.9,
+                                                spacing_scaling = 1,
+                                                text.hjust = 0.5,
+                                                font.family = "sans",
+                                                neat.labels = FALSE) + 
+  annotate("text", 
+           x = 1.15, 
+           y = 3.5, 
+           label =  expression(bold("Bottom Temperature"~(degree*C))), 
+           size = rel(3.2)) + 
+  theme(plot.margin = unit(c(0,0, 0, 5), units = "mm"))
+
+for(ii in 1:length(year_vec)) {
+  
+    sel_year <- dplyr::filter(bt_year_df, year == year_vec[ii])
+  
+  temp_map <- ggplot() +
+      ggplot2::geom_sf(data = nbs_layers$akland, 
+                       fill = "grey70", 
+                       color = "black") +
+      ggplot2::geom_sf(data = sel_year,
+                       mapping = aes(fill = temperature),
+                       color = NA) +
+      ggplot2::geom_sf(data = nbs_layers$bathymetry) +
+      ggplot2::geom_sf(data = nbs_layers$survey.area, 
+                      fill = NA, 
+                      color = "black") +
+      ggplot2::geom_sf(data = nbs_layers$graticule,
+                       alpha = 0.3) +
+      ggplot2::coord_sf(xlim = nbs_layers$plot.boundary$x, 
+                        ylim = nbs_layers$plot.boundary$y) +
+      ggplot2::scale_x_continuous(name = "Longitude", 
+                                  breaks = nbs_layers$lon.breaks) + 
+      ggplot2::scale_y_continuous(name = "Latitude", 
+                                  breaks = nbs_layers$lat.breaks) +
+      facet_wrap(~year, ncol = 4) +
+      ggplot2::scale_fill_manual(values = viridis_pal(option = color_pal)(length(temp_breaks)-1),
+                                 na.value = NA,
+                                 drop = FALSE) +
+      coldpool::theme_multi_map_blue_strip() +
+      theme(legend.position = "none",
+            plot.margin = unit(c(5,5,-5,5), units = "mm"),
+            axis.title = element_blank(),
+            axis.text = element_text(size = 9))
+    
+  temp_map_grid <- cowplot::plot_grid(temp_map,
+                       temp_map_cbar,
+                       nrow = 2,
+                       rel_heights = c(0.8,0.2))
+  
+  ragg::agg_png(filename = here::here("plots", "annual_bt", paste0(year_vec[ii], "_ebs_bt_map.png")), 
+      width = 6, height = 6, units = "in", res = fig_res)
+  print(temp_map_grid)
+  dev.off()
+    
+  
+}
+```
+
+Contributed by Sean Rohan^1^ and Lewis Barnett^1^   
+^1^ Resource Assessment and Conservation Engineering Division, Alaska Fisheries Science Center, National Marine Fisheries Service, NOAA  
+**Contact**: sean.rohan@noaa.gov
+**Last updated**:  September 2023
+
+```{r fig.height=3,fig.width=6,fig.cap="\\label{fig:figs}Figure 1. Area of the cold pool in the eastern Bering Sea (EBS) shelf bottom trawl survey area, as measured using observations from the EBS bottom trawl survey (including northwest strata 82 and 90) from 1982–2022. Dashed line denotes the grand mean of the time series and dotted lines show ±1 standard deviation.", message=FALSE, warning=FALSE, echo=FALSE}
+print(plot_cpi_timeseries)
+```
+
+Summer SST and Bottom Temperatures
+Contributed by Sean Rohan, sean.rohan@noaa.gov, and Lewis Barnett, lewis.barnett@noaa.gov
+Mean surface and bottom temperatures are calculated from spatially interpolated data collected during AFSC summer bottom trawl surveys of the EBS shelf (1982-2023, except 2020) and NBS (2010, 2017–2019, 2021–2023). Temperature data are not adjusted for effects of seasonal heating. Temperature data are interpolated using ordinary kriging with Stein's parameterization of the Matern semivariogram model (Rohan et al., 2022). Code, figures, and data products presented in this contribution are provided in the coldpool R package [https://github.com/afsc-gap-products/coldpool](https://github.com/afsc-gap-products/coldpool).
+
+In the EBS, the mean surface temperature (6.34&deg;C) was near the time series average (6.75&deg;C) and 1.12&deg;C colder than in 2022. The 2023 mean bottom temperature in the EBS (2.28&deg;C) was near the time series mean of 2.49&deg;C and 0.28&deg;C colder than the mean bottom temperature in 2022 (Figure 24). The near-average bottom temperatures in 2022 and 2023 are a departure from extremely warm conditions in 2016-2021 that had four of the five warmest years in the times series. In the NBS, the mean surface temperature (8.05oC) was slightly below the time series average (9.18oC) and the mean bottom temperature (3.92oC) was near the time series average (3.94oC). However, the time series for the NBS is extremely short compared to the EBS.
+
+In 2023, bottom temperatures $\leq$ -1&deg;C were observed south of St. Matthew Island for the first time since 2015 (Figure 25). The average bottom temperature in the inner domain of the EBS survey area (2.17&deg;C) was the coldest observed since 2013 (1.64&deg;C). The coldest bottom temperatures ($\leq$ -1&deg;C) within the combined EBS shelf and NBS survey areas were in the middle shelf (between 50 and 100 m isobaths), extending from south of St. Matthew Island at ~61.5&deg;N to the U.S.-Russia maritime boundary. This area of cold water was considerably larger than in 2019 and 2021, when bottom temperatures $\leq$ 0&deg;C were confined to a small area along the U.S.-Russia Convention Line.
+
+The warmest bottom temperatures were along the coast of the Alaska mainland between Nunivak Island and Norton Sound. However, the area north of Nunivak Island at 60.5&deg;N is sampled at the end of the survey and reflects seasonal warming since sampling occurs 35-45 days later than in the area directly south.
+
+
+Cold Pool Extent - AFSC Bottom Trawl Survey
+Contributed by Sean Rohan, sean.rohan@noaa gov, and Lewis Barnett, lewis.barnett@noaa gov
+The cold pool extent is calculated from spatially interpolated bottom temperature data collected during AFSC summer bottom trawl surveys of the EBS shelf (1982-2023, except 2020). See 'Summer SST and Bottom Temperatures' contribution above for more details.
+
+The spatial footprint of the cold pool in 2023 was similar to the most recent near-average years in 2011, 2017, and 2022 (Figure 33). North of ∼57.5&deg;N, the cold pool covered nearly the entire middle domain of the survey area between the 50m and 100m isobaths. The extents of the $\leq$ -1&deg;C (26,550 km^2^) and $\leq$ 0&deg;C (62,400 km^2^) isotherms were larger than they have been since the 2015 survey. The extent of the $\leq$ 1&deg;C isotherm (110,875 km^2^) was the largest it’s been since 2013. The extents of the $\leq$ -1&deg;C, $\leq$ 0&deg;C, and $\leq$ 1&deg;C isotherms were all larger than their time series averages of 23,579 km^2^, 54,158 km^2^, and 102,906 km^2^, respectively.
+
+
+```{r fig.cap="\\label{fig:figs}Figure 2. Cold pool extent in the eastern Bering Sea (EBS), as measured using observations from the EBS bottom trawl survey. Upper panels: Maps of cold pool extent in the EBS shelf survey area from 2002–2021. Lower panel: Extent of the cold pool in proportion to the total EBS shelf survey area from 1982–2022. Fill colors denote bottom temperatures $\\leq$ 2&deg;C, $\\leq$ 1&deg;C, $\\leq$ 0&deg;C, and $\\leq$ -1&deg;C.", fig.height=8, fig.width=6, message=FALSE, warning=FALSE, echo=FALSE}
+print(coldpool_with_area)
+```
+
+
+```{r fig.height=3,fig.width=6,fig.cap="\\label{fig:figs}Figure 3. Average summer surface (green triangles) and bottom (blue circles) temperatures (&deg;C) on the eastern Bering Sea (EBS) shelf based on data collected during standardized summer bottom trawl surveys from 1982–2022. Dashed lines represent the time series mean.", message=FALSE, warning=FALSE, echo=FALSE}
+print(plot_sebs_average_temperature)
+```
+
+```{r fig.height=6,fig.width=6,fig.cap="\\label{fig:figs}Figure 4. Contour maps of bottom temperatures from the 2018, 2019, 2021, and 2022 eastern Bering Sea shelf and northern Bering Sea bottom trawl surveys.", message=FALSE, warning=FALSE, echo=FALSE}
+print(ebs_nbs_bt_map_grid)
+```

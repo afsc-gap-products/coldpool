@@ -55,30 +55,6 @@ if(update_sysdata) {
   coldpool:::get_data(channel = channel, include_preliminary_data = NULL)
 }
 
-# Temporarily add unfinalized NBS data -- COMMENT OUT WHEN 2023 NBS DATA ARE FINALIZED
-
-# nbs_layers <- get_base_layers(select.region = "nbs", set.crs = "EPSG:4269")
-# 
-# nbs_centroid <- nbs_layers$survey.grid |>
-# sf::st_make_valid() |> 
-# sf::st_centroid()
-# 
-# nbs_centroid <- cbind(nbs_centroid,
-#                       sf::st_coordinates(nbs_centroid)) |>
-#   as.data.frame() |>
-#   dplyr::select(-geometry) |>
-#   dplyr::rename(longitude = X,
-#                 latitude = Y,
-#                 stationid = STATIONID)
-# 
-# read.csv(file = here::here("data", "unfinalized_nbs_2023.csv")) |>
-#   dplyr::inner_join(nbs_centroid) |>
-#   dplyr::bind_rows(
-#   read.csv(file = nbs_ebs_csv_path)
-#   ) |>
-#   write.csv(file = nbs_ebs_csv_path)
-
-
 ```
 
 
@@ -94,7 +70,7 @@ Writes:
 interpolation_wrapper(temp_data_path = ebs_csv_path,
                       proj_crs = proj_crs,
                       cell_resolution = 5000, # 5x5 km grid resolution
-                      select_years = 1982:2023,
+                      select_years = 1982:2024,
                       interp_variable = "gear_temperature",
                       select_region = "sebs",
                       methods = "Ste") 
@@ -103,7 +79,7 @@ interpolation_wrapper(temp_data_path = ebs_csv_path,
 interpolation_wrapper(temp_data_path = ebs_csv_path,
                       proj_crs = proj_crs,
                       cell_resolution = 5000, # 5x5 km grid resolution
-                      select_years = 1982:2023,
+                      select_years = 1982:2024,
                       interp_variable = "surface_temperature",
                       select_region = "sebs",
                       methods = "Ste") 
@@ -201,7 +177,7 @@ nbs_area <- akgfmaps::get_base_layers(select.region = "ebs",
   dplyr::filter(SURVEY == "NBS_SHELF")
 
 nbs_ebs_bt_files <- list.files(here::here("output", "raster", "ebs", "gear_temperature"), 
-                                full.names = TRUE,
+                               full.names = TRUE,
                                pattern = "ste_")
 
 nbs_ebs_sst_files <- list.files(here::here("output", "raster", "ebs", "surface_temperature"), 
@@ -209,22 +185,31 @@ nbs_ebs_sst_files <- list.files(here::here("output", "raster", "ebs", "surface_t
                                 pattern = "ste_")
 
 nbs_mean_temperature <- data.frame(YEAR = numeric(length = length(nbs_ebs_bt_files)),
-                    MEAN_GEAR_TEMPERATURE = numeric(length = length(nbs_ebs_bt_files)),
-                    MEAN_SURFACE_TEMPERATURE = numeric(length = length(nbs_ebs_bt_files)))
+                                   MEAN_GEAR_TEMPERATURE = numeric(length = length(nbs_ebs_bt_files)),
+                                   MEAN_SURFACE_TEMPERATURE = numeric(length = length(nbs_ebs_bt_files)))
 
 for(i in 1:length(nbs_ebs_bt_files)) {
   nbs_bt_raster <- terra::rast(nbs_ebs_bt_files[i]) |>
     terra::mask(nbs_area, touches = FALSE)
   
-    nbs_mean_temperature$YEAR[i] <- as.numeric(gsub("[^0-9.-]", "", names(nbs_bt_raster))) # Extract year
-    
-      nbs_mean_temperature$MEAN_GEAR_TEMPERATURE[i] <- mean(terra::values(nbs_bt_raster), na.rm = TRUE)
+  nbs_mean_temperature$YEAR[i] <- as.numeric(gsub("[^0-9.-]", "", names(nbs_bt_raster))) # Extract year
   
-      # Don't calculate SST if NBS data haven't been finalized
+  nbs_mean_temperature$MEAN_GEAR_TEMPERATURE[i] <- mean(terra::values(nbs_bt_raster), na.rm = TRUE)
+  
+  nbs_mean_temperature$AREA_LTE2_KM2[i] <- nbs_bt_raster |> 
+    cpa_from_raster(raster_units = "m", temperature_threshold = 2)
+  nbs_mean_temperature$AREA_LTE1_KM2[i] <- nbs_bt_raster |> 
+    cpa_from_raster(raster_units = "m", temperature_threshold = 1)
+  nbs_mean_temperature$AREA_LTE0_KM2[i] <- nbs_bt_raster |> 
+    cpa_from_raster(raster_units = "m", temperature_threshold = 0)
+  nbs_mean_temperature$AREA_LTEMINUS1_KM2[i] <- nbs_bt_raster |> 
+    cpa_from_raster(raster_units = "m", temperature_threshold = -1)
+  
+  # Don't calculate SST if NBS data haven't been finalized
   if(file.exists(nbs_ebs_sst_files[i])) {
-      nbs_sst_raster <- terra::rast(nbs_ebs_sst_files[i]) |>
-    terra::mask(nbs_area, touches = FALSE)
-      
+    nbs_sst_raster <- terra::rast(nbs_ebs_sst_files[i]) |>
+      terra::mask(nbs_area, touches = FALSE)
+    
     nbs_mean_temperature$MEAN_SURFACE_TEMPERATURE[i] <- mean(terra::values(nbs_sst_raster), na.rm = TRUE)
   } else {
     nbs_mean_temperature$MEAN_SURFACE_TEMPERATURE[i] <- NA
@@ -232,7 +217,7 @@ for(i in 1:length(nbs_ebs_bt_files)) {
   
 }
 
- nbs_mean_temperature <- nbs_mean_temperature |>
+nbs_mean_temperature <- nbs_mean_temperature |>
   dplyr::filter(YEAR != 2018)
 
 nbs_mean_temperature$LAST_UPDATE <- Sys.Date()
