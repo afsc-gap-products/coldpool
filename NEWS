@@ -1,4 +1,18 @@
-coldpool 3.3-1 (February 23, 2023)
+coldpool 3.4-1 (August 22, 2024)
+----------------------------------------------------------------
+
+NEW FEATURES
+
+- Added temperature isotherm extent as built-in data sets for 
+  the NBS (see ?nbs_mean_temperature).
+
+
+DATA UPDATE
+
+- Update with 2024 survey data.
+
+
+coldpool 3.3-1 (February 23, 2024)
 ----------------------------------------------------------------
 
 NEW FEATURES

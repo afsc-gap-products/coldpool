@@ -22,6 +22,8 @@ unique_years <- sort(unique(profile_dat$YEAR))
 cv_fits <- data.frame()
 
 ii <- 1
+
+with(ii, mean())
   
   sel_profile <- dplyr::filter(profile_dat, 
                                YEAR == unique_years[ii]) #|>
@@ -32,14 +34,8 @@ ii <- 1
   location_formula = ~ LONGITUDE + LATITUDE + DEPTH
   nm = Inf
   maxdist = Inf
-
-# mod_idw <- gstat::gstat(formula = kriging_formula,
-#                         locations = ~ LONGITUDE + LATITUDE,
-#                         data = dplyr::filter(x, CAST == "bottom"),
-#                         set = list(idp = 2),
-#                         nmax = Inf)
-# 
-# vgm_mod <- gstat::variogram(mod_idw)
+  
+  
 
 mod_vertical <- gstat::gstat(formula = kriging_formula, 
                         locations = location_formula,
@@ -82,80 +78,97 @@ mod <- gstat::gstat(formula = kriging_formula,
                maxdist = maxdist,
                model = fit_vg_vertical)
 
+vgm_fn <- function(range, psill, nugget, dist, model) {
+  
+  sel_fn <- switch(model,
+                   "Exp" = coldpool::exp_vgm,
+                   "Sph" = coldpool::sph_vgm,
+                   "Cir" = coldpool::cir_vgm,
+                   "Gau" = coldpool::gau_vgm,
+                   "Mat" = coldpool::mat_vgm,
+                   "Bes" = coldpool::bes_vgm,
+                   "Ste" = coldpool::ste_vgm
+  )
+  
+  return(out)
+}
+
+exp_vgm <- function(nugget = 0, psill, range, dist, a = 1) {
+  a <- range * a
+  return(nugget + psill *(1-exp(-1*dist/a)))
+}
+
+sph_vgm <- function(nugget = 0, psill, range, dist, a = 1) {
+  a <- range*a
+  val <- numeric(length = length(dist))
+  val[dist > a] <- nugget + psill
+  val[dist <= a] <- nugget + psill * (1.5*dist[dist <= a]/a - 0.5 * (dist[dist <= a]/a)^3)
+  return(val)
+  
+}
+
+cir_vgm <- function(nugget = 0, psill, range, dist, a = 1) {
+  a <- range*a
+  val <- numeric(length = length(dist))
+  val[dist > a] <- nugget + psill
+  val[dist <= a] <- nugget + psill * ((2*dist[dist <= a])/(pi*a) * sqrt(1-(dist[dist <= a]/a)^2)+(2/pi)*asin(dist[dist <= a]/a))
+  return(val)
+}
+
+
+gau_vgm <- function(nugget = 0, psill, range, dist, a = 1) {
+  a <- range*a
+  return(nugget + psill*(1-exp(-(dist/a)^2)))
+}
+
+mat_vgm <- function(nugget = 0, psill, dist, range, kappa = 0.5) {
+  
+  dist <- dist/range
+  
+  if(kappa == .5) {
+    return(nugget+psill*exp(-dist))
+  }
+  if(kappa == 1.5) {
+    return(nugget+psill*(1+dist)*exp(-dist))
+  }
+  if(kappa == 2.5) {
+    return(nugget+psill*(1+dist+dist^2/3)*exp(-dist))
+  }
+  
+  con <- 1/(2^(kappa - 1)) * gamma(kappa)
+  
+  dist[dist == 0] <- 1e-10
+  
+  return(nugget + psill * con * (dist^kappa) * besselK(x = dist, nu = kappa))
+}
+
+bes_vgm <- function(nugget = 0, psill, range, dist, a = 1) {
+  a <- range*a
+  
+  dist[dist == 0] <- 1e-10
+  val <- nugget + psill*(1-dist/a*besselK(x = dist/a, nu = 1))
+  
+  return(val)
+  
+}
+
+ste_vgm <- function(nugget = 0, dist, range, kappa, a = 1) {
+  
+  a <- range/a
+  
+  matern <- besselK(x = 2 * kappa^(1/2) * dist / a, nu = kappa)
+  multipl <- 1 / (2^(kappa - 1) * gamma(kappa))*(2 * kappa^(1/2) * dist/a)^kappa
+  val <- ifelse(matern == 0 | !is.finite(multipl), 
+                0, 
+                ifelse(!is.finite(matern),
+                       1,
+                       multipl*matern))
+  
+  return(nugget + val)
+}
+
 
 optim_exp_z <- function(z_start, kriging_formula, location_formula, anis = c(0,0,0,1,1), nmax, maxdist, data, model = "Exp") {
-  
-  vgm_fn <- function(range, psill, nugget, dist, model) {
-    
-    exp_vgm <- function(nugget = 0, psill, range, dist, a = 1) {
-      a <- range * a
-      return(nugget + psill *(1-exp(-1*dist/a)))
-    }
-    
-    sph_vgm <- function(nugget = 0, psill, range, dist, a = 1) {
-      a <- range*a
-      val <- numeric(length = length(dist))
-      val[dist > a] <- nugget + psill
-      val[dist <= a] <- nugget + psill * (1.5*dist[dist <= a]/a - 0.5 * (dist[dist <= a]/a)^3)
-      return(val)
-      
-    }
-
-    cir_vgm <- function(nugget = 0, psill, range, dist, a = 1) {
-      a <- range*a
-      val <- numeric(length = length(dist))
-      val[dist > a] <- nugget + psill
-      val[dist <= a] <- nugget + psill * ((2*dist[dist <= a])/(pi*a) * sqrt(1-(dist[dist <= a]/a)^2)+(2/pi)*asin(dist[dist <= a]/a))
-      return(val)
-    }
-
-    
-    gau_vgm <- function(nugget = 0, psill, range, dist, a = 1) {
-      a <- range*a
-      return(nugget + psill*(1-exp(-(dist/a)^2)))
-    }
-    
-    mat_vgm <- function(nugget = 0, psill, dist, range, kappa = 0.5) {
-      
-      dist <- dist * 1/range
-      # call some special cases for half fractions of nu
-      if( kappa == .5){
-        return(nugget+psill*exp(-dist))
-      }
-      if( kappa == 1.5){
-        return(nugget+psill*(1+dist)*exp(-dist))
-      }
-      if( kappa == 2.5){
-        return(nugget+psill*(1+dist+dist^2/3)*exp(-dist))
-      }
-
-      con <- 1/(2^(kappa - 1)) * gamma(kappa)
-      
-      dist[dist == 0] <- 1e-10
-      
-      return(nugget + psill * con * (dist^kappa) * besselK(dist, kappa))
-    }
-    
-    bes_vgm <- function(nugget = 0, psill, range, dist, a = 1) {
-      
-      dist[dist == 0] <- 1e-10
-      val <- nugget + psill*(1-dist/a*besselK(dist/a, nu = 1))
-      
-        return()
-      
-    }
-    
-    bes_vgm(nugget = 0.1, psill = 1, range = 2, dist = 0:3)
-    
-    sel_fn <- switch(model,
-                  "Exp" = exp_vgm,
-                  "Sph" = sph_vgm,
-                  "Cir" = cir_vgm,
-                  "Gau" = gau_vgm,
-                  )
-    
-    return(out)
-  }
   
   
   z_fn <- function(zz, 
