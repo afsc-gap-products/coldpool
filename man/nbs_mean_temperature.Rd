@@ -8,8 +8,12 @@
 A data frame with 4 rows and 4 columns.
 \describe{
      \item{YEAR}{Year}
-     \item{MEAN_GEAR_TEMPERATURE}{Mean gear temperature (i.e. bottom temperature) in the survey area.}
-     \item{MEAN_SURFACE_TEMPERATURE}{Mean sea surface temperature in the survey area.}
+     \item{MEAN_GEAR_TEMPERATURE}{Mean gear temperature (i.e. bottom temperature) in the NBS survey area.}
+     \item{MEAN_SURFACE_TEMPERATURE}{Mean sea surface temperature in the NBS survey area.}
+     \item{AREA_LTE2_KM2}{Total area with bottom temperatures less than or equal to 2 celsius, in square kilometers, in the NBS survey area.}
+     \item{AREA_LTE1_KM2}{Total area with bottom temperatures less than or equal to 1 celsius, in square kilometers, in the NBS survey area.}
+     \item{AREA_LTE0_KM2}{Total area with bottom temperatures less than or equal to 0 celsius, in square kilometers, in the NBS survey area.}
+     \item{AREA_LTEMINUS1_KM2}{Total area with bottom temperatures less than or equal to -1 celsius, in square kilometers, in the NBS survey area.}
      \item{LAST_UPDATE}{Date when cold pool index and temperature rasters were last updated.}
 }
 }

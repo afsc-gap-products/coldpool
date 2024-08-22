@@ -5,11 +5,11 @@
 #' @format A data frame with 39 rows and 9 columns.
 #' \describe{
 #'      \item{YEAR}{Year}
-#'      \item{AREA_LTE2_KM2}{Cold Pool Index. Total area with bottom temperatures less than or equal to 2 celsius, in square kilometers}
-#'      \item{AREA_LTE1_KM2}{Total area with bottom temperatures less than or equal to 1 celsius, in square kilometers}
-#'      \item{AREA_LTE0_KM2}{Total area with bottom temperatures less than or equal to 0 celsius, in square kilometers}
-#'      \item{AREA_LTEMINUS1_KM2}{Total area with bottom temperatures less than or equal to -1 celsius, in square kilometers}
-#'      \item{MEAN_GEAR_TEMPERATURE}{Mean gear temperature (i.e. bottom temperature) in the survey area.}
+#'      \item{AREA_LTE2_KM2}{Cold Pool Index. Total area with bottom temperatures less than or equal to 2 celsius, in square kilometers, in the EBS shelf survey area.}
+#'      \item{AREA_LTE1_KM2}{Total area with bottom temperatures less than or equal to 1 celsius, in square kilometers, in the EBS shelf survey area.}
+#'      \item{AREA_LTE0_KM2}{Total area with bottom temperatures less than or equal to 0 celsius, in square kilometers, in the EBS shelf survey area.}
+#'      \item{AREA_LTEMINUS1_KM2}{Total area with bottom temperatures less than or equal to -1 celsius, in square kilometers, in the EBS shelf survey area.}
+#'      \item{MEAN_GEAR_TEMPERATURE}{Mean gear temperature (i.e. bottom temperature) in the EBS shelf survey area.}
 #'      \item{MEAN_SURFACE_TEMPERATURE}{Mean sea surface temperature in the survey area.}
 #'      \item{MEAN_BT_LT100M}{Mean gear temperature (i.e. bottom temperature) for EBS shelf *STANDARD* strata (i.e., excluding northwest strata 82 and 90) with bottom depth less than 100 m (strata 10, 20, 31, 32, 41, 42, 43).}
 #'      \item{LAST_UPDATE}{Date when cold pool index and temperature rasters were last updated.}
@@ -25,8 +25,12 @@
 #' @format A data frame with 4 rows and 4 columns.
 #' \describe{
 #'      \item{YEAR}{Year}
-#'      \item{MEAN_GEAR_TEMPERATURE}{Mean gear temperature (i.e. bottom temperature) in the survey area.}
-#'      \item{MEAN_SURFACE_TEMPERATURE}{Mean sea surface temperature in the survey area.}
+#'      \item{MEAN_GEAR_TEMPERATURE}{Mean gear temperature (i.e. bottom temperature) in the NBS survey area.}
+#'      \item{MEAN_SURFACE_TEMPERATURE}{Mean sea surface temperature in the NBS survey area.}
+#'      \item{AREA_LTE2_KM2}{Total area with bottom temperatures less than or equal to 2 celsius, in square kilometers, in the NBS survey area.}
+#'      \item{AREA_LTE1_KM2}{Total area with bottom temperatures less than or equal to 1 celsius, in square kilometers, in the NBS survey area.}
+#'      \item{AREA_LTE0_KM2}{Total area with bottom temperatures less than or equal to 0 celsius, in square kilometers, in the NBS survey area.}
+#'      \item{AREA_LTEMINUS1_KM2}{Total area with bottom temperatures less than or equal to -1 celsius, in square kilometers, in the NBS survey area.}
 #'      \item{LAST_UPDATE}{Date when cold pool index and temperature rasters were last updated.}
 #' }
 #' @source \url{https://www.fisheries.noaa.gov/contact/groundfish-assessment-program}
