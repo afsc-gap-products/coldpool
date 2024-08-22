@@ -40,7 +40,8 @@ get_data_temp3d <- function() {
         survey_definition_ids[ii]
       )
     ) |>
-      dplyr::mutate(DATE_TIME = lubridate::with_tz(lubridate::force_tz(DATE_TIME, tzone = "UTC"), tzone = "America/Anchorage")) |>
+      dplyr::mutate(DATE_TIME = lubridate::with_tz(lubridate::force_tz(DATE_TIME, tzone = "UTC"), tzone = "America/Anchorage"),
+                    HAUL_ID = paste0(VESSEL, CRUISE, HAUL)) |>
       dplyr::inner_join(event_names, by = "EVENT_TYPE_ID") |>
       dplyr::select(-EVENT_TYPE_ID) |>
       tidyr::pivot_wider(values_from = "DATE_TIME", names_from = "EVENT_NAME")
@@ -71,7 +72,7 @@ get_data_temp3d <- function() {
     temp_depth <- RODBC::sqlQuery(
       channel = channel,
       query = paste0(
-        "select bt.temperature, bt.depth, bt.date_time, h.haul_id 
+        "select bt.temperature, bt.depth, bt.date_time, h.haul, c.vessel_id vessel, c.cruise
         from race_data.bathythermics bt, race_data.bathythermic_headers bth, race_data.hauls h, 
         race_data.cruises c, race_data.surveys s 
         where bth.haul_id = h.haul_id 
@@ -84,10 +85,40 @@ get_data_temp3d <- function() {
         and s.survey_definition_id = ",
         survey_definition_ids[ii]
       )
-    ) |> dplyr::mutate(DATE_TIME = lubridate::with_tz(lubridate::force_tz(DATE_TIME, tzone = "UTC"), tzone = "America/Anchorage"))
+    ) |> dplyr::mutate(DATE_TIME = lubridate::with_tz(lubridate::force_tz(DATE_TIME, tzone = "UTC"), tzone = "America/Anchorage"),
+                       HAUL_ID = paste0(VESSEL, CRUISE, HAUL)) |>
+      dplyr::select(-VESSEL, -CRUISE, -HAUL)
+    
+    temp_depth_rb2 <- RODBC::sqlQuery(channel = channel,
+                                      query = paste0(
+                                        "select bt.vessel, bt.cruise, bt.haul, bt.date_time,
+                                        bt.temperature, bt.depth
+                                        from race_edit.rb2_btd bt,
+                                        racebase.haul h,
+                                        race_data.cruises c,
+                                        race_data.surveys s
+                                        where bt.vessel = h.vessel
+                                        and h.vessel = c.vessel_id
+                                        and h.cruise = c.cruise
+                                        and bt.cruise = h.cruise
+                                        and bt.haul = h.haul
+                                        and bt.depth > 0.1
+                                        and bt.temperature > -2.0
+                                        and bt.temperature < 20
+                                        and s.survey_id = c.survey_id
+                                        and s.survey_definition_id = ", survey_definition_ids[ii]))
+    
+    temp_depth_rb2 <- hauls |>
+      dplyr::select(HAUL_ID) |> 
+      dplyr::inner_join(temp_depth_rb2) |>
+      dplyr::mutate(HAUL_ID = paste0(VESSEL, CRUISE, HAUL)) |>
+      dplyr::select(-VESSEL, -CRUISE, -HAUL)
     
     temp_depth <- dplyr::filter(temp_depth, HAUL_ID %in% unique(hauls$HAUL_ID))
+    
     hauls <- dplyr::filter(hauls, HAUL_ID %in% unique(temp_depth$HAUL_ID))
+    
+    temp_depth <- dplyr::bind_rows(temp_depth, temp_depth_rb2)
     
     unique_haul_id <- sort(unique(temp_depth$HAUL_ID))
     
