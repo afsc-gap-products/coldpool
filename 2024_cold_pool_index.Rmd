@@ -891,7 +891,7 @@ dev.off()
 ```
 
 ```{r maps_by_year, message=FALSE, warning=FALSE, include=FALSE}
-year_vec <- c(1982:2019, 2021:2023)
+year_vec <- c(1982:2019, 2021:2024)
 
 nbs_years <- c(2010, 2017, 2019, 2021:2023)
 
