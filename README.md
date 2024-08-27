@@ -94,7 +94,7 @@ Temperature data products in the coldpool package are updated on an annual basis
 
 
 # Cold pool area and temperature trends
-*Updated: September 5, 2023 (provisional data, subject to change)*
+*Updated: August 27, 2024*
 
 Cold pool area and temperature trends are reported in the annual [Ecosystem Status Reports](https://www.fisheries.noaa.gov/alaska/ecosystems/ecosystem-status-reports-gulf-alaska-bering-sea-and-aleutian-islands) for the eastern Bering Sea and ecosystem and socioeconomic profiles for EBS stocks. Temperature products are also used as covariates in some [stock assessment](https://www.fisheries.noaa.gov/alaska/population-assessments/north-pacific-groundfish-stock-assessments-and-fishery-evaluation) models or their inputs (e.g. abundance indices).
 
