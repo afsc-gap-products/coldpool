@@ -891,7 +891,7 @@ dev.off()
 ```
 
 ```{r maps_by_year, message=FALSE, warning=FALSE, include=FALSE}
-year_vec <- c(1982:2019, 2021:2023)
+year_vec <- c(1982:2019, 2021:2024)
 
 nbs_years <- c(2010, 2017, 2019, 2021:2023)
 
@@ -1043,42 +1043,14 @@ for(ii in 1:length(year_vec)) {
 }
 ```
 
-Contributed by Sean Rohan^1^ and Lewis Barnett^1^   
-^1^ Resource Assessment and Conservation Engineering Division, Alaska Fisheries Science Center, National Marine Fisheries Service, NOAA  
-**Contact**: sean.rohan@noaa.gov
-**Last updated**:  September 2023
+```{r cpa_table message=FALSE, warning=FALSE, echo=FALSE}
+coldpool::cold_pool_index |>
+  dplyr::select(YEAR, EBS_AREA_LTE2_KM2 = AREA_LTE2_KM2) |>
+  dplyr::full_join(coldpool::nbs_mean_temperature |>
+                     dplyr::select(YEAR, NBS_AREA_LTE2_KM2 = AREA_LTE2_KM2)) |>
+  write.csv(file = here::here("plots", "cpa_table.csv"), row.names = FALSE)
+```
 
 ```{r fig.height=3,fig.width=6,fig.cap="\\label{fig:figs}Figure 1. Area of the cold pool in the eastern Bering Sea (EBS) shelf bottom trawl survey area, as measured using observations from the EBS bottom trawl survey (including northwest strata 82 and 90) from 1982–2022. Dashed line denotes the grand mean of the time series and dotted lines show ±1 standard deviation.", message=FALSE, warning=FALSE, echo=FALSE}
 print(plot_cpi_timeseries)
-```
-
-Summer SST and Bottom Temperatures
-Contributed by Sean Rohan, sean.rohan@noaa.gov, and Lewis Barnett, lewis.barnett@noaa.gov
-Mean surface and bottom temperatures are calculated from spatially interpolated data collected during AFSC summer bottom trawl surveys of the EBS shelf (1982-2023, except 2020) and NBS (2010, 2017–2019, 2021–2023). Temperature data are not adjusted for effects of seasonal heating. Temperature data are interpolated using ordinary kriging with Stein's parameterization of the Matern semivariogram model (Rohan et al., 2022). Code, figures, and data products presented in this contribution are provided in the coldpool R package [https://github.com/afsc-gap-products/coldpool](https://github.com/afsc-gap-products/coldpool).
-
-In the EBS, the mean surface temperature (6.34&deg;C) was near the time series average (6.75&deg;C) and 1.12&deg;C colder than in 2022. The 2023 mean bottom temperature in the EBS (2.28&deg;C) was near the time series mean of 2.49&deg;C and 0.28&deg;C colder than the mean bottom temperature in 2022 (Figure 24). The near-average bottom temperatures in 2022 and 2023 are a departure from extremely warm conditions in 2016-2021 that had four of the five warmest years in the times series. In the NBS, the mean surface temperature (8.05oC) was slightly below the time series average (9.18oC) and the mean bottom temperature (3.92oC) was near the time series average (3.94oC). However, the time series for the NBS is extremely short compared to the EBS.
-
-In 2023, bottom temperatures $\leq$ -1&deg;C were observed south of St. Matthew Island for the first time since 2015 (Figure 25). The average bottom temperature in the inner domain of the EBS survey area (2.17&deg;C) was the coldest observed since 2013 (1.64&deg;C). The coldest bottom temperatures ($\leq$ -1&deg;C) within the combined EBS shelf and NBS survey areas were in the middle shelf (between 50 and 100 m isobaths), extending from south of St. Matthew Island at ~61.5&deg;N to the U.S.-Russia maritime boundary. This area of cold water was considerably larger than in 2019 and 2021, when bottom temperatures $\leq$ 0&deg;C were confined to a small area along the U.S.-Russia Convention Line.
-
-The warmest bottom temperatures were along the coast of the Alaska mainland between Nunivak Island and Norton Sound. However, the area north of Nunivak Island at 60.5&deg;N is sampled at the end of the survey and reflects seasonal warming since sampling occurs 35-45 days later than in the area directly south.
-
-
-Cold Pool Extent - AFSC Bottom Trawl Survey
-Contributed by Sean Rohan, sean.rohan@noaa gov, and Lewis Barnett, lewis.barnett@noaa gov
-The cold pool extent is calculated from spatially interpolated bottom temperature data collected during AFSC summer bottom trawl surveys of the EBS shelf (1982-2023, except 2020). See 'Summer SST and Bottom Temperatures' contribution above for more details.
-
-The spatial footprint of the cold pool in 2023 was similar to the most recent near-average years in 2011, 2017, and 2022 (Figure 33). North of ∼57.5&deg;N, the cold pool covered nearly the entire middle domain of the survey area between the 50m and 100m isobaths. The extents of the $\leq$ -1&deg;C (26,550 km^2^) and $\leq$ 0&deg;C (62,400 km^2^) isotherms were larger than they have been since the 2015 survey. The extent of the $\leq$ 1&deg;C isotherm (110,875 km^2^) was the largest it’s been since 2013. The extents of the $\leq$ -1&deg;C, $\leq$ 0&deg;C, and $\leq$ 1&deg;C isotherms were all larger than their time series averages of 23,579 km^2^, 54,158 km^2^, and 102,906 km^2^, respectively.
-
-
-```{r fig.cap="\\label{fig:figs}Figure 2. Cold pool extent in the eastern Bering Sea (EBS), as measured using observations from the EBS bottom trawl survey. Upper panels: Maps of cold pool extent in the EBS shelf survey area from 2002–2021. Lower panel: Extent of the cold pool in proportion to the total EBS shelf survey area from 1982–2022. Fill colors denote bottom temperatures $\\leq$ 2&deg;C, $\\leq$ 1&deg;C, $\\leq$ 0&deg;C, and $\\leq$ -1&deg;C.", fig.height=8, fig.width=6, message=FALSE, warning=FALSE, echo=FALSE}
-print(coldpool_with_area)
-```
-
-
-```{r fig.height=3,fig.width=6,fig.cap="\\label{fig:figs}Figure 3. Average summer surface (green triangles) and bottom (blue circles) temperatures (&deg;C) on the eastern Bering Sea (EBS) shelf based on data collected during standardized summer bottom trawl surveys from 1982–2022. Dashed lines represent the time series mean.", message=FALSE, warning=FALSE, echo=FALSE}
-print(plot_sebs_average_temperature)
-```
-
-```{r fig.height=6,fig.width=6,fig.cap="\\label{fig:figs}Figure 4. Contour maps of bottom temperatures from the 2018, 2019, 2021, and 2022 eastern Bering Sea shelf and northern Bering Sea bottom trawl surveys.", message=FALSE, warning=FALSE, echo=FALSE}
-print(ebs_nbs_bt_map_grid)
 ```

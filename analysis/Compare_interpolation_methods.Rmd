@@ -1,0 +1,502 @@
+---
+title: "Estimating mean temperatures and cold pool are from AFSC bottom trawl surveys of the eastern Bering Sea"
+author: "Sean Rohan, Lewis Barnett, and Nicole Charriere"
+date: "3/4/2022"
+output: html_document
+---
+
+# Get data
+
+Get temperature data from racebase and survey tables.
+
+```{r setup, warning=FALSE, message=FALSE, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(coldpool)
+library(cowplot)
+
+# Setup directories
+if(!dir.exists(here::here("data"))) {
+  dir.create(here::here("data"))
+}
+
+# Plotting ----
+fig_res <- 300
+
+# CRS
+proj_crs <- coldpool:::ebs_proj_crs
+
+# Retrieve area-weighted surface and bottom temperatures
+channel <- coldpool:::get_connected(schema = "AFSC")
+
+# PlusNW strata
+area_weighted_plusnw_df <- RODBC::sqlQuery(channel = channel,
+                                           query = "select * from HAEHNR.BTTEMP_EBS_PLUSNW_LT200M") |>
+  saveRDS(file = here::here("data", "ebs_bttemp_plus_nw_lt200m.rds"))
+
+# Standard strata
+area_weighted_standard_df <- RODBC::sqlQuery(channel = channel,
+                                             query = "select * from HAEHNR.EBS_BTTEMP_LT200M_STANDARD") |>
+  saveRDS(file = here::here("data", "ebs_bttemp_standard_lt200m.rds"))
+
+# Get temperature data
+# Writes: 
+# -- /data/ebs_nbs_temperature_full_area.csv
+# -- /data/index_hauls_temperature_data.csv
+coldpool::get_data(channel = channel)
+```
+
+# Conduct cross-validation on gear temperature
+
+Perform leave-one-out cross validation (LOOCV) on gear temperature (i.e., bottom temperature) and write results to csv files.
+
+```{r loocv, warning=FALSE, message=FALSE, results='hide'}
+# Leave one out cross-validation to compare interpolation methods ----
+# Writes:
+# -- /plots/RSPE_violin_GEAR_TEMPERATURE_[n].png: Plots of root square prediction error for interpolation methods.
+# -- /output/[date]_rmse_loocv_GEAR_TEMPERATURE_[year].csv: Results of leave-one-out cross validation.
+coldpool::loocv_gear_temp(temp_data_path =  here::here("data", "index_hauls_temperature_data.csv"),  # update file name to specify data file 
+                          proj_crs = proj_crs,
+                          interp_variable = "surface_temperature")
+
+coldpool::loocv_gear_temp(temp_data_path =  here::here("data", "index_hauls_temperature_data.csv"),  # update file name to specify data file 
+                          proj_crs = proj_crs,
+                          interp_variable = "gear_temperature")
+
+# Generate rasters using interpolation methods ----
+# Writes:
+# -- /output/raster/[method]_[year]_gear_temperature.tiff: GeoTIFF raster files for each interpolation method and year
+interpolation_wrapper(temp_data_path = here::here("data", "index_hauls_temperature_data.csv"),
+                                proj_crs = coldpool:::ebs_proj_crs,
+                                cell_resolution = 5000, # In meters
+                                select_years = 1982:2021, 
+                                interp_variable = "gear_temperature",
+                                select_region = "sebs")
+
+interpolation_wrapper(temp_data_path = here::here("data", "index_hauls_temperature_data.csv"),
+                                proj_crs = coldpool:::ebs_proj_crs,
+                                cell_resolution = 5000, # In meters
+                                select_years = 1982:2021, 
+                                interp_variable = "surface_temperature",
+                                select_region = "sebs")
+
+interpolation_wrapper(temp_data_path = here::here("data", "index_hauls_temperature_data.csv"),
+                                proj_crs = coldpool:::ebs_proj_crs,
+                                cell_resolution = 5000, # In meters
+                                select_years = 1982:2021, 
+                                interp_variable = "gear_temperature",
+                                select_region = "ebs")
+
+interpolation_wrapper(temp_data_path = here::here("data", "index_hauls_temperature_data.csv"),
+                                proj_crs = coldpool:::ebs_proj_crs,
+                                cell_resolution = 5000, # In meters
+                                select_years = 1982:2021, 
+                                interp_variable = "surface_temperature",
+                                select_region = "ebs")
+```
+
+# Compare interpolation methods
+
+Create plots and table output showing results of LOOCV.
+
+```{r make_summaries}
+# Estimates of mean bottom temperature, surface temperature, and temperature by area (incl. cold pool area). By year and interpolation method.
+coldpool:::make_var_by_method(method_prefix = c("ste_", "tps_", "mat_", "sph_", "cir_", "gau_", "bes_", "idw_", "exp_", "idwnmax4_", "nn_"), 
+                               temp_dir = here::here("output", "raster", "sebs"), 
+                               region = "sebs")
+
+coldpool:::make_var_by_method(method_prefix = c("ste_", "tps_", "mat_", "sph_", "cir_", "gau_", "bes_", "idw_", "exp_", "idwnmax4_", "nn_"), 
+                               temp_dir = here::here("output", "raster", "ebs"), 
+                               region = "ebs")
+
+# Make summary tables
+coldpool:::make_loocv_summary(sel_paths = list.files("./output/loocv", full.names = TRUE),
+                   interp_variable = "surface_temperature")
+coldpool:::make_loocv_summary(sel_paths = list.files("./output/loocv", full.names = TRUE),
+                   interp_variable = "gear_temperature")
+```
+
+# Generate CPA plots
+
+```{r compare_cpa}
+# Set up method labels for plots 
+method_labels_df <- data.frame(method = c("BES",
+                                          "CIR",
+                                          "EXP",
+                                          "IDW",
+                                          "IDWNMAX4",
+                                          "MAT",
+                                          "NN",
+                                          "SPH",
+                                          "STE",
+                                          "TPS",
+                                          "OLD IDW",
+                                          "BT[AW]",
+                                          "SST[AW]"),
+                               label = c("OK-BES",
+                                         "OK-CIR",
+                                         "OK-EXP",
+                                         "IDW",
+                                         "IDW (Max 4)",
+                                         "OK-MAT",
+                                         "NN",
+                                         "OK-SPH",
+                                         "OK-STE",
+                                         "TPS",
+                                         "Historical",
+                                          "AW",
+                                          "AW"))
+
+# Set up colors for plots
+color_vec <- c("OK-BES" = "#4E79A7",
+               "OK-CIR" = "#A0CBE8",
+               "OK-EXP" = "#F28E2B",
+               "IDW" = "#B6992D",
+               "IDW (Max 4)" = "#F1CE63",
+               "OK-MAT" = "#8CD17D",
+               "NN" = "#499894",
+               "OK-SPH" = "#FFBE7D",
+               "OK-STE" = "#59A14F",
+               "TPS" = "#E15759",
+               "Historical" = "black",
+               "AW" = "black",
+               "AW" = "black")
+
+# Load cold pool calculations from Bob Lauth ----
+lauth_cpa_df <- coldpool:::cpa_pre2021 |>
+  dplyr::select(YEAR, 
+                AREA_SUM_KM2_LTE2) |>
+  dplyr::rename(year = YEAR,
+                `Old IDW` = AREA_SUM_KM2_LTE2)
+
+annual_cpa_df <- read.csv(file = here::here("output", 
+                                            "sebs_variable_est_by_method.csv"),
+                          stringsAsFactors = FALSE)
+
+# Select cold pool area calculations for less than or equal to to 2 degrees
+annual_cpa_df <- annual_cpa_df[,c(1, which(stringr::str_detect(names(annual_cpa_df), "_area_lte2_km2")))]
+
+combined_cpa_df <- annual_cpa_df |> 
+  reshape2::melt(id.vars = "year") |>
+  dplyr::bind_rows(lauth_cpa_df |> 
+                     reshape2::melt(id.vars = "year")) |>
+  dplyr::mutate(method = stringr::str_remove(variable, "_area_lte2_km2") |> 
+                  toupper()) |>
+  dplyr::inner_join(method_labels_df)
+
+cpa_change_df <- annual_cpa_df |> 
+  reshape2::melt(id.vars = "year") |>
+  dplyr::inner_join(lauth_cpa_df) |>
+  dplyr::mutate(rel_diff = 100*(value - `Old IDW`)/`Old IDW`,
+                abs_diff = value - `Old IDW`) |>
+  dplyr::mutate(method = stringr::str_remove(variable, "_area_lte2_km2") |> 
+                  toupper()) |>
+  dplyr::inner_join(method_labels_df)
+
+plot_cpa_by_year <- ggplot() +
+  geom_line(data = combined_cpa_df,
+            aes(x = year, 
+                y = value, 
+                color = label)) +
+    geom_point(data = combined_cpa_df,
+             aes(x = year, 
+                 y = value, 
+                 color = label)) +
+  scale_x_continuous(name = "Year", limits = c(1982, 2021)) +
+        scale_color_manual(name = "Method", 
+                           values = color_vec[names(color_vec) %in% unique(combined_cpa_df$label)]) +
+  scale_y_continuous(name = expression("Cold Pool Area"~(km^2))) +
+        theme_tm_no_legend()
+
+plot_cpa_rel_diff <- ggplot(data = cpa_change_df,
+       aes(x = year,
+           y = rel_diff,
+           color = label)) + 
+  geom_line() +
+    geom_point() + 
+  scale_y_continuous(name = "Relative Difference (%)") +
+  scale_x_continuous(name = "Year", limits = c(1982, 2021)) +
+        scale_color_manual(name = "Method", 
+                           values = color_vec[names(color_vec) %in% unique(cpa_change_df$label)]) +
+        theme_tm_no_legend()
+
+plot_cpa_abs_diff <- ggplot(data = cpa_change_df,
+                            aes(x = year,
+                                y = abs_diff,
+                                color = label)) + 
+  geom_line() +
+    geom_point() +
+  scale_y_continuous(name = expression(CPA[method]-CPA[old]~(km^2))) +
+  scale_x_continuous(name = "Year", limits = c(1982, 2021)) +
+  scale_color_manual(name = "Method", 
+                     values = color_vec[names(color_vec) %in% unique(cpa_change_df$label)]) +
+        theme_tm_no_legend()
+
+png(file = here::here("plots", "cpa_by_year.png"), width = 169, height = 81, units = "mm", res = fig_res)
+print(plot_cpa_by_year)
+dev.off()
+
+png(file = here::here("plots", "cpa_by_year_methods_rel_diff.png"), width = 169, height = 81, units = "mm", res = fig_res)
+print(plot_cpa_rel_diff)
+dev.off()
+
+png(file = here::here("plots", "cpa_by_year_methods_abs_diff.png"), width = 169, height = 81, units = "mm", res = fig_res)
+print(plot_cpa_abs_diff)
+dev.off()
+```
+
+# Compare BT and SST from candidate spatial interpolation methods to stratum-weighted method
+
+Historically, mean bottom and surface temperatures were calculated using a mean stratum-weighting approach, where temperature data from survey stations were averaged within strata then weighted in proportion to stratum area within the survey domain. However, this approach does not account for the spatial structure of samples within strata and leads to variation in spatial coverage of samples within strata among years due to instances where equipment malfunctions led to spatially autocorrelated gaps in coverage.
+
+Calculating mean temperature from spatially interpolated rasters of bottom and surface temperatures better accounts for the spatial structure of samples and helps account for temperature at locations where data are missing.
+
+
+```{r load_area_weighted_temp}
+compare_temp_df <- readRDS(file = here::here("data", "ebs_bttemp_plus_nw_lt200m.rds")) |>
+  dplyr::select(YEAR, AVGBSBT, AVGBSST) |>
+  dplyr::rename(`BT[aw]` = AVGBSBT,
+                `SST[aw]` = AVGBSST) |>
+  dplyr::full_join(coldpool:::cold_pool_index) |>
+  dplyr::select(-AREA_LTE2_KM2, -AREA_LTE1_KM2, -AREA_LTE0_KM2, -AREA_LTEMINUS1_KM2) |>
+  dplyr::rename(`SST[int]` = MEAN_SURFACE_TEMPERATURE,
+                `BT[int]` = MEAN_GEAR_TEMPERATURE)
+```
+
+# Generate BT plots
+
+```{r compare_bt}
+annual_bt_df <- read.csv(file = here::here("output", 
+                                            "sebs_variable_est_by_method.csv"),
+                          stringsAsFactors = FALSE)
+
+# Select cold pool area calculations for less than or equal to to 2 degrees
+annual_bt_df <- annual_bt_df[,c(1, which(stringr::str_detect(names(annual_bt_df), "_mean_gear_temperature")))]
+
+combined_bt_df <- annual_bt_df |> 
+  reshape2::melt(id.vars = "year") |>
+  dplyr::bind_rows(compare_temp_df |>
+                     dplyr::select(YEAR, `BT[aw]`) |>
+                     dplyr::rename(year = YEAR) |> 
+                     reshape2::melt(id.vars = "year")) |>
+  dplyr::mutate(method = stringr::str_remove(variable, "_mean_gear_temperature") |> 
+                  toupper()) |>
+  dplyr::inner_join(method_labels_df)
+
+bt_change_df <- annual_bt_df |> 
+  reshape2::melt(id.vars = "year") |>
+  dplyr::inner_join(compare_temp_df |>
+                      dplyr::select(YEAR, `BT[aw]`) |>
+                      dplyr::rename(year = YEAR)) |>
+  dplyr::mutate(rel_diff = 100*(value - `BT[aw]`)/`BT[aw]`,
+                abs_diff = value - `BT[aw]`) |>
+  dplyr::mutate(method = stringr::str_remove(variable, "_mean_gear_temperature") |> 
+                  toupper()) |>
+  dplyr::inner_join(method_labels_df)
+
+plot_bt_by_year <- ggplot() +
+        geom_line(data = combined_bt_df,
+                  aes(x = year, 
+                      y = value, 
+                      color = label)) +
+          geom_point(data = combined_bt_df,
+                   aes(x = year, 
+                       y = value, 
+                       color = label)) +
+        scale_x_continuous(name = "Year", limits = c(1982, 2021)) +
+        scale_color_manual(name = "Method", 
+                           values = color_vec[names(color_vec) %in% unique(combined_bt_df$label)]) +
+        scale_y_continuous(name = expression("Mean bottom temperature"~(degree*C))) +
+        theme_tm_no_legend()
+
+plot_bt_rel_diff <- ggplot(data = bt_change_df,
+             aes(x = year,
+                 y = rel_diff,
+                 color = label)) + 
+        geom_line() +
+          geom_point() + 
+        scale_y_continuous(name = "Relative Difference (%)") +
+        scale_x_continuous(name = "Year", limits = c(1982, 2021)) +
+        scale_color_manual(name = "Method",
+                           values = color_vec[names(color_vec) %in% unique(bt_change_df$label)]) +
+        theme_tm_no_legend()
+
+plot_bt_abs_diff <- ggplot(data = bt_change_df,
+             aes(x = year,
+                 y = abs_diff,
+                 color = label)) + 
+        geom_line() +
+          geom_point() + 
+        scale_y_continuous(name = expression(BT[method]-BT[AW]~(degree*C))) +
+        scale_x_continuous(name = "Year", limits = c(1982, 2021)) +
+        scale_color_manual(name = "Method",
+                           values = color_vec[names(color_vec) %in% unique(bt_change_df$label)]) +
+        theme_tm_no_legend()
+
+png(file = here::here("plots", "bt_by_year.png"), width = 169, height = 81, units = "mm", res = fig_res)
+print(plot_bt_by_year)
+dev.off()
+
+png(file = here::here("plots", "bt_by_year_methods_rel_diff.png"), width = 169, height = 81, units = "mm", res = fig_res)
+print(plot_bt_rel_diff)
+dev.off()
+
+png(file = here::here("plots", "bt_by_year_methods_abs_diff.png"), width = 169, height = 81, units = "mm", res = fig_res)
+print(plot_bt_abs_diff)
+dev.off()
+```
+
+# Generate SST plots
+
+```{r compare_sst}
+annual_sst_df <- read.csv(file = here::here("output", 
+                                           "sebs_variable_est_by_method.csv"),
+                         stringsAsFactors = FALSE)
+
+# Select cold pool area calculations for less than or equal to to 2 degrees
+annual_sst_df <- annual_sst_df[,c(1, which(stringr::str_detect(names(annual_sst_df), "_mean_surface_temperature")))]
+
+combined_sst_df <- annual_sst_df |> 
+  reshape2::melt(id.vars = "year") |>
+  dplyr::bind_rows(compare_temp_df |>
+                     dplyr::select(YEAR, `SST[aw]`) |>
+                     dplyr::rename(year = YEAR) |> 
+                     reshape2::melt(id.vars = "year")) |>
+  dplyr::mutate(method = stringr::str_remove(variable, "_mean_surface_temperature") |> 
+                  toupper()) |>
+  dplyr::inner_join(method_labels_df)
+
+sst_change_df <- annual_sst_df |> 
+  reshape2::melt(id.vars = "year") |>
+  dplyr::inner_join(compare_temp_df |>
+                      dplyr::select(YEAR, `SST[aw]`) |>
+                      dplyr::rename(year = YEAR)) |>
+  dplyr::mutate(rel_diff = 100*(value - `SST[aw]`)/`SST[aw]`,
+                abs_diff = value - `SST[aw]`) |>
+  dplyr::mutate(method = stringr::str_remove(variable, "_mean_surface_temperature") |> 
+                  toupper()) |>
+  dplyr::inner_join(method_labels_df)
+
+plot_sst_by_year <- ggplot() +
+  geom_line(data = combined_sst_df,
+            aes(x = year, 
+                y = value, 
+                color = label)) +
+    geom_point(data = combined_sst_df,
+             aes(x = year, 
+                 y = value, 
+                 color = label)) +
+  scale_x_continuous(name = "Year", limits = c(1982, 2021)) +
+  scale_color_manual(name = "Method",
+                     values = color_vec[names(color_vec) %in% unique(combined_sst_df$label)]) +
+  scale_y_continuous(name = expression("Mean surface temperature"~(degree*C))) +
+        theme_tm_no_legend()
+
+plot_sst_rel_diff <- ggplot(data = sst_change_df,
+                            aes(x = year,
+                                y = rel_diff,
+                                color = label)) + 
+  geom_line() +
+    geom_point() + 
+  scale_y_continuous(name = "Relative Difference (%)") +
+  scale_x_continuous(name = "Year", limits = c(1982, 2021)) +
+  scale_color_manual(name = "Method",
+                     values = color_vec[names(color_vec) %in% unique(sst_change_df$label)]) +
+        theme_tm_no_legend()
+
+plot_sst_abs_diff <- ggplot(data = sst_change_df,
+                            aes(x = year,
+                                y = abs_diff,
+                                color = label)) + 
+  geom_line() +
+    geom_point() + 
+  scale_y_continuous(name = expression(SST[method]-SST[AW]~(degree*C))) +
+  scale_x_continuous(name = "Year", limits = c(1982, 2021)) +
+  scale_color_manual(name = "Method",
+                     values = color_vec[names(color_vec) %in% unique(sst_change_df$label)]) +
+        theme_tm_no_legend()
+
+png(file = here::here("plots", "sst_by_year.png"), width = 169, height = 81, units = "mm", res = fig_res)
+print(plot_sst_by_year)
+dev.off()
+
+png(file = here::here("plots", "sst_by_year_methods_rel_diff.png"), width = 169, height = 81, units = "mm", res = fig_res)
+print(plot_sst_rel_diff)
+dev.off()
+
+png(file = here::here("plots", "sst_by_year_methods_abs_diff.png"), width = 169, height = 81, units = "mm", res = fig_res)
+print(plot_sst_abs_diff)
+dev.off()
+```
+
+# Make multipanel plots
+
+```{r multipanel_plots}
+png(filename = here::here("plots", "bt_methods_multipanel.png"), width = 6, height = 6, units = "in", res = 600)
+print(
+cowplot::plot_grid(plot_bt_by_year, 
+                   plot_bt_abs_diff,
+                   nrow = 2, 
+                   ncol = 1,
+                   labels = LETTERS[1:2]))
+dev.off()
+
+png(filename = here::here("plots", "sst_methods_multipanel.png"), width = 6, height = 6, units = "in", res = 600)
+print(
+cowplot::plot_grid(plot_sst_by_year, 
+                   plot_sst_abs_diff,
+                   nrow = 2, 
+                   ncol = 1,
+                   labels = LETTERS[1:2]))
+dev.off()
+
+png(filename = here::here("plots", "cpa_methods_multipanel.png"), width = 6, height = 6, units = "in", res = 600)
+print(
+cowplot::plot_grid(plot_cpa_by_year, 
+                   plot_cpa_abs_diff,
+                   nrow = 2, 
+                   ncol = 1,
+                   labels = LETTERS[1:2]))
+dev.off()
+```
+
+# Kendall's Tau correlations among methods
+
+Kendall's Tau correlations among interpolation methods for BT, SST, and CPA.
+
+```{r kendalls_tau}
+# Make Kendall's tau ranking tables
+combined_sst_df |>
+  dplyr::filter(year > 1986) |>
+  coldpool:::make_rank_table() |>
+  write.csv(file = here::here("output", "kendall_tau_method_sst.csv"), 
+            row.names = FALSE)
+
+combined_bt_df |>
+  dplyr::filter(year > 1986) |>
+  coldpool:::make_rank_table() |>
+  write.csv(file = here::here("output", "kendall_tau_method_bt.csv"), 
+            row.names = FALSE)
+
+combined_cpa_df |>
+  dplyr::filter(year < 2020) |>
+  coldpool:::make_rank_table() |>
+  write.csv(file = here::here("output", "kendall_tau_method_cpa.csv"), 
+            row.names = FALSE)
+```
+
+# Sampling day of year
+
+Make a map of sampling day of year, by station.
+
+```{r}
+# Make a map showing the average day of year stations were sampled.
+coldpool:::plot_stn_doy()
+```
+
+# Data product figures for TM
+
+Data product figures with ESR-style formatting.
+
+```{r data_product_figs}
+coldpool:::make_tm_product_figs(fig_res = 600)
+```
