@@ -219,7 +219,7 @@ Metrics of mean bottom temperature and cold pool fractions are calculated for bo
 
 # Open netCDF file
 
-nc <- nc_open(cpoolnc_path)
+nc <- nc_open(cpoolnc_path, write=TRUE)
 
 # Read relevant coordinate data
 
@@ -297,7 +297,7 @@ for (ii in 1:length(year_vec)) {
     hisnew = paste(format(Sys.time(), "%a %b %d %H:%M:%S %Y:"),
                    "Survey and survey-replicated data added for year", 
                    year_vec[ii])
-    ncattput(nc, 0, "history", paste(hisnew, hisold$value, sep="\n"))
+    ncatt_put(nc, 0, "history", paste(hisnew, hisold$value, sep="\n"))
     
   }
 }
