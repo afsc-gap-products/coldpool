@@ -90,7 +90,7 @@ Raster surfaces and temperature products are produced by interpolating temperatu
 
 ## Data product and package updates
 
-Temperature data products in the coldpool package are updated on an annual basis via new package releases after the conclusion of summer bottom trawl surveys.
+Temperature data products in the coldpool package are updated annually in August-September following the conclusion of summer bottom trawl surveys.
 
 
 # Cold pool area and temperature trends
