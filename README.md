@@ -39,11 +39,11 @@ Documentation for the dataset can be accessed using:
 ```
 
 ## Accessing datasets without installing the package
-Users can access temperature products in an R data format (.rda) without installing the package. To do so, download the [sysdata.rda](./R/sysdata.rda) file in the R directory of the coldpool repository. The data set can then be loaded in R after installing and loading the [raster](https://cran.r-project.org/web/packages/raster/index.html) package (version >= 3.2-1), as follows:
+Users can access temperature products in an R data format (.rda) without installing the package. To do so, download the [sysdata.rda](./R/sysdata.rda) file in the R directory of the coldpool repository. The data set can then be loaded in R after installing and loading the [terra](https://cran.r-project.org/web/packages/terra/index.html) package, as follows:
 
 ```{r}
-# Load raster package and data
-library(raster)
+# Load SpatRast package and data
+library(terra)
 load("[local_path]\\sysdata.rda")
 
 # View loaded cold pool index data frame
