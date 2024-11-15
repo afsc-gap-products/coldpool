@@ -130,6 +130,15 @@ interpolate_variable <- function(dat,
       xshift <- ((-1625000/cell_resolution) - floor(-1625000/cell_resolution))*cell_resolution
       yshift <- ((379500/cell_resolution) - floor(379500/cell_resolution))*cell_resolution
       bbox <- bbox + c(xshift,yshift,xshift,yshift)
+      
+      interp_raster <- terra::rast(xmin = bbox["xmin"],
+                                   xmax = bbox["xmax"],
+                                   ymin = bbox["ymin"],
+                                   ymax = bbox["ymax"],
+                                   nrows = floor((bbox["ymax"]-bbox["ymin"])/cell.resolution),
+                                   ncols = floor((bbox["xmax"]-bbox["xmin"])/cell.resolution),
+                                   crs = interpolation.crs)
+      
     }
   } else { # User-customized interpolation bounds
     
