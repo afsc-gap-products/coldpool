@@ -121,8 +121,8 @@ interpolate_variable <- function(dat,
                                    xmax = plot.boundary$x[2], 
                                    ymin = plot.boundary$y[1], 
                                    ymax = plot.boundary$y[2], 
-                                   nrow = n_dim, 
-                                   ncol = n_dim,
+                                   nrow = n_dim[1], 
+                                   ncol = n_dim[2],
                                    crs = interpolation.crs)
       
     }

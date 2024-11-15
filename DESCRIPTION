@@ -1,7 +1,7 @@
 Package: coldpool
 Type: Package
 Title: AFSC/RACE Groundfish Assessment Program EBS and NBS temperature products
-Version: 3.3-1
+Version: 3.4-2
 Authors@R: c(person("Sean", "Rohan", email = "sean.rohan@noaa.gov", role = c("aut", "cre")),
     person("Lewis", "Barnett", email = "lewis.barnett@noaa.gov", role = c("aut", "ctb")),
     person("Kelly", "Kearney", role = c("ctb")),
@@ -25,7 +25,7 @@ Description: This package calculates the area of the cold pool in the eastern Be
 License: GPL (>=2)
 Encoding: UTF-8
 LazyData: false
-RoxygenNote: 7.3.1
+RoxygenNote: 7.3.2
 Imports: colorspace,
     viridis,
     raster,
