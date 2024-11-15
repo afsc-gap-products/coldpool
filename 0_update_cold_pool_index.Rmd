@@ -224,6 +224,33 @@ nbs_mean_temperature$LAST_UPDATE <- Sys.Date()
 
 ```
 
+```{r cpa_change}
+cpa_previous_year <- tail(coldpool:::cold_pool_index$AREA_LTE2_KM2,2)[1]
+cpa_this_year <- tail(coldpool:::cold_pool_index$AREA_LTE2_KM2,1)
+
+(cpa_previous_year - cpa_this_year) /cpa_previous_year
+
+
+lte1_previous_year <- tail(coldpool:::cold_pool_index$AREA_LTE1_KM2,2)[1]
+lte1_this_year <- tail(coldpool:::cold_pool_index$AREA_LTE1_KM2,1)
+
+(lte1_previous_year - lte1_this_year) / lte1_previous_year
+
+
+lte0_previous_year <- tail(coldpool:::cold_pool_index$AREA_LTE0_KM2,2)[1]
+lte0_this_year <- tail(coldpool:::cold_pool_index$AREA_LTE0_KM2,1)
+
+(lte0_previous_year - lte0_this_year) / lte0_previous_year
+
+
+
+lteminus1_previous_year <- tail(coldpool:::cold_pool_index$AREA_LTEMINUS1_KM2,2)[1]
+lteminus1_this_year <- tail(coldpool:::cold_pool_index$AREA_LTEMINUS1_KM2,1)
+
+(lteminus1_previous_year - lteminus1_this_year) / lteminus1_previous_year
+
+```
+
 # 5. Add data to R/sysdata.rda ----
 
 Update sysdata.rda with cold pool area, mean bottom temperature, mean surface temperature, and and 5-km resolution rasters of surface and bottom temperature.

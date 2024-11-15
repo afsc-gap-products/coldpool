@@ -112,19 +112,17 @@ interpolate_variable <- function(dat,
         plot.boundary <- akgfmaps::transform_data_frame_crs(data.frame(x = c(extrap.box['xmn'], extrap.box['xmx']), 
                                                                        y = c(extrap.box['ymn'], extrap.box['ymx'])), 
                                                             out.crs = interpolation.crs)
-      
-      
-      
+        
         n_dim <- floor(abs(plot.boundary$x[1] - plot.boundary$x[2]))/cell.resolution
       
         interp_raster <- terra::rast(xmin = plot.boundary$x[1], 
                                      xmax = plot.boundary$x[2], 
                                      ymin = plot.boundary$y[1], 
                                      ymax = plot.boundary$y[2], 
-                                     nrow = n_dim, 
-                                     ncol = n_dim,
+                                     nrow = n_dim[1], 
+                                     ncol = n_dim[2],
                                      crs = interpolation.crs)
-      
+
       }
     } else { # Default interpolation bounds for sf object regions
       bbox <- sf::st_bbox(st_buffer(region_mask, cell.resolution*5))
@@ -140,6 +138,7 @@ interpolate_variable <- function(dat,
                                    nrows = floor((bbox["ymax"]-bbox["ymin"])/cell.resolution),
                                    ncols = floor((bbox["xmax"]-bbox["xmin"])/cell.resolution),
                                    crs = interpolation.crs)
+      
     }
   } else { # User-customized interpolation bounds
     
