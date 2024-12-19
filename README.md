@@ -15,7 +15,7 @@ This repository contains an R package that is used to calculate the *cold pool i
 
 1. Install the [akgfmaps package](https://github.com/sean-rohan-NOAA/akgfmaps) from GitHub prior to installing coldpool, as follows:
 ```{r}
-devtools::install_github("sean-rohan-NOAA/akgfmaps", build_vignettes = TRUE)
+devtools::install_github("afsc-gap-products/akgfmaps", build_vignettes = TRUE)
 ```
 
 If you encounter problems installing the akgfmaps package, please refer to the akgfmaps GitHub repository.
