@@ -15,7 +15,6 @@
 #'      \item{LAST_UPDATE}{Date when cold pool index and temperature rasters were last updated.}
 #' }
 #' @source \url{https://www.fisheries.noaa.gov/contact/groundfish-assessment-program}
-#' @export
 "cold_pool_index"
 
 #' Northern Bering Sea Mean Temperature (nbs_mean_temperature)
@@ -26,6 +25,7 @@
 #' \describe{
 #'      \item{YEAR}{Year}
 #'      \item{MEAN_GEAR_TEMPERATURE}{Mean gear temperature (i.e. bottom temperature) in the NBS survey area.}
+#'      \item{MEAN_GEAR_SALINITY}{Mean gear PSS-78 salinity (, i.e., bottom salinity) in the NBS survey area.}
 #'      \item{MEAN_SURFACE_TEMPERATURE}{Mean sea surface temperature in the NBS survey area.}
 #'      \item{AREA_LTE2_KM2}{Total area with bottom temperatures less than or equal to 2 celsius, in square kilometers, in the NBS survey area.}
 #'      \item{AREA_LTE1_KM2}{Total area with bottom temperatures less than or equal to 1 celsius, in square kilometers, in the NBS survey area.}
@@ -34,7 +34,6 @@
 #'      \item{LAST_UPDATE}{Date when cold pool index and temperature rasters were last updated.}
 #' }
 #' @source \url{https://www.fisheries.noaa.gov/contact/groundfish-assessment-program}
-#' @export
 "nbs_mean_temperature"
 
 #' Historical cold pool area calculations (cpa_pre2021)
@@ -61,7 +60,6 @@
 #'      \item{AVGBSST_LT100M}{Mean sea surface temperature for EBS shelf stations at bottom depths < 100 m}
 #' }
 #' @source \url{https://www.fisheries.noaa.gov/contact/groundfish-assessment-program}
-#' @export
 "cpa_pre2021"
 
 #' CRS for eastern Bering Sea cold pool index
@@ -69,53 +67,70 @@
 #' Character vector for North American Datum 1983 / Albers Equal Area Alaska (EPSG:3338).
 #' 
 #' @format A 1L character vector
-#' @export
 "ebs_proj_crs"
 
 #' Rasters of summer bottom temperature in the eastern Bering Sea at 5-km resolution
 #' 
-#' Summer bottom temperatures in the eastern Bering Sea continental shelf survey area, calculated from interpolation of temperature data from summer bottom trawl surveys conducted by AFSC/RACE/GAP. To load this data set, it is necessary to first load the coldpool package or raster and sp packages. Raster layers were interpolated using ordinary kriging with Matern covariance \doi{10.1007/978-1-4612-1494-6}{(Stein, 1999)}.
+#' Summer bottom temperatures in the eastern Bering Sea continental shelf survey area, calculated from interpolation of temperature data from summer bottom trawl surveys conducted by AFSC/RACE/GAP. To load this data set, it is necessary to first load the coldpool package or terra. Raster layers were interpolated using ordinary kriging with Matern covariance \doi{10.1007/978-1-4612-1494-6}{(Stein, 1999)}.
 #' 
-#' @format A RasterStack class with 39 layers, one for every year from 1982-2021, except for 2020 (due to survey cancellation).
+#' @format A PackedSpatRast class with 39 layers, one for every year from 1982-2021, except for 2020 (due to survey cancellation).
 #' #' \describe{
 #'      \item{ste_(year)_gear_temperature}{Raster layer of temperature for a given year}
 #' }
 #' @source \url{https://www.fisheries.noaa.gov/contact/groundfish-assessment-program}
-#' @export
 "ebs_bottom_temperature"
 
 #' Rasters of summer sea surface temperature in the eastern Bering Sea at 5-km resolution
 #' 
-#' Summer surface temperatures in the eastern Bering Sea continental shelf survey area, calculated from interpolation of temperature data from summer bottom trawl surveys conducted by AFSC/RACE/GAP. To load ethis data set, it is necessary to first load the coldpool package or raster and sp packages. Raster layers were interpolated using ordinary kriging with Matern covariance \doi{10.1007/978-1-4612-1494-6}{(Stein, 1999)}.
+#' Summer surface temperatures in the eastern Bering Sea continental shelf survey area, calculated from interpolation of temperature data from summer bottom trawl surveys conducted by AFSC/RACE/GAP. To load ethis data set, it is necessary to first load the coldpool package or terra package. Raster layers were interpolated using ordinary kriging with Matern covariance \doi{10.1007/978-1-4612-1494-6}{(Stein, 1999)}.
 #' 
-#' @format A RasterStack class with 39 layers, one for every year from 1982-2021, except for 2020 (due to survey cancellation).
+#' @format A PackedSpatRast class with 39 layers, one for every year from 1982-2021, except for 2020 (due to survey cancellation).
 #' #' \describe{
 #'      \item{ste_(year)_gear_temperature}{Raster layer of temperature for a given year}
 #' }
 #' @source \url{https://www.fisheries.noaa.gov/contact/groundfish-assessment-program}
-#' @export
 "ebs_surface_temperature"
+
+#' Rasters of summer salinity (PSS-78) in the eastern Bering Sea at 5-km resolution
+#' 
+#' Summer salinity (PSS-78) in the eastern Bering Sea continental shelf survey area, calculated from interpolation of data from summer bottom trawl surveys conducted by AFSC/RACE/GAP. To load this data set, it is necessary to first load the coldpool package or terra package. Raster layers were interpolated using ordinary kriging with Matern covariance \doi{10.1007/978-1-4612-1494-6}{(Stein, 1999)}.
+#' 
+#' @format A PackedSpatRast class with five layers.
+#' #' \describe{
+#'      \item{ste_(year)_gear_temperature}{Raster layer of salinity (PSS-78) for a given year}
+#' }
+#' @source \url{https://www.fisheries.noaa.gov/contact/groundfish-assessment-program}
+"ebs_bottom_salinity"
 
 #' Rasters of summer bottom temperature in the eastern and northern Bering Sea at 5-km resolution
 #' 
-#' Summer bottom temperatures in the full eastern Bering Sea survey area, calculated from interpolation of temperature data from summer bottom trawl surveys conducted by AFSC/RACE/GAP. To load this data set, it is necessary to first load the coldpool package or raster and sp packages. Raster layers were interpolated using ordinary kriging with Matern covariance \doi{10.1007/978-1-4612-1494-6}{(Stein, 1999)}.
+#' Summer bottom temperatures in the full eastern Bering Sea survey area, calculated from interpolation of temperature data from summer bottom trawl surveys conducted by AFSC/RACE/GAP. To load this data set, it is necessary to first load the coldpool package or terra package. Raster layers were interpolated using ordinary kriging with Matern covariance \doi{10.1007/978-1-4612-1494-6}{(Stein, 1999)}.
 #' 
-#' @format A RasterStack class with five layers, one for every year with an NBS survey, including the unplanned 2018 partial northern extention.
+#' @format A PackedSpatRast class with five layers, one for every year with an NBS survey, including the unplanned 2018 partial northern extention.
 #' #' \describe{
 #'      \item{ste_(year)_gear_temperature}{Raster layer of temperature for a given year}
 #' }
 #' @source \url{https://www.fisheries.noaa.gov/contact/groundfish-assessment-program}
-#' @export
 "nbs_ebs_bottom_temperature"
 
 #' Rasters of summer bottom temperature in the eastern and northern Bering Sea at 5-km resolution
 #' 
-#' Summer bottom temperatures in the full eastern Bering Sea survey area, calculated from interpolation of temperature data from summer bottom trawl surveys conducted by AFSC/RACE/GAP. To load ethis data set, it is necessary to first load the coldpool package or raster and sp packages. Raster layers were interpolated using ordinary kriging with Matern covariance \doi{10.1007/978-1-4612-1494-6}{(Stein, 1999)}.
+#' Summer bottom temperatures in the full eastern Bering Sea survey area, calculated from interpolation of temperature data from summer bottom trawl surveys conducted by AFSC/RACE/GAP. To load ethis data set, it is necessary to first load the coldpool package or terra. Raster layers were interpolated using ordinary kriging with Matern covariance \doi{10.1007/978-1-4612-1494-6}{(Stein, 1999)}.
 #' 
-#' @format A RasterStack class with five layers, one for every year with an NBS survey, including the unplanned 2018 partial northern extention.
+#' @format A PackedSpatRast class with five layers, one for every year with an NBS survey, including the unplanned 2018 partial northern extention.
 #' #' \describe{
 #'      \item{ste_(year)_gear_temperature}{Raster layer of temperature for a given year}
 #' }
 #' @source \url{https://www.fisheries.noaa.gov/contact/groundfish-assessment-program}
-#' @export
 "nbs_ebs_surface_temperature"
+
+#' Rasters of summer salinity (PSS-78) in the eastern and northern Bering Sea at 5-km resolution
+#' 
+#' Summer salinity (PSS-78) in the full eastern Bering Sea survey area, calculated from interpolation of data from summer bottom trawl surveys conducted by AFSC/RACE/GAP. To load this data set, it is necessary to first load the coldpool package or terra package. Raster layers were interpolated using ordinary kriging with Matern covariance \doi{10.1007/978-1-4612-1494-6}{(Stein, 1999)}.
+#' 
+#' @format A PackedSpatRast class with five layers.
+#' #' \describe{
+#'      \item{ste_(year)_gear_temperature}{Raster layer of salinity (PSS-78) for a given year}
+#' }
+#' @source \url{https://www.fisheries.noaa.gov/contact/groundfish-assessment-program}
+"nbs_ebs_bottom_salinity"

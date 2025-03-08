@@ -1,7 +1,8 @@
 Package: coldpool
 Type: Package
 Title: AFSC/RACE Groundfish Assessment Program EBS and NBS temperature products
-Version: 3.4-2
+Version: 3.4-3
+Date: 2025-03-07
 Authors@R: c(person("Sean", "Rohan", email = "sean.rohan@noaa.gov", role = c("aut", "cre")),
     person("Lewis", "Barnett", email = "lewis.barnett@noaa.gov", role = c("aut", "ctb")),
     person("Kelly", "Kearney", role = c("ctb")),
@@ -24,7 +25,7 @@ Remotes: afsc-gap-products/akgfmaps
 Description: This package calculates the area of the cold pool in the eastern Bering Sea (cold pool index), mean bottom temperature, and mean sea surface temperature. The cold pool is defined as the estimated area of the eastern Bering Sea continental shelf survey area with bottom temperatures less than or equal to 2 degrees C.
 License: GPL (>=2)
 Encoding: UTF-8
-LazyData: false
+LazyData: true
 RoxygenNote: 7.3.2
 Imports: colorspace,
     viridis,

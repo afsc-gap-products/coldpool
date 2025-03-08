@@ -5,7 +5,7 @@
 \alias{ebs_bottom_temperature}
 \title{Rasters of summer bottom temperature in the eastern Bering Sea at 5-km resolution}
 \format{
-A RasterStack class with 39 layers, one for every year from 1982-2021, except for 2020 (due to survey cancellation).
+A PackedSpatRast class with 39 layers, one for every year from 1982-2021, except for 2020 (due to survey cancellation).
 #' \describe{
      \item{ste_(year)_gear_temperature}{Raster layer of temperature for a given year}
 }
@@ -17,6 +17,6 @@ A RasterStack class with 39 layers, one for every year from 1982-2021, except fo
 ebs_bottom_temperature
 }
 \description{
-Summer bottom temperatures in the eastern Bering Sea continental shelf survey area, calculated from interpolation of temperature data from summer bottom trawl surveys conducted by AFSC/RACE/GAP. To load this data set, it is necessary to first load the coldpool package or raster and sp packages. Raster layers were interpolated using ordinary kriging with Matern covariance \doi{10.1007/978-1-4612-1494-6}{(Stein, 1999)}.
+Summer bottom temperatures in the eastern Bering Sea continental shelf survey area, calculated from interpolation of temperature data from summer bottom trawl surveys conducted by AFSC/RACE/GAP. To load this data set, it is necessary to first load the coldpool package or terra. Raster layers were interpolated using ordinary kriging with Matern covariance \doi{10.1007/978-1-4612-1494-6}{(Stein, 1999)}.
 }
 \keyword{datasets}

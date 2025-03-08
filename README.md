@@ -61,12 +61,14 @@ cold_pool_index
 <dd><p>Interpolated rasters of bottom temperature for the EBS survey area from 1982-2024 (excluding 2020 due to cancelled survey).</p></dd>
 <dt><b>ebs_surface_temperature</b></dt> 
 <dd><p>Interpolated rasters of sea surface temperature for the EBS survey area from 1982-2024 (excluding 2020 due to cancelled survey).</p></dd>
+<dt><b>ebs_bottom_salinity</b></dt>
+<dd><p>Interpolated rasters of bottom salinity (PSS-78) for the EBS survey area for 2010, 2017, and 2021-2024</p></dd>
 <dt><b>nbs_ebs_bottom_temperature</b></dt> 
 <dd><p>Interpolated rasters of bottom temperature for the full EBS and NBS survey area for years with a full EBS+NBS standardized survey (2010, 2017, 2019, 2021, 2022, 2023).</p></dd>
 <dt><b>nbs_ebs_surface_temperature</b></dt> 
 <dd><p>Interpolated rasters of sea surface temperature for the full EBS and NBS survey area for years with a full EBS+NBS standardized survey (2010, 2017, 2019, 2021, 2022, 2023).</p></dd>
-<dt><b>cpa_pre2021</b></dt>
-<dd><p>Data frame of cold pool area and mean temperatures calculated using the interpolation method used prior to 2021.</p></dd>
+<dt><b>nbs_ebs_bottom_salinity</b></dt> 
+<dd><p>Interpolated rasters of bottom salinity (PSS-78) for the full EBS and NBS survey area for 2010, 2017, and 2021-2024</p></dd>
 </dl>
 
 ## Caveat emptor
