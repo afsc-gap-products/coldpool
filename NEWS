@@ -1,3 +1,15 @@
+coldpool 3.4-3 (March 7, 2025)
+----------------------------------------------------------------
+
+NEW FEATURES
+
+- Added salinity rasters and time series as built-in data sets.
+
+FUNCTIONALITY CHANGES
+
+- Files from /data/ moved to /assets/ to allow lazy data.
+
+
 coldpool 3.4-2 (November 15, 2024)
 ----------------------------------------------------------------
 

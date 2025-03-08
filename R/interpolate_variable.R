@@ -99,8 +99,8 @@ interpolate_variable <- function(dat,
                                      xmax = -35000, 
                                      ymin = 379500, 
                                      ymax = 1969500, 
-                                     nrow = n_dim, 
-                                     ncol = n_dim,
+                                     nrow = n_dim[1], 
+                                     ncol = n_dim[2],
                                      crs = interpolation.crs)
       
       } else {
