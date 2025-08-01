@@ -1,10 +1,12 @@
-coldpool 3.5-1 (August 1, 2025)
+coldpool 3.5-1 (In progress)
 ----------------------------------------------------------------
 
 NEW FEATURES
 
 - interpolate_variable generates variogram fits and diagnostic 
   plots.
+- New cluster_spatraster() function to perform hierarchical
+  cluster analysis on terra SpatRaster objects.
   
 DATA UPDATE
 
