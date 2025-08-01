@@ -6,7 +6,7 @@ library(gapctd)
 
 # 2. Set global options ----
 fig_res <- 600
-proj_crs <- coldpool:::ebs_proj_crs
+proj_crs <- coldpool::ebs_proj_crs
 update_sysdata <- TRUE
 
 # Setup mask to calculate mean bottom temperature from <100 m strata
@@ -14,8 +14,8 @@ update_sysdata <- TRUE
 ebs_layers <- akgfmaps::get_base_layers(select.region = "ebs",
                                         set.crs = coldpool::ebs_proj_crs)
 # Filepath to csv containing data to use for temperature interpolation
-ebs_csv_path <- here::here("assets", paste0("index_hauls_temperature_data.csv"))
-nbs_ebs_csv_path <- here::here("assets", paste0("ebs_nbs_temperature_full_area.csv"))
+ebs_csv_path <- here::here("data", paste0("index_hauls_temperature_data.csv"))
+nbs_ebs_csv_path <- here::here("data", paste0("ebs_nbs_temperature_full_area.csv"))
 
 nbs_bt_years <- c(2010, 2017, 2018, 2019, 2021, 2022, 2023)
 nbs_sst_years <- c(2010, 2017, 2018, 2019, 2021, 2022, 2023)
@@ -29,7 +29,7 @@ if(update_sysdata) {
   channel <- get_connected(schema = "AFSC")
   
   # Get temperature data and write csvs to data directory
-  coldpool:::get_data(channel = channel, include_preliminary_data = NULL)
+  coldpool:::get_data(channel = channel, include_preliminary_data = "ebs")
 }
 
 # 4. Interpolate bottom and surface temperature ---- 
@@ -41,7 +41,7 @@ interpolation_wrapper(
   temp_data_path = ebs_csv_path,
   proj_crs = proj_crs,
   cell_resolution = c(5000, 5000), # 5x5 km grid resolution
-  select_years = 1982:2024,
+  select_years = 2025, #1982:2025,
   interp_variable = "gear_temperature",
   select_region = "sebs",
   methods = "Ste"
@@ -52,7 +52,7 @@ interpolation_wrapper(
   temp_data_path = ebs_csv_path,
   proj_crs = proj_crs,
   cell_resolution = c(5000, 5000), # 5x5 km grid resolution
-  select_years = 1982:2024,
+  select_years = 2025, #1982:2025,
   interp_variable = "surface_temperature",
   select_region = "sebs",
   methods = "Ste"
@@ -186,7 +186,7 @@ cold_pool_index <- dplyr::inner_join(bt_df, sst_df)
 nbs_area <- 
   akgfmaps::get_base_layers(
     select.region = "ebs", 
-    set.crs = coldpool:::ebs_proj_crs)$survey.area |>
+    set.crs = coldpool::ebs_proj_crs)$survey.area |>
   dplyr::filter(SURVEY_DEFINITION_ID == 143)
 
 nbs_ebs_bt_files <- 
@@ -268,34 +268,34 @@ nbs_mean_temperature <-
 # Summary statistics for write-up
 cpa_previous_year <- 
   tail(
-    coldpool:::cold_pool_index$AREA_LTE2_KM2, 2
+    cold_pool_index$AREA_LTE2_KM2, 2
     )[1]
 
 cpa_this_year <- 
   tail(
-    coldpool:::cold_pool_index$AREA_LTE2_KM2, 1
+    cold_pool_index$AREA_LTE2_KM2, 1
     )
 
 (cpa_previous_year - cpa_this_year) /cpa_previous_year
 
 
-lte1_previous_year <- tail(coldpool:::cold_pool_index$AREA_LTE1_KM2,2)[1]
+lte1_previous_year <- tail(cold_pool_index$AREA_LTE1_KM2,2)[1]
 
-lte1_this_year <- tail(coldpool:::cold_pool_index$AREA_LTE1_KM2,1)
+lte1_this_year <- tail(cold_pool_index$AREA_LTE1_KM2,1)
 
 (lte1_previous_year - lte1_this_year) / lte1_previous_year
 
 
-lte0_previous_year <- tail(coldpool:::cold_pool_index$AREA_LTE0_KM2,2)[1]
+lte0_previous_year <- tail(cold_pool_index$AREA_LTE0_KM2,2)[1]
 
-lte0_this_year <- tail(coldpool:::cold_pool_index$AREA_LTE0_KM2,1)
+lte0_this_year <- tail(cold_pool_index$AREA_LTE0_KM2,1)
 
 (lte0_previous_year - lte0_this_year) / lte0_previous_year
 
 
-lteminus1_previous_year <- tail(coldpool:::cold_pool_index$AREA_LTEMINUS1_KM2,2)[1]
+lteminus1_previous_year <- tail(cold_pool_index$AREA_LTEMINUS1_KM2,2)[1]
 
-lteminus1_this_year <- tail(coldpool:::cold_pool_index$AREA_LTEMINUS1_KM2,1)
+lteminus1_this_year <- tail(cold_pool_index$AREA_LTEMINUS1_KM2,1)
 
 (lteminus1_previous_year - lteminus1_this_year) / lteminus1_previous_year
 
@@ -720,7 +720,7 @@ cold_pool_index$LAST_UPDATE <- Sys.Date()
 nbs_mean_temperature$LAST_UPDATE <- Sys.Date()
 
 cpa_pre2021 <- read.csv(file = here::here("inst", "extdata", "old_method_cpa_temperature_2021.csv"))
-ebs_proj_crs <- coldpool:::ebs_proj_crs
+ebs_proj_crs <- coldpool::ebs_proj_crs
 
 usethis::use_data(cpa_pre2021, overwrite = TRUE)
 usethis::use_data(ebs_proj_crs, overwrite = TRUE)

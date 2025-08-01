@@ -1,3 +1,16 @@
+coldpool 3.5-1 (August 1, 2025)
+----------------------------------------------------------------
+
+NEW FEATURES
+
+- interpolate_variable generates variogram fits and diagnostic 
+  plots.
+  
+DATA UPDATE
+
+- Preliminary EBS shelf data update for 2025.
+
+
 coldpool 3.4-3 (March 7, 2025)
 ----------------------------------------------------------------
 
