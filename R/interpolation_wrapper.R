@@ -18,14 +18,6 @@ interpolation_wrapper <- function(temp_data_path,
                                   interp_variable,
                                   select_region = "sebs",
                                   methods = NULL) {
-  
-  # temp_data_path = ebs_csv_path
-  # proj_crs = proj_crs
-  # cell_resolution = 5000 # 5x5 km grid resolution
-  # select_years = 1982:2022
-  # interp_variable = "gear_temperature"
-  # select_region = "sebs"
-  # methods = NULL
 
   if(!(class(temp_data_path) == "data.frame")) {
     
@@ -50,18 +42,20 @@ interpolation_wrapper <- function(temp_data_path,
   # Calculate cold pool area and generate rasters
   for(ii in 1:length(year_vec)) {
 
-    cpa_year <- interpolate_variable(dat = dplyr::filter(temperature_df, year == year_vec[ii]),
-                                     dat.year = year_vec[ii],
-                                     in.crs = "EPSG:4326",
-                                     interpolation.crs = proj_crs,
-                                     cell.resolution = cell_resolution,
-                                     lon.col = "longitude",
-                                     lat.col = "latitude",
-                                     var.col = interp_variable,
-                                     nm = Inf,
-                                     pre = paste0("_", toupper(interp_variable), "_", year_vec[ii]),
-                                     select.region = select_region,
-                                     methods = methods)
+    cpa_year <- interpolate_variable(
+      dat = dplyr::filter(temperature_df, year == year_vec[ii]),
+      dat.year = year_vec[ii],
+      in.crs = "EPSG:4326",
+      interpolation.crs = proj_crs,
+      cell.resolution = cell_resolution,
+      lon.col = "longitude",
+      lat.col = "latitude",
+      var.col = interp_variable,
+      nm = Inf,
+      pre = paste0("_", toupper(interp_variable), "_", year_vec[ii]),
+      select.region = select_region,
+      methods = methods
+    )
 
   }
 
