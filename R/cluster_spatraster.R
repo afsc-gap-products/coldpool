@@ -42,49 +42,7 @@
 #'   hclust_method = "complete"
 #' )
 
-cluster_spatraster <- function(x, scale_vars = TRUE, dist_method = "euclidean", hclust_method = "complete") {
-    
-    # Convert to matrix, remove NAs, apply row standardization
-    x_mat <-
-      x |>
-      as.matrix() |>
-      na.omit()
-    
-    if(scale_vars) {
-      
-      x_mat <-
-        x_mat |>
-        apply(
-          MARGIN = 1,
-          FUN = scale
-        )
-      
-      # Assign names
-      # After apply, the original rownames become colnames.
-      # We assume the original colnames were the time points.
-      rownames(x_mat) <- colnames(x)
-      
-    } else {
-      
-      x_mat <- t(x_mat)
-      
-    }
-    
-    # Calculate Euclidean distance matrix
-    x_dist <-
-      x_mat |>
-      dist(method = dist_method)
-    
-    # Complete linkage clustering
-    x_clust <- hclust(x_dist, method = hclust_method)
-    
-    plot(x_clust)
-    
-    return(list(mat = x_mat, dist = x_dist, clust = x_clust))
-    
-  }
-
-cluster_analysis_temps <-
+cluster_spatraster <- 
   function(x, scale_vars = TRUE, dist_method = "euclidean", hclust_method = "complete") {
     
     # Convert to matrix, remove NAs, apply row standardization

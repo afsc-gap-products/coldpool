@@ -324,6 +324,37 @@ print(cold_pool_grid)
 graphics.off()
 ```
 
+```{r fit_btst_path, message=FALSE, warning=FALSE, include=FALSE}
+plot_btst_path <- 
+  ggplot(
+  data = cold_pool_index, 
+  mapping = 
+    aes(
+      x = MEAN_GEAR_TEMPERATURE, 
+      y = MEAN_SURFACE_TEMPERATURE, 
+      label = substring(YEAR, nchar(YEAR)-1), 
+      color = YEAR, 
+      group = YEAR > 2020)
+  ) +
+  geom_vline(linetype = 2, xintercept = mean(cold_pool_index$MEAN_GEAR_TEMPERATURE), alpha = 0.7) +
+  geom_hline(linetype = 2, yintercept = mean(cold_pool_index$MEAN_SURFACE_TEMPERATURE), alpha = 0.7) +
+  geom_path(alpha = 0.7) +
+  geom_point() +
+  geom_text_repel() +
+  scale_color_continuous_tableau() +
+  scale_x_continuous(name = expression('Bottom temperature ('*degree*'C)')) +
+  scale_y_continuous(name = expression('Sea surface temperature ('*degree*'C)')) +
+  facet_wrap(~"EBS shelf summer bottom trawl survey") +
+  coldpool::theme_multi_map_blue_strip() +
+  theme(legend.position = "none",
+        panel.grid.major = element_line(color = "grey92"),
+        panel.grid.minor = element_line(color = "grey92", linewidth = rel(0.5)))
+
+png(here::here("plots", paste0(max_year, "_ebs_btst_year_path.png")), width = 5, height = 5, units = "in", res = fig_res)
+print(plot_btst_path)
+dev.off()
+```
+
 ```{r fig3_nbs_ebs_map, message=FALSE, warning=FALSE, include=FALSE}
 nbs_ebs_temp_breaks <- c(-Inf, seq(-1,8,1), Inf)
 nbs_ebs_viridis_option <- "H" # viridis turbo palette
@@ -899,7 +930,7 @@ dev.off()
 ```
 
 ```{r maps_by_year, message=FALSE, warning=FALSE, include=FALSE}
-year_vec <- c(1982:2019, 2021:2024)
+year_vec <- c(1982:2019, 2021:2025)
 
 nbs_years <- c(2010, 2017, 2019, 2021:2023)
 
