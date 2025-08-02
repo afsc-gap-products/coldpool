@@ -4,6 +4,7 @@
 
 library(coldpool) # 3.5-1
 library(akgfmaps) # 4.1.0
+library(ggrepel)
 
 # Setup directories and figure options
 if(!dir.exists("plots")) {dir.create("plots")}
@@ -1170,7 +1171,7 @@ for(ii in 1:length(year_vec)) {
     ggplot2::geom_sf(data = sel_year,
                      mapping = aes(fill = temperature),
                      color = NA) +
-    ggplot2::geom_sf(data = nbs_layers$bathymetry) +
+    ggplot2::geom_sf(data = nbs_layers$bathymetry, linewidth = rel(0.5)) +
     ggplot2::geom_sf(data = nbs_layers$survey.area, 
                      fill = NA, 
                      color = "black") +
