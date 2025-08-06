@@ -10,8 +10,9 @@
 #'      \item{AREA_LTE0_KM2}{Total area with bottom temperatures less than or equal to 0 celsius, in square kilometers, in the EBS shelf survey area.}
 #'      \item{AREA_LTEMINUS1_KM2}{Total area with bottom temperatures less than or equal to -1 celsius, in square kilometers, in the EBS shelf survey area.}
 #'      \item{MEAN_GEAR_TEMPERATURE}{Mean gear temperature (i.e. bottom temperature) in the EBS shelf survey area.}
+#'      \item{MEAN_BT_LT100M}{Mean gear temperature (i.e. bottom temperature) for EBS shelf strata with bottom depth less than 100 m (strata 10, 20, 31, 32, 41, 42, 43).}
 #'      \item{MEAN_SURFACE_TEMPERATURE}{Mean sea surface temperature in the survey area.}
-#'      \item{MEAN_BT_LT100M}{Mean gear temperature (i.e. bottom temperature) for EBS shelf *STANDARD* strata (i.e., excluding northwest strata 82 and 90) with bottom depth less than 100 m (strata 10, 20, 31, 32, 41, 42, 43).}
+#'      \item{MEAN_GEAR_SALINITY}{Mean gear PSS-78 salinity (, i.e., bottom salinity) in the EBS survey area.}
 #'      \item{LAST_UPDATE}{Date when cold pool index and temperature rasters were last updated.}
 #' }
 #' @source \url{https://www.fisheries.noaa.gov/contact/groundfish-assessment-program}
