@@ -1,10 +1,11 @@
 # Create 2025 EBS and NBS temperature figures
-# Last update: August 1, 2025
+# Last update: August 6, 2025
 # Created by Sean Rohan
 
 library(coldpool) # 3.5-1
 library(akgfmaps) # 4.1.0
 library(ggrepel)
+library(shadowtext)
 
 # Setup directories and figure options
 if(!dir.exists("plots")) {dir.create("plots")}
@@ -1160,6 +1161,14 @@ temp_map_cbar <-
            size = rel(3.2)) + 
   theme(plot.margin = unit(c(0,0, 0, 5), units = "mm"))
 
+depth_labels <- 
+  akgfmaps::transform_data_frame_crs(
+  data.frame(x = c(-166, -167.5, -168),
+             y = c(58.2, 56.8, 55.2),
+             label = c("50 m", "100 m", "200 m")),
+  out.crs = coldpool::ebs_proj_crs
+)
+
 for(ii in 1:length(year_vec)) {
   
   sel_year <- dplyr::filter(bt_year_df, year == year_vec[ii])
@@ -1177,6 +1186,16 @@ for(ii in 1:length(year_vec)) {
                      color = "black") +
     ggplot2::geom_sf(data = nbs_layers$graticule,
                      alpha = 0.3) +
+    shadowtext::geom_shadowtext(
+      data = depth_labels,
+      color = "black",
+      bg.color = "white",
+      mapping = aes(
+        x = x,
+        y = y,
+        label = label
+      )
+    ) +
     ggplot2::coord_sf(xlim = nbs_layers$plot.boundary$x, 
                       ylim = nbs_layers$plot.boundary$y) +
     ggplot2::scale_x_continuous(name = "Longitude", 
@@ -1205,8 +1224,6 @@ for(ii in 1:length(year_vec)) {
   
   
 }
-
-
 
 # Cold pool area table -----------------------------------------------------------------------------
 
