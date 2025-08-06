@@ -12,6 +12,11 @@ DATA UPDATE
 
 - Preliminary EBS shelf data update for 2025.
 
+FUNCTIONALITY CHANGES
+
+- theme_multi_map_blue_strip() includes a strip.background 
+  color.
+
 
 coldpool 3.4-3 (March 7, 2025)
 ----------------------------------------------------------------
