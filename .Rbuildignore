@@ -2,3 +2,14 @@
 ^\.Rproj\.user$
 ^doc$
 ^Meta$
+
+0_update_ebs_nbs_data.R
+1_2025_ebs_nbs_plots.R
+2_update_goa_data.R
+
+analysis
+archive
+assets
+plots
+output
+paper

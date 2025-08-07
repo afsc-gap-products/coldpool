@@ -7,6 +7,8 @@ NEW FEATURES
   plots.
 - New cluster_spatraster() function to perform hierarchical
   cluster analysis on terra SpatRaster objects.
+- Added calc_fixed_depth_var_bt() function from gapctd to 
+  calculate variable values from oceanographic profiles (casts).
   
 DATA UPDATE
 
@@ -14,7 +16,7 @@ DATA UPDATE
 
 FUNCTIONALITY CHANGES
 
-- theme_multi_map_blue_strip() includes a strip.background 
+- theme_multi_map_blue_strip() now includes a strip.background 
   color.
 
 
