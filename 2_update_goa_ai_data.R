@@ -4,12 +4,39 @@ library(coldpool)
 library(akgfmaps)
 
 # Retrieve GOA or AI data
-survey_definition_id <- 47 #GOA
-# survey_definition_id <- 52 #AI
+# survey_definition_id <- 47 #GOA
+survey_definition_id <- 52 #AI
 
-max_year <- 2025
+# Setup variables for analysis
+if(survey_definition_id == 47) {
+  region <- "GOA"
+  min_year <- 1993 # First year with temperature data from every haul
+  max_year <- 2025 # Most recent survey
+  range_baseline <- c(1993, 2014)
+  year_breaks <- seq(min_year, max_year, 4)
+  subarea_levels <- c("Western Gulf of Alaska", "Eastern Gulf of Alaska") # Panel/timeseries order
+}
+
+if(survey_definition_id == 52) {
+  region <- "AI"
+  min_year <- 1991
+  max_year <- 2024 # Most recent survey
+  range_baseline <- c(1991, 2012)
+  year_breaks <- seq(min_year-1, max_year, 4)
+  subarea_levels <- c("Western Aleutians", "Central Aleutians", "Eastern Aleutians") # Panel/timeseries order
+}
 
 channel <- coldpool:::get_connected(schema = "AFSC")
+
+# Get spatial data ---------------------------------------------------------------------------------
+# Survey layers
+map_layers <- 
+  akgfmaps::get_base_layers(select.region = region, set.crs = "EPSG:3338")
+
+# ESR subareas
+esr_subareas <-
+  akgfmaps::get_esr_regions(select.region = "esr_subarea", set.crs = "EPSG:3338") |>
+  dplyr::filter(AREA_NAME %in% subarea_levels)
 
 # Retrieve cast data -------------------------------------------------------------------------------
 # Data from index station hauls with good performance that are used in stock assessments
@@ -43,7 +70,7 @@ casts_since_2005 <-
       )
   )
 
-# Casts data from before 2005 are in racebase 2
+# Cast data from before 2005 are in rb2 tables
 casts_before_2005 <- 
   RODBC::sqlQuery(
     channel = channel, 
@@ -66,6 +93,7 @@ casts_before_2005 <-
       and c.vessel_id = bt.vessel
       and bt.datum_code in (0, 1, 7, 11) 
       and bt.depth >= 0
+      and bt.temperature between -2.2 and 30
       ")
   )
 
@@ -114,15 +142,16 @@ events_since_2005 <-
              "
       )
   ) |>
-  dplyr::mutate(EVENT_NAME = 
-                  dplyr::case_match(
-                    EVENT_TYPE_ID,
-                    3 ~ "OB",
-                    4 ~ "EQ",
-                    6 ~ "HB",
-                    16 ~ "END"
-                  ))
-
+  dplyr::mutate(
+    EVENT_NAME = 
+      dplyr::case_match(
+        EVENT_TYPE_ID,
+        3 ~ "OB",
+        4 ~ "EQ",
+        6 ~ "HB",
+        16 ~ "END"
+      )
+  )
 
 events_before_2005 <-
   RODBC::sqlQuery(
@@ -197,8 +226,6 @@ events <-
     events_since_2005
   )
 
-rm(events_since_2005, events_before_2005)
-
 # Retrieve haul data from GAP_PRODUCTS -------------------------------------------------------------
 
 hauls <- 
@@ -215,6 +242,7 @@ hauls <-
       h.longitude_dd_start, 
       h.longitude_dd_end, 
       h.station, 
+      h.stratum,
       h.depth_gear_m, 
       h.depth_m, 
       h.surface_temperature_c, 
@@ -227,47 +255,48 @@ hauls <-
       )
   )
 
-# Assign hauls to subareas
-if(survey_definition_id == 47) {
-  hauls$SUBAREA <- "EGOA"
-  hauls$SUBAREA[hauls$LONGITUDE_DD_START < -147] <- "CGOA"
-  hauls$SUBAREA[hauls$LONGITUDE_DD_START < -165] <- "WGOA"
-}
+# Assign hauls to ESR subareas ---------------------------------------------------------------------
+# longitude cutoffs for the GOA
+
+haul_subareas <- 
+  hauls |>
+  dplyr::select(VESSEL, CRUISE, HAUL, LATITUDE_DD_START, LONGITUDE_DD_START) |>
+  sf::st_as_sf(coords = c("LONGITUDE_DD_START", "LATITUDE_DD_START"), crs = "WGS84") |>
+  sf::st_transform(crs = "EPSG:3338") |>
+  sf::st_intersection(esr_subareas) |>
+  dplyr::filter(!is.na(AREA_NAME)) # Exclude hauls outside of ESR subareas from temperature calculations
+
+haul_subareas <-
+  haul_subareas |>
+  dplyr::select(VESSEL, CRUISE, HAUL, SUBAREA = AREA_NAME) |>
+  sf::st_drop_geometry()
+
+hauls <- 
+  dplyr::inner_join(
+    hauls, 
+    haul_subareas, 
+    by = c("VESSEL", "CRUISE", "HAUL")
+  )
+
+hauls$SUBAREA <- factor(hauls$SUBAREA, levels = subarea_levels)
 
 
-# Calculate temperatures at target depths from upcasts and downcasts
+# Calculate temperatures at target depths ----------------------------------------------------------
 
+# Depth interval around target depth for which measurements can be used to estimate temperature at the 
+# target depth
 start_time <- Sys.time()
-hauls$DC_TEMP_5M <- -99
-hauls$DC_TEMP_100M <- -99
-hauls$DC_TEMP_200M <- -99
-hauls$UC_TEMP_5M <- -99
-hauls$UC_TEMP_100M <- -99
-hauls$UC_TEMP_200M <- -99
-
-temp_cast <- casts
+hauls$DC_TEMP_5M <- hauls$DC_TEMP_100M <- hauls$DC_TEMP_200M <- NA
+hauls$UC_TEMP_5M <- hauls$UC_TEMP_100M <- hauls$UC_TEMP_200M <- NA
 
 for(ii in 1:nrow(hauls)) {
   
-  if(ii %% 200 == 0) {
-    print(paste0(ii, "/", nrow(hauls), ": ", round(as.numeric(difftime(Sys.time(), start_time, "min")), 2)))
-  }
-  
-  
   sel_cast <- 
     dplyr::filter(
-      temp_cast, 
+      casts, 
       VESSEL == hauls$VESSEL[ii], 
       CRUISE == hauls$CRUISE[ii], 
       HAUL == hauls$HAUL[ii]
-    )
-  
-  temp_cast <- 
-    dplyr::filter(
-      temp_cast, 
-      VESSEL != hauls$VESSEL[ii], 
-      CRUISE != hauls$CRUISE[ii], 
-      HAUL != hauls$HAUL[ii]
     )
   
   sel_events <- 
@@ -283,62 +312,152 @@ for(ii in 1:nrow(hauls)) {
   upcast <- dplyr::arrange(upcast, DATE_TIME)
   downcast <- sel_cast[sel_cast$DATE_TIME <= (sel_events$DATE_TIME[sel_events$EVENT_NAME == "EQ"] + 60), ] 
   downcast <- dplyr::arrange(downcast, desc(DATE_TIME))
-  
-  if(nrow(upcast) > 3) {
     
     hauls$UC_TEMP_5M[[ii]] <- 
       coldpool::calc_fixed_depth_var_bt(
         depth = upcast$DEPTH, 
         var = upcast$TEMPERATURE, 
-        ref_depth = 5
+        ref_depth = 5,
+        ref_buffer = 5
       )
     
     hauls$UC_TEMP_100M[[ii]] <- 
       coldpool::calc_fixed_depth_var_bt(
         depth = upcast$DEPTH, 
         var = upcast$TEMPERATURE, 
-        ref_depth = 100
+        ref_depth = 100,
+        ref_buffer = 10
       )
     
-    hauls$UC_TEMP_200M[ii] <- 
+    hauls$UC_TEMP_200M[[ii]] <- 
       coldpool::calc_fixed_depth_var_bt(
         depth = upcast$DEPTH, 
         var = upcast$TEMPERATURE, 
-        ref_depth = 200
+        ref_depth = 200,
+        ref_buffer = 10
       )
-    
-  }
-  
-  if(nrow(downcast) > 3) {
     
     hauls$DC_TEMP_5M[[ii]] <- 
       coldpool::calc_fixed_depth_var_bt(
         depth = downcast$DEPTH, 
         var = downcast$TEMPERATURE, 
-        ref_depth = 5
+        ref_depth = 5,
+        ref_buffer = 5
       )
     
-    hauls$DC_TEMP_100M[ii] <- 
+    hauls$DC_TEMP_100M[[ii]] <- 
       coldpool::calc_fixed_depth_var_bt(
         depth = downcast$DEPTH, 
         var = downcast$TEMPERATURE, 
-        ref_depth = 100
+        ref_depth = 100,
+        ref_buffer = 10
       )
     
-    hauls$DC_TEMP_200M[ii] <- 
+    hauls$DC_TEMP_200M[[ii]] <- 
       coldpool::calc_fixed_depth_var_bt(
         depth = downcast$DEPTH, 
         var = downcast$TEMPERATURE, 
-        ref_depth = 200
+        ref_depth = 200,
+        ref_buffer = 10
       )
-    
+  
+  if(ii %% 100 == 0) {
+    print(paste0(ii, "/", nrow(hauls), ": ", round(as.numeric(difftime(Sys.time(), start_time, "min")), 2)))
+    print(hauls[ii, ])
   }
+
 }
 
-# Replace dummy values (-99) with NAs
-hauls$DC_TEMP_5M[is.na(hauls$DC_TEMP_5M)] <- NA
-hauls$DC_TEMP_100M[is.na(hauls$DC_TEMP_100M)] <- NA
-hauls$DC_TEMP_200M[is.na(hauls$DC_TEMP_200M)] <- NA
-hauls$UC_TEMP_5M[is.na(hauls$UC_TEMP_5M)] <- NA
-hauls$UC_TEMP_100M[is.na(hauls$UC_TEMP_100M)] <- NA
-hauls$UC_TEMP_200M[is.na(hauls$UC_TEMP_200M)] <- NA
+# Assign temperature values ------------------------------------------------------------------------
+# Preference order: upcast > downcast > surface/gear temperature
+hauls <- hauls |>
+  dplyr::mutate(
+    TEMPERATURE_5M = 
+      ifelse(
+        !is.na(UC_TEMP_5M), 
+        UC_TEMP_5M, 
+        ifelse(
+          !is.na(DC_TEMP_5M), 
+               DC_TEMP_5M, 
+               ifelse(
+                 !is.na(SURFACE_TEMPERATURE_C), 
+                 SURFACE_TEMPERATURE_C, 
+                 NA)
+          )
+        ),
+    TEMPERATURE_100M = 
+      ifelse(
+        !is.na(UC_TEMP_100M), 
+        UC_TEMP_100M, 
+        ifelse(
+          !is.na(DC_TEMP_100M),
+          DC_TEMP_100M, 
+          ifelse(
+            DEPTH_GEAR_M >= 95 & DEPTH_GEAR_M <= 105, 
+            GEAR_TEMPERATURE_C,
+            NA)
+          )
+        ),
+    TEMPERATURE_200M = 
+      ifelse(
+        !is.na(UC_TEMP_200M), 
+        UC_TEMP_200M, 
+        ifelse(
+          !is.na(DC_TEMP_200M),
+          DC_TEMP_200M, 
+          ifelse(
+            DEPTH_GEAR_M >= 195 & DEPTH_GEAR_M <= 205, 
+            GEAR_TEMPERATURE_C,
+            NA)
+        )
+      )
+  )
+
+# Calculate temperature summaries ------------------------------------------------------------------
+# By for subarea, region, and year.
+
+temp_by_year <- 
+  hauls |>
+  dplyr::group_by(
+    SUBAREA, 
+    YEAR
+  ) |>
+  dplyr::summarise(
+    MEAN_TEMPERATURE_5M = mean(TEMPERATURE_5M, na.rm = TRUE),
+    MEAN_TEMPERATURE_100M = mean(TEMPERATURE_100M, na.rm = TRUE),
+    MEAN_TEMPERATURE_200M = mean(TEMPERATURE_200M, na.rm = TRUE),
+    MEAN_GEAR_TEMPERATURE = mean(GEAR_TEMPERATURE_C, na.rm = TRUE),
+    MEAN_SURFACE_TEMPERATURE = mean(SURFACE_TEMPERATURE_C, na.rm = TRUE),
+    N_5M = sum(!is.na(TEMPERATURE_5M)),
+    N_100M = sum(!is.na(TEMPERATURE_100M)),
+    N_200M = sum(!is.na(TEMPERATURE_200M)),
+    N_GEAR_TEMPERATURE = sum(!is.na(GEAR_TEMPERATURE_C)),
+    N_SURFACE_TEMPERATURE = sum(!is.na(SURFACE_TEMPERATURE_C))
+  ) |>
+  dplyr::ungroup()
+
+output_temperature <- 
+  temp_by_year |>
+  dplyr::select(
+    YEAR,
+    SUBAREA,
+    MEAN_SURFACE_TEMPERATURE,
+    MEAN_GEAR_TEMPERATURE,
+    MEAN_100M_TEMPERATURE = MEAN_TEMPERATURE_100M,
+    MEAN_200M_TEMPERATURE = MEAN_TEMPERATURE_200M
+  ) |>
+  dplyr::mutate(LAST_UPDATE = Sys.Date())
+
+# Save to rda
+
+if(survey_definition_id == 47) {
+  goa_mean_temperature <- output_temperature
+  usethis::use_data(goa_mean_temperature, overwrite = TRUE)
+}
+
+if(survey_definition_id == 52) {
+  ai_mean_temperature <- output_temperature
+  usethis::use_data(ai_mean_temperature, overwrite = TRUE)
+}
+
+# REBUILD!

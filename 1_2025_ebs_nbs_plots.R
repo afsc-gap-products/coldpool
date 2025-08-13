@@ -64,7 +64,7 @@ plot_cpi_timeseries <- ggplot(data = cpi_df,
                                         color = NA))
 
 ragg::agg_png(
-  filename = here::here("plots", paste0(max_year, "_cold_pool_index.png")), 
+  filename = here::here("plots", "ebs_nbs",  paste0(max_year, "_cold_pool_index.png")), 
   width = 6,
   height = 3, 
   units = "in",
@@ -127,7 +127,7 @@ stacked_area_plot <-
         legend.title = element_blank())
 
 ragg::agg_png(
-  file = here::here("plots", paste0(max_year, "_stacked_temperature.png")), 
+  file = here::here("plots", "ebs_nbs",  paste0(max_year, "_stacked_temperature.png")), 
   height = 4, 
   width = 6, 
   units = "in", 
@@ -165,7 +165,7 @@ stacked_area_simple_label_plot <-
         legend.title = element_blank())
 
 ragg::agg_png(
-  file = here::here("plots", paste0(max_year, "_stacked_temperature_simple_label.png")), 
+  file = here::here("plots", "ebs_nbs",  paste0(max_year, "_stacked_temperature_simple_label.png")), 
   height = 4, 
   width = 6, 
   units = "in", 
@@ -338,7 +338,7 @@ coldpool_with_area <-
   )
 
 ragg::agg_png(
-  file = here::here("plots", paste0(max_year, "_coldpool_with_area.png")), 
+  file = here::here("plots", "ebs_nbs",  paste0(max_year, "_coldpool_with_area.png")), 
   height = 8, 
   width = 6, 
   units = "in", 
@@ -348,7 +348,7 @@ print(coldpool_with_area)
 dev.off()
 
 ragg::agg_png(
-  file = here::here("plots", paste0(max_year, "_coldpool.png")), 
+  file = here::here("plots", "ebs_nbs",  paste0(max_year, "_coldpool.png")), 
   height = 6, 
   width = 6, 
   units = "in", 
@@ -395,7 +395,7 @@ plot_btst_path <-
         panel.grid.minor = element_line(color = "grey92", linewidth = rel(0.5)))
 
 png(
-  here::here("plots", paste0(max_year, "_ebs_btst_year_path.png")), 
+  here::here("plots", "ebs_nbs",  paste0(max_year, "_ebs_btst_year_path.png")), 
   width = 5, 
   height = 5, 
   units = "in", 
@@ -550,7 +550,7 @@ ebs_nbs_map <-
   )
 
 ragg::agg_png(
-  filename = here::here("plots", paste0(max_year, "_nbs_ebs_temperature_map.png")), 
+  filename = here::here("plots", "ebs_nbs",  paste0(max_year, "_nbs_ebs_temperature_map.png")), 
   width = 6, 
   height = 6, 
   units = "in", 
@@ -739,7 +739,7 @@ ebs_nbs_bt_map_grid <-
   )
 
 ragg::agg_png(
-  filename = here::here("plots", paste0(max_year, "_nbs_ebs_temperature_map_grid.png")), 
+  filename = here::here("plots", "ebs_nbs",  paste0(max_year, "_nbs_ebs_temperature_map_grid.png")), 
   width = 5, 
   height = 6, 
   units = "in", 
@@ -811,7 +811,7 @@ ebs_nbs_sst_map_grid <-
   )
 
 ragg::agg_png(
-  filename = here::here("plots", paste0(max_year, "_nbs_ebs_sst_map_grid.png")), 
+  filename = here::here("plots", "ebs_nbs",  paste0(max_year, "_nbs_ebs_sst_map_grid.png")), 
   width = 5, 
   height = 6, 
   units = "in", 
@@ -949,7 +949,7 @@ plot_sebs_average_temperature <-
                                         color = NA))
 
 ragg::agg_png(
-  file = here::here("plots", paste0(max_year, "_average_temperature.png")), 
+  file = here::here("plots", "ebs_nbs",  paste0(max_year, "_average_temperature.png")), 
   width = 6, 
   height = 3, 
   units = "in", 
@@ -959,7 +959,7 @@ print(plot_average_temperature)
 dev.off()
 
 ragg::agg_png(
-  file = here::here("plots", paste0(max_year, "_plot_sebs_average_temperature.png")), 
+  file = here::here("plots", "ebs_nbs",  paste0(max_year, "_plot_sebs_average_temperature.png")), 
   width = 6, 
   height = 3, 
   units = "in", 
@@ -1035,7 +1035,7 @@ zscore_plot <-
         legend.position = "none")
 
 ragg::agg_png(
-  file = here::here("plots", paste0(max_year, "_anomaly.png")), 
+  file = here::here("plots", "ebs_nbs",  paste0(max_year, "_anomaly.png")), 
   width = 6, 
   height = 6, 
   units = "in", 
@@ -1054,7 +1054,7 @@ temp_breaks <- c(-Inf, seq(-1,8,1), Inf)
 color_pal <- "H"
 fig_res <- 300
 
-dir.create(here::here("plots", "annual_bt"))
+dir.create(here::here("plots", "ebs_nbs",  "annual_bt"))
 
 sebs_layers <-
   akgfmaps::get_base_layers(
@@ -1217,7 +1217,7 @@ for(ii in 1:length(year_vec)) {
                                       nrow = 2,
                                       rel_heights = c(0.8,0.2))
   
-  ragg::agg_png(filename = here::here("plots", "annual_bt", paste0(year_vec[ii], "_ebs_bt_map.png")), 
+  ragg::agg_png(filename = here::here("plots", "ebs_nbs",  "annual_bt", paste0(year_vec[ii], "_ebs_bt_map.png")), 
                 width = 5.25, height = 6, units = "in", res = fig_res)
   print(temp_map_grid)
   dev.off()
@@ -1231,7 +1231,7 @@ coldpool::cold_pool_index |>
   dplyr::select(YEAR, EBS_AREA_LTE2_KM2 = AREA_LTE2_KM2) |>
   dplyr::full_join(coldpool::nbs_mean_temperature |>
                      dplyr::select(YEAR, NBS_AREA_LTE2_KM2 = AREA_LTE2_KM2)) |>
-  write.csv(file = here::here("plots", "cpa_table.csv"), row.names = FALSE)
+  write.csv(file = here::here("plots", "ebs_nbs",  "cpa_table.csv"), row.names = FALSE)
 
 
 

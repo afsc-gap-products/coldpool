@@ -1,8 +1,9 @@
+# Update EBS and NBS temperature products
+
 # 1. Setup project options ----
 
 library(coldpool)
 library(akgfmaps)
-library(gapctd)
 
 # 2. Set global options ----
 fig_res <- 600
