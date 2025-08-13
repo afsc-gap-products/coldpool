@@ -51,3 +51,28 @@ theme_multi_map_blue_strip <- function() {
           strip.background = element_rect(fill = "#0055a4",
                                           color = "#0055a4"))
 }
+
+
+#' Multi-panel map theme with blue strip
+#' 
+#' Theme for multipanel maps with blue strip
+#' 
+#' @export
+
+theme_timeseries_blue_strip <- function() {
+  theme_bw() %+replace%
+    theme(axis.title = element_text(color = "black", face = "bold"),
+          axis.text.y = element_text(color = "black"),
+          axis.text.x = element_text(color = "black", angle = 90, vjust = 0.5),
+          axis.ticks = element_line(color = "black"),
+          panel.grid.major = element_line(color = "grey92"),
+          panel.grid.minor = element_blank(),
+          legend.title = element_blank(),
+          legend.position = "bottom",
+          strip.text = element_text(size = 9,
+                                    color = "white",
+                                    face = "bold",
+                                    margin = margin(0.5, 0, 0.5, 0, "mm")),
+          strip.background = element_rect(fill = "#0055a4",
+                                          color = "#0055a4"))
+}
