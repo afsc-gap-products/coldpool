@@ -5,7 +5,7 @@
 \alias{ebs_proj_crs}
 \title{CRS for eastern Bering Sea cold pool index}
 \format{
-A 1L character vector
+character vector
 }
 \usage{
 ebs_proj_crs

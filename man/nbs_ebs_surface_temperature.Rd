@@ -5,7 +5,7 @@
 \alias{nbs_ebs_surface_temperature}
 \title{Rasters of summer bottom temperature in the eastern and northern Bering Sea at 5-km resolution}
 \format{
-A PackedSpatRast class with five layers, one for every year with an NBS survey, including the unplanned 2018 partial northern extention.
+terra PackedSpatRast
 #' \describe{
      \item{ste_(year)_gear_temperature}{Raster layer of temperature for a given year}
 }

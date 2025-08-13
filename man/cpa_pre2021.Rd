@@ -5,7 +5,7 @@
 \alias{cpa_pre2021}
 \title{Historical cold pool area calculations (cpa_pre2021)}
 \format{
-A data frame with 39 rows and 16 columns:
+data.frame
 \describe{
      \item{YEAR}{Year}
      \item{AREA_KM2_MINUS1}{Area with bottom temperatures less than -1 celsius, in square kilometers}
