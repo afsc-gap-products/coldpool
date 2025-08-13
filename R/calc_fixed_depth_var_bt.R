@@ -5,16 +5,33 @@
 #' @param depth Numeric vector of depth values
 #' @param var vector of variables
 #' @param ref_depth Reference depth for estimating 1L numeric vector
+#' @param ref_buffer Optional. Depth range around ref_depth to use for interpolation (e.g., ref_depth = 20 and ref_buffer = 10 means observations from depth 10-30 could be used for interpolation). All observations are used when NULL (the default).
 #' @export
 #' @author Sean Rohan
 
 calc_fixed_depth_var_bt <- 
   function(depth,
            var,
-           ref_depth) {
+           ref_depth,
+           ref_buffer = NULL) {
+    
+    if(!is.null(ref_buffer)) {
+      var <- var[depth >= ref_depth - ref_buffer & depth <= ref_depth + ref_buffer]
+      depth <- depth[depth >= ref_depth - ref_buffer & depth <= ref_depth + ref_buffer]
+      
+      min_gap <- ref_buffer
+    } else {
+      min_gap <- 5
+    }
+
+    
+    if(length(depth) < 1) {
+      warning("calc_fixed_depth_var_bt: No data. Returning NA.")
+      return(NA)
+    }
     
     # Case when there's no data or surface data are missing
-    if(min(depth) > (ref_depth + 5) | length(depth) < 1) {
+    if(min(depth) > (ref_depth + min_gap) | length(depth) < 1) {
       return(NA)
     }
     
@@ -22,9 +39,9 @@ calc_fixed_depth_var_bt <-
     var <- var[depth >= 0]
     depth <- depth[depth >= 0]
     
-    # Case where there's no data shallower than the reference depth, but data within 5 m
-    if(length(depth) > 1 & min(depth) > ref_depth) {
-      return(var[depth == min(depth)])
+    # Case where there's no data shallower than the reference depth, but data within buffer window
+    if(length(depth) > 0 & min(depth) > ref_depth) {
+      return(var[depth == min(depth)][1])
     }
     
     # Find the first value where depth is equal to or shallower than the reference depth
@@ -34,7 +51,7 @@ calc_fixed_depth_var_bt <-
     
     # Case where there is an observation at the reference depth
     if(sel_depth == ref_depth) {
-      return(sel_var)
+      return(sel_var[1])
     }
     
     # Case where there isn't an observation at the reference depth (interpolation)
@@ -42,6 +59,6 @@ calc_fixed_depth_var_bt <-
     sel_depth <- depth[(index-1):index]
     sel_var <- sel_var[1] + ( ( ( sel_var[2] - sel_var[1]) / ( sel_depth[2] - sel_depth[1]) ) * ( ref_depth - sel_depth[1]) )
     
-    return(sel_var)
+    return(sel_var[1])
     
   }
