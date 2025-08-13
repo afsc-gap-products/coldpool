@@ -1,13 +1,15 @@
 # Introduction
 
-This repository contains an R package that is used to calculate the *cold pool index*, mean sea surface temperature, and mean bottom temperature using temperature data collected during bottom trawl surveys of the eastern Bering Sea conducted by NOAA/AFSC/RACE's Groundfish Assessment Program [(Rohan, Barnett, and Charriere, 2022)](https://doi.org/10.25923/1wwh-q418). The cold pool index is defined as the area of the NOAA/AFSC/RACE eastern Bering Sea bottom trawl survey footprint with bottom temperatures less than or equal to 2° Celsius, in square kilometers. This package includes temperature products (mean temperatures, cold pool area, interpolated temperature raster) that are updated on an annual basis following the eastern Bering Sea shelf bottom trawl survey.
+This repository contains an R package that is used to calculate the *cold pool index*, mean sea surface temperature, and mean bottom temperature using temperature data collected during bottom trawl surveys of the eastern Bering Sea conducted by NOAA/AFSC/RACE's Groundfish Assessment Program and Shellfish Assessment Program [(Rohan, Barnett, and Charriere, 2022)](https://doi.org/10.25923/1wwh-q418). The cold pool index is defined as the area of the NOAA/AFSC/RACE eastern Bering Sea bottom trawl survey footprint with bottom temperatures less than or equal to 2° Celsius, in square kilometers. The package also includes temperature data products (mean temperature and cold pool area time series, interpolated temperature rasters) for the eastern Bering Sea (EBS) shelf, northern Bering Sea (NBS), Gulf of Alaska (GOA), and Aleutian Islands (AI). Data products are updated in August to September after the conclusion of summer bottom trawl surveys.
 
 - [Installation](https://github.com/afsc-gap-products/coldpool#installation)
 - [Accessing datasets using the package](https://github.com/afsc-gap-products/coldpool#accessing-datasets-using-the-package)
 - [Accessing datasets without installing the package](https://github.com/afsc-gap-products/coldpool#accessing-datasets-without-installing-the-package)
 - [Datasets in the package](https://github.com/afsc-gap-products/coldpool#datasets-in-the-package)
-- [Data collection and processing methods](https://github.com/afsc-gap-products/coldpool#data-collection)
-- [Cold pool area and temperature trends](https://github.com/afsc-gap-products/coldpool#cold-pool-area-and-temperature-trends)
+- [EBS/NBS data collection and processing methods](https://github.com/afsc-gap-products/coldpool#data-collection)
+- [EBS/NBS cold pool area and temperature time series](https://github.com/afsc-gap-products/coldpool#cold-pool-area-and-temperature-trends)
+- [AI temperature time series](https://github.com/afsc-gap-products/coldpool#ai-temperature-time-series)
+- [GOA temperature time series](https://github.com/afsc-gap-products/coldpool#goa-temperature-time-series)
 - [Citation](https://github.com/afsc-gap-products/coldpool#citation)
 
 
@@ -57,6 +59,10 @@ cold_pool_index
 <dd><p>Data frame containing the total area of EBS waters with bottom temperatures less than or equal to 2, 1, 0, and -1 °C, mean bottom temperature, and mean surface temperature during the EBS survey for 1982-2025 (excluding 2020 due to cancelled survey).</p></dd>
 <dt><b>nbs_mean_bottom_temperature</b></dt>
 <dd><p>Data frame containing the total area of EBS waters with bottom temperatures less than or equal to 2, 1, 0, and -1 °C, mean bottom temperature, and mean surface temperature in the NBS during years with a full EBS+NBS standardized survey (2010, 2017, 2019, 2021, 2022, 2023).</p></dd>
+<dt><b>goa_mean_bottom_temperature</b></dt>
+<dd><p>Data frame containing mean surface, bottom, 100 m, and 200 m temperatures in the Gulf of Alaska by Ecosystem Status Report subarea from 1993-2025.</p></dd>
+<dt><b>ai_mean_bottom_temperature</b></dt>
+<dd><p>Data frame containing mean surface, bottom, 100 m, and 200 m temperatures in the Aleutian Islands by Ecosystem Status Report subarea from 1991-2025.</p></dd>
 <dt><b>ebs_bottom_temperature</b></dt>
 <dd><p>Interpolated rasters of bottom temperature for the EBS survey area from 1982-2025 (excluding 2020 due to cancelled survey).</p></dd>
 <dt><b>ebs_surface_temperature</b></dt> 
@@ -81,7 +87,7 @@ The temperature data products in this package are an annual snapshot of temperat
 
 Temperature data have been collected annually during AFSC's standardized summer bottom trawl surveys of the eastern Bering Sea continental shelf (EBS shelf) and northern Bering Sea (BS). The EBS shelf survey has been conducted annually since 1982 (except for 2020) and the NBS survey was conducted in 2010, 2017, 2019, 2021-2023, and 2025. In the eastern Bering Sea, surveys are conducted from late May or early June through late July to early August and the northern Bering Sea survey is conducted immediately after the EBS shelf survey (July-August). The EBS shelf survey samples 350 index stations and the NBS survey samples 142 index stations per year, although the survey footprint and number of stations has changed over time (e.g. EBS NW strata added in 1987). The EBS shelf survey progresses from the nearshore waters inside Bristol Bay to the outer continental shelf in the NW portion of southeastern Bering Sea (Figure 1). The NBS survey starts offshore where the EBS shelf survey ends, then progresses northward towards the Bering Strait and Norton Sound, before heading south towards Nunivak Island.
 
-![Map of eastern Bering Sea and northern Bering Sea survey areas showing the EBS standard, EBS NW, and NBS survey strata.](./plots/ebs_nbs_survey_area.png)
+![Map of eastern Bering Sea and northern Bering Sea survey areas showing the EBS standard, EBS NW, and NBS survey strata.](./plots/ebs_nbs/ebs_nbs_survey_area.png)
  <font size="1"><b>Figure 1.</b> Map of eastern Bering Sea (EBS) shelf and northern Bering Sea (NBS) shelf survey areas and station grid, including EBS standard (sampled since 1982) and northwest (sampled since 1987) subareas. Thick black lines denote survey boundaries and fill color denotes the average day of year when stations are sampled by the survey.</font>
 
 Temperature data are collected at every survey station using temperature sensors attached to the bottom trawl survey gear. The equipment used to collect temperature data has changed over time, as described in [Buckley et al. (2009)](https://repository.library.noaa.gov/view/noaa/3655).
@@ -95,10 +101,10 @@ Raster surfaces and temperature products are produced by interpolating temperatu
 Temperature data products in the coldpool package are updated annually in August-September following the conclusion of summer bottom trawl surveys.
 
 
-# Cold pool area and temperature trends
+# EBS/NBS cold pool area and temperature time series
 *Updated: August 1, 2025*
 
-Cold pool area and temperature trends are reported in the annual [Ecosystem Status Reports](https://www.fisheries.noaa.gov/alaska/ecosystems/ecosystem-status-reports-gulf-alaska-bering-sea-and-aleutian-islands) for the eastern Bering Sea and ecosystem and socioeconomic profiles for EBS stocks. Temperature products are also used as covariates in some [stock assessment](https://www.fisheries.noaa.gov/alaska/population-assessments/north-pacific-groundfish-stock-assessments-and-fishery-evaluation) models or their inputs (e.g. abundance indices).
+Cold pool area and temperature time series are reported in the annual [Ecosystem Status Reports](https://www.fisheries.noaa.gov/alaska/ecosystems/ecosystem-status-reports-gulf-alaska-bering-sea-and-aleutian-islands) for the eastern Bering Sea and ecosystem and socioeconomic profiles for EBS stocks. Temperature products are also used as covariates in some [stock assessment](https://www.fisheries.noaa.gov/alaska/population-assessments/north-pacific-groundfish-stock-assessments-and-fishery-evaluation) models or their inputs (e.g. abundance indices).
 
 ![Cold pool area from 2004-2025, based on interpolated survey bottom temperature observations.](./plots/2025_coldpool_with_area.png)
  <font size="1"><b>Figure 2.</b> Cold pool extent in the eastern Bering Sea from 2005–2025, showing areas with bottom temperatures ≤ 2°C, ≤ 1°C, ≤ 0°C, and ≤ -1°C (upper panels), and proportion of the southeastern Bering Sea survey area with bottom temperatures ≤ 2°C, ≤ 1°C, ≤ 0°C, and ≤ -1°C (lower panel). Solid black lines in the interior of the surface represent the 50m and 100m isobaths.</font>
@@ -108,6 +114,11 @@ Cold pool area and temperature trends are reported in the annual [Ecosystem Stat
 
 ![Mean bottom and sea surface temperatures in the eastern Bering Sea from 1982-2025, based on interpolated survey temperature observations.](./plots/2025_average_temperature.png)
  <font size="1"><b>Figure 4.</b> Average summer surface (green triangles) and bottom (blue circles) temperatures (°C) of the eastern Bering Sea (EBS) shelf and northern Bering Sea (NBS) shelf based on data collected during standardized summer bottom trawl surveys from 1982–2024. Dashed lines represent the time series mean for the EBS (1982–2025, except 2020) and NBS (2010, 2017, 2019, 2021-2023).</font>
+ 
+# AI temperature time series
+
+# GOA temperature time series
+ 
 
 # Citation
 
