@@ -1,8 +1,8 @@
-#' Cold Pool Index and SEBS Mean Temperature (cold_pool_index)
+#' eastern Bering Sea bottom summer trawl survey cold pool index and mean temperature (cold_pool_index)
 #' 
-#' Data frame containing mean gear temperature (i.e., bottom temperature), mean surface temperatures, and areas of temperatures less than or equal to 2, 1, 0, and -1 degree celcius. The Cold Pool Index (i.e., cold pool area) is the area of the eastern Bering Sea continental shelf bottom trawl survey area with bottom temperatures less than or equal to two (2) degrees celsius during AFSC/RACE/GAP summer bottom trawl surveys. In this data set, the Cold Pool Index has the column name AREA_LTE2_KM2.
+#' Data frame containing temperature and cold pool area time series from AFSC/RACE summer bottom trawl surveys of the eastern Bering Sea continental shelf. Includes mean gear temperature (i.e., bottom temperature), mean surface temperatures, and areas of temperatures less than or equal to 2, 1, 0, and -1 degree celcius. The Cold Pool Index (i.e., cold pool area) is the area of the eastern Bering Sea continental shelf bottom trawl survey area with bottom temperatures less than or equal to two (2) degrees celsius during AFSC/RACE/GAP summer bottom trawl surveys. In this data set, the Cold Pool Index has the column name AREA_LTE2_KM2.
 #' 
-#' @format A data frame with 39 rows and 9 columns.
+#' @format data.frame
 #' \describe{
 #'      \item{YEAR}{Year}
 #'      \item{AREA_LTE2_KM2}{Cold Pool Index. Total area with bottom temperatures less than or equal to 2 celsius, in square kilometers, in the EBS shelf survey area.}
@@ -13,16 +13,16 @@
 #'      \item{MEAN_BT_LT100M}{Mean gear temperature (i.e. bottom temperature) for EBS shelf strata with bottom depth less than 100 m (strata 10, 20, 31, 32, 41, 42, 43).}
 #'      \item{MEAN_SURFACE_TEMPERATURE}{Mean sea surface temperature in the survey area.}
 #'      \item{MEAN_GEAR_SALINITY}{Mean gear PSS-78 salinity (, i.e., bottom salinity) in the EBS survey area.}
-#'      \item{LAST_UPDATE}{Date when cold pool index and temperature rasters were last updated.}
+#'      \item{LAST_UPDATE}{Date when data set was last updated.}
 #' }
 #' @source \url{https://www.fisheries.noaa.gov/contact/groundfish-assessment-program}
 "cold_pool_index"
 
-#' Northern Bering Sea Mean Temperature (nbs_mean_temperature)
+#' Northern Bering Sea summer bottom trawl survey mean temperature (nbs_mean_temperature)
 #' 
-#' Data frame containing average bottom temperature and surface temperature for the NBS survey area. Does not include the unplanned 2018 northern extension because the entire survey area was not sampled.
+#' Data frame containing average bottom temperature and surface temperature for the NBS survey area.
 #' 
-#' @format A data frame with 4 rows and 4 columns.
+#' @format data.frame
 #' \describe{
 #'      \item{YEAR}{Year}
 #'      \item{MEAN_GEAR_TEMPERATURE}{Mean gear temperature (i.e. bottom temperature) in the NBS survey area.}
@@ -32,16 +32,50 @@
 #'      \item{AREA_LTE1_KM2}{Total area with bottom temperatures less than or equal to 1 celsius, in square kilometers, in the NBS survey area.}
 #'      \item{AREA_LTE0_KM2}{Total area with bottom temperatures less than or equal to 0 celsius, in square kilometers, in the NBS survey area.}
 #'      \item{AREA_LTEMINUS1_KM2}{Total area with bottom temperatures less than or equal to -1 celsius, in square kilometers, in the NBS survey area.}
-#'      \item{LAST_UPDATE}{Date when cold pool index and temperature rasters were last updated.}
+#'      \item{LAST_UPDATE}{Date when data set was last updated.}
 #' }
 #' @source \url{https://www.fisheries.noaa.gov/contact/groundfish-assessment-program}
 "nbs_mean_temperature"
+
+#' Gulf of Alaska summer bottom trawl survey mean temperature (goa_mean_temperature)
+#' 
+#' Data frame containing mean temperatures from AFSC/RACE/GAP summer bottom trawl surveys of the Gulf of Alaska for western and eastern Gulf of Alaska Ecosystem Status Report subareas.
+#' 
+#' @format data.frame
+#' \describe{
+#'      \item{YEAR}{Year}
+#'      \item{SUBAREA}{Gulf of Alaska Ecosystem Status Report subarea (Western/Eastern).}
+#'      \item{MEAN_GEAR_TEMPERATURE}{Mean gear temperature (i.e. bottom temperature).}
+#'      \item{MEAN_SURFACE_TEMPERATURE}{Mean sea surface temperature.}
+#'      \item{MEAN_100M_TEMPERATURE}{Mean temperature at 100 m}
+#'      \item{MEAN_200M_TEMPERATURE}{Mean temperature at 200 m}
+#'      \item{LAST_UPDATE}{Date when data set was last updated.}
+#' }
+#' @source \url{https://www.fisheries.noaa.gov/contact/groundfish-assessment-program}
+"goa_mean_temperature"
+
+#' Aleutian Islands summer bottom trawl survey mean temperature (ai_mean_temperature)
+#' 
+#' Data frame containing mean temperatures from AFSC/RACE/GAP summer bottom trawl surveys of the Aleutian Islands for western, central, and eastern Aleutian Islands Ecosystem Status Report subareas.
+#' 
+#' @format data.frame
+#' \describe{
+#'      \item{YEAR}{Year}
+#'      \item{SUBAREA}{Aleutian Islands Ecosystem Status Report subarea (Western/Central/Eastern).}
+#'      \item{MEAN_GEAR_TEMPERATURE}{Mean gear temperature (i.e. bottom temperature) in the AI survey area.}
+#'      \item{MEAN_SURFACE_TEMPERATURE}{Mean sea surface temperature in the AI survey area.}
+#'      \item{MEAN_100M_TEMPERATURE}{Mean temperature at 100 m.}
+#'      \item{MEAN_200M_TEMPERATURE}{Mean temperature at 200 m.}
+#'      \item{LAST_UPDATE}{Date when data set was last updated.}
+#' }
+#' @source \url{https://www.fisheries.noaa.gov/contact/groundfish-assessment-program}
+"ai_mean_temperature"
 
 #' Historical cold pool area calculations (cpa_pre2021)
 #' 
 #' Historical temperature cold pool area  (AREA_SUM_KM2_LTE2) and other temperature isotherm (AREA_KM2_MINUS1, AREA_KM2_0, AREA_KM2_1, AREA_KM2_2, AREA_KM2_LTE0, AREA_KM2_LTE1) areas that were calculated prior to 2021 by Bob Lauth, Lyle Britt, Dan Nichol, and Rebecca Haehn. These calculations were obtained from raster surfaces generated using ArcMap by interpolating temperatures using inverse distance weighting with a maximum of four nearest neighbor points for interpolation (search radius nmax = 4) and weighting function power equal to 2 (i.e., idp = 2). Default ArcGIS settings were used to generate rasters cells for interpolation (cell dimensions equal to the smaller horizontal or vertical dimension divided by 250). Protocols for including stations for interpolation varied among years but it was intended for all standard survey grid stations from the EBS survey to be included. In some years, it is possible that near-shore stations or red king crab resample stations were included in the calculations. Rasters were converted to polygon shapefiles and areas were calculated from polygons. The CRS used in ArcGIS .mxd files was North American Datum 1983 / Albers Equal Area Alaska (EPSG:3338). Historical weighted average temperature data products (AVGBSBT_PLUSNW, AVGBSST_PLUSNW, AVGBSBT_STANDARD, AVGBSST_STANDARD, AVGBSBT_NBS, AVGBSST_NBS, AVGBSBT_LT100M, AVGBSST_LT100M) were calculated by weighting temperature observations from survey stations in proportion to the area of the stratum where they were collected relative to the total survey area. Historical mean temperature for stations at bottom depths < 100 m (AVGBSBT_LT100M, AVGBSST_LT100M) were calculated by averaging temperature observations from samples collected at bottom depths < 100 m.
 #' 
-#' @format A data frame with 39 rows and 16 columns:
+#' @format data.frame
 #' \describe{
 #'      \item{YEAR}{Year}
 #'      \item{AREA_KM2_MINUS1}{Area with bottom temperatures less than -1 celsius, in square kilometers}
@@ -67,14 +101,14 @@
 #' 
 #' Character vector for North American Datum 1983 / Albers Equal Area Alaska (EPSG:3338).
 #' 
-#' @format A 1L character vector
+#' @format character vector
 "ebs_proj_crs"
 
 #' Rasters of summer bottom temperature in the eastern Bering Sea at 5-km resolution
 #' 
 #' Summer bottom temperatures in the eastern Bering Sea continental shelf survey area, calculated from interpolation of temperature data from summer bottom trawl surveys conducted by AFSC/RACE/GAP. To load this data set, it is necessary to first load the coldpool package or terra. Raster layers were interpolated using ordinary kriging with Matern covariance \doi{10.1007/978-1-4612-1494-6}{(Stein, 1999)}.
 #' 
-#' @format A PackedSpatRast class with 39 layers, one for every year from 1982-2021, except for 2020 (due to survey cancellation).
+#' @format terra PackedSpatRast
 #' #' \describe{
 #'      \item{ste_(year)_gear_temperature}{Raster layer of temperature for a given year}
 #' }
@@ -85,7 +119,7 @@
 #' 
 #' Summer surface temperatures in the eastern Bering Sea continental shelf survey area, calculated from interpolation of temperature data from summer bottom trawl surveys conducted by AFSC/RACE/GAP. To load ethis data set, it is necessary to first load the coldpool package or terra package. Raster layers were interpolated using ordinary kriging with Matern covariance \doi{10.1007/978-1-4612-1494-6}{(Stein, 1999)}.
 #' 
-#' @format A PackedSpatRast class with 39 layers, one for every year from 1982-2021, except for 2020 (due to survey cancellation).
+#' @format terra PackedSpatRast
 #' #' \describe{
 #'      \item{ste_(year)_gear_temperature}{Raster layer of temperature for a given year}
 #' }
@@ -96,7 +130,7 @@
 #' 
 #' Summer salinity (PSS-78) in the eastern Bering Sea continental shelf survey area, calculated from interpolation of data from summer bottom trawl surveys conducted by AFSC/RACE/GAP. To load this data set, it is necessary to first load the coldpool package or terra package. Raster layers were interpolated using ordinary kriging with Matern covariance \doi{10.1007/978-1-4612-1494-6}{(Stein, 1999)}.
 #' 
-#' @format A PackedSpatRast class with five layers.
+#' @format terra PackedSpatRast
 #' #' \describe{
 #'      \item{ste_(year)_gear_temperature}{Raster layer of salinity (PSS-78) for a given year}
 #' }
@@ -107,7 +141,7 @@
 #' 
 #' Summer bottom temperatures in the full eastern Bering Sea survey area, calculated from interpolation of temperature data from summer bottom trawl surveys conducted by AFSC/RACE/GAP. To load this data set, it is necessary to first load the coldpool package or terra package. Raster layers were interpolated using ordinary kriging with Matern covariance \doi{10.1007/978-1-4612-1494-6}{(Stein, 1999)}.
 #' 
-#' @format A PackedSpatRast class with five layers, one for every year with an NBS survey, including the unplanned 2018 partial northern extention.
+#' @format terra PackedSpatRast
 #' #' \describe{
 #'      \item{ste_(year)_gear_temperature}{Raster layer of temperature for a given year}
 #' }
@@ -118,7 +152,7 @@
 #' 
 #' Summer bottom temperatures in the full eastern Bering Sea survey area, calculated from interpolation of temperature data from summer bottom trawl surveys conducted by AFSC/RACE/GAP. To load ethis data set, it is necessary to first load the coldpool package or terra. Raster layers were interpolated using ordinary kriging with Matern covariance \doi{10.1007/978-1-4612-1494-6}{(Stein, 1999)}.
 #' 
-#' @format A PackedSpatRast class with five layers, one for every year with an NBS survey, including the unplanned 2018 partial northern extention.
+#' @format terra PackedSpatRast
 #' #' \describe{
 #'      \item{ste_(year)_gear_temperature}{Raster layer of temperature for a given year}
 #' }
@@ -129,7 +163,7 @@
 #' 
 #' Summer salinity (PSS-78) in the full eastern Bering Sea survey area, calculated from interpolation of data from summer bottom trawl surveys conducted by AFSC/RACE/GAP. To load this data set, it is necessary to first load the coldpool package or terra package. Raster layers were interpolated using ordinary kriging with Matern covariance \doi{10.1007/978-1-4612-1494-6}{(Stein, 1999)}.
 #' 
-#' @format A PackedSpatRast class with five layers.
+#' @format terra PackedSpatRast
 #' #' \describe{
 #'      \item{ste_(year)_gear_temperature}{Raster layer of salinity (PSS-78) for a given year}
 #' }
