@@ -1,0 +1,3 @@
+ATTRIBUTION FOR 2024 AI FIGURES
+
+AI temperature data products and figures from 2024 were created by Rebecca Howard. They are provided here to facilitate user access. Code for producing these figures is available from https://github.com/afsc-gap-products/ESR_temperature_data/

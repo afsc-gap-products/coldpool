@@ -15,26 +15,36 @@ sql_to_rqry <- function(sql_path) {
 }
 
 
-
 #' Create a database connection using RODBC
 #'
 #' A function that accepts a data source name, username, and password to establish returns an Oracle DataBase Connection (ODBC) as an RODBC class in R.
 #'
 #' @param schema Data source name (DSN) as a character vector.
+#' @param channel Open channel- used internally to handle connections.
+#' @param check_connections If TRUE, checks that the user has access to the necessary tables.
 #' @return An RODBC class ODBC connection.
 #' @export
+#' @import getPass RODBC
 
-get_connected <- function(schema = NA){
-  (echo = FALSE)
-  if(is.na(schema)) {
-    schema <- getPass::getPass(msg = "Enter ORACLE schema: ")
+get_connected <- function(channel = NULL, schema = NA, check_connections = TRUE) {
+  
+  if(is.null(channel)) {
+    (echo = FALSE)
+    if(is.na(schema)) {
+      schema <- getPass::getPass(msg = "Enter ORACLE schema: ")
+    }
+    username <- getPass::getPass(msg = "Enter your ORACLE Username: ")
+    password <- getPass::getPass(msg = "Enter your ORACLE Password: ")
+    channel  <- RODBC::odbcConnect(dsn = paste(schema),
+                                   uid = paste(username),
+                                   pwd = paste(password),
+                                   believeNRows = FALSE)
   }
-  username <- getPass::getPass(msg = "Enter your ORACLE Username: ")
-  password <- getPass::getPass(msg = "Enter your ORACLE Password: ")
-  channel  <- RODBC::odbcConnect(dsn = paste(schema),
-                                 uid = paste(username),
-                                 pwd = paste(password),
-                                 believeNRows = FALSE)
+  
+  stopifnot("get_connected: RODBC did not successfully connect." =  class(channel) == "RODBC")
+  
+  return(channel)
+  
 }
 
 
