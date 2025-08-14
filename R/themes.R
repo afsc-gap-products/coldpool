@@ -65,7 +65,7 @@ theme_timeseries_blue_strip <- function() {
           axis.text.y = element_text(color = "black"),
           axis.text.x = element_text(color = "black", angle = 90, vjust = 0.5),
           axis.ticks = element_line(color = "black"),
-          panel.grid.major = element_line(color = "grey92"),
+          panel.grid.major = element_line(color = "grey92", linewidth = rel(0.8)),
           panel.grid.minor = element_blank(),
           legend.title = element_blank(),
           legend.position = "bottom",
