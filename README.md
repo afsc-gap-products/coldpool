@@ -60,9 +60,9 @@ cold_pool_index
 <dt><b>nbs_mean_bottom_temperature</b></dt>
 <dd><p>Data frame containing the total area of EBS waters with bottom temperatures less than or equal to 2, 1, 0, and -1 °C, mean bottom temperature, and mean surface temperature in the NBS during years with a full EBS+NBS standardized survey (2010, 2017, 2019, 2021, 2022, 2023).</p></dd>
 <dt><b>goa_mean_bottom_temperature</b></dt>
-<dd><p>Data frame containing mean surface, bottom, 100 m, and 200 m temperatures in the Gulf of Alaska by Ecosystem Status Report subarea from 1993-2025.</p></dd>
+<dd><p>Data frame containing mean surface, bottom, and 200 m temperatures in the Gulf of Alaska by Ecosystem Status Report subarea from 1990-2025.</p></dd>
 <dt><b>ai_mean_bottom_temperature</b></dt>
-<dd><p>Data frame containing mean surface, bottom, 100 m, and 200 m temperatures in the Aleutian Islands by Ecosystem Status Report subarea from 1991-2025.</p></dd>
+<dd><p>Data frame containing mean surface, bottom, and 200 m temperatures in the Aleutian Islands by Ecosystem Status Report subarea from 1991-2024.</p></dd>
 <dt><b>ebs_bottom_temperature</b></dt>
 <dd><p>Interpolated rasters of bottom temperature for the EBS survey area from 1982-2025 (excluding 2020 due to cancelled survey).</p></dd>
 <dt><b>ebs_surface_temperature</b></dt> 
@@ -118,12 +118,12 @@ Cold pool area and temperature time series are reported in the annual [Ecosystem
 # AI temperature time series
 
 ![Mean bottom and sea surface temperatures in the Aleutian Islands.](./plots/ai/2024_temperature_by_subarea_depth.png)
- <font size="1"><b>Figure 5.</b> Average summer surface and bottom) temperatures (°C) in Aleutian Islands Ecosystem Status Report subareas based on data collected during standardized summer bottom trawl surveys from 1991 to 2024. Solid horizontal line denotes the mean from 1991–2012, dashed horizontal lines denote one standard deviation from the 1991–2012 mean. Circles denote annual means and vertical lines denote two standard errors from the annual mean.</font>
+ <font size="1"><b>Figure 5.</b> Average summer surface and bottom temperatures (°C) in Aleutian Islands Ecosystem Status Report subareas (western, central, and eastern Aleutian Islands) based on data collected during standardized summer bottom trawl surveys from 1991 to 2024. Solid horizontal line denotes the mean from 1991–2012, dashed horizontal lines denote one standard deviation from the 1991–2012 mean. Circles denote annual means and vertical lines denote two standard errors from the annual mean.</font>
 
 # GOA temperature time series
 
 ![Mean bottom and sea surface temperatures in the Gulf of Alaska.](./plots/goa/2025_temperature_by_subarea_depth.png)
- <font size="1"><b>Figure 6.</b> Average summer surface and 200 m temperatures (°C) in Gulf of Alaska Ecosystem Status Report subareas based on data collected during standardized summer bottom trawl surveys from 1993 to 2025. Solid horizontal line denotes the mean from 1993–2014 and dashed horizontal lines denote one standard deviation from the 1993–2014 mean. Circles denote annual means and vertical lines denote two standard errors from the annual mean.</font>
+ <font size="1"><b>Figure 6.</b> Average summer surface and 200 m temperatures (°C) in Gulf of Alaska Ecosystem Status Report subareas (western and eastern Gulf of Alaska) based on data collected during standardized summer bottom trawl surveys from 1993 to 2025. Solid horizontal line denotes the mean from 1993–2014 and dashed horizontal lines denote one standard deviation from the 1993–2014 mean. Circles denote annual means and vertical lines denote two standard errors from the annual mean.</font>
 
 # Citation
 
