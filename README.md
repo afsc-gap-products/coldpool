@@ -60,9 +60,9 @@ cold_pool_index
 <dt><b>nbs_mean_bottom_temperature</b></dt>
 <dd><p>Data frame containing the total area of EBS waters with bottom temperatures less than or equal to 2, 1, 0, and -1 °C, mean bottom temperature, and mean surface temperature in the NBS during years with a full EBS+NBS standardized survey (2010, 2017, 2019, 2021, 2022, 2023).</p></dd>
 <dt><b>goa_mean_bottom_temperature</b></dt>
-<dd><p>Data frame containing mean surface, bottom, and 200 m temperatures in the Gulf of Alaska by Ecosystem Status Report subarea from 1990-2025.</p></dd>
+<dd><p>Data frame containing mean surface, bottom, and 200 m temperatures in Gulf of Alaska Ecosystem Status Report subareas from 1990-2025.</p></dd>
 <dt><b>ai_mean_bottom_temperature</b></dt>
-<dd><p>Data frame containing mean surface, bottom, and 200 m temperatures in the Aleutian Islands by Ecosystem Status Report subarea from 1991-2024.</p></dd>
+<dd><p>Data frame containing mean surface, bottom, and 200 m temperatures in Aleutian Islands Ecosystem Status Report subareas from 1991-2024.</p></dd>
 <dt><b>ebs_bottom_temperature</b></dt>
 <dd><p>Interpolated rasters of bottom temperature for the EBS survey area from 1982-2025 (excluding 2020 due to cancelled survey).</p></dd>
 <dt><b>ebs_surface_temperature</b></dt> 
