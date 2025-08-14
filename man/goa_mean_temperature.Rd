@@ -11,8 +11,10 @@ data.frame
      \item{SUBAREA}{Gulf of Alaska Ecosystem Status Report subarea (Western/Eastern).}
      \item{MEAN_GEAR_TEMPERATURE}{Mean gear temperature (i.e. bottom temperature).}
      \item{MEAN_SURFACE_TEMPERATURE}{Mean sea surface temperature.}
-     \item{MEAN_100M_TEMPERATURE}{Mean temperature at 100 m}
      \item{MEAN_200M_TEMPERATURE}{Mean temperature at 200 m}
+     \item{SE_GEAR_TEMPERATURE}{Standard error of mean gear temperature.}
+     \item{SE_SURFACE_TEMPERATURE}{Standard error of mean surface temperature.}
+     \item{SE_200M_TEMPERATURE}{Standard error of mean temperature at 200 m.}
      \item{LAST_UPDATE}{Date when data set was last updated.}
 }
 }
