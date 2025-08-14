@@ -102,27 +102,39 @@ Temperature data products in the coldpool package are updated annually in August
 
 
 # EBS/NBS cold pool area and temperature time series
-*Updated: August 1, 2025*
+*Updated: August 14, 2025*
 
 Cold pool area and temperature time series are reported in the annual [Ecosystem Status Reports](https://www.fisheries.noaa.gov/alaska/ecosystems/ecosystem-status-reports-gulf-alaska-bering-sea-and-aleutian-islands) for the eastern Bering Sea and ecosystem and socioeconomic profiles for EBS stocks. Temperature products are also used as covariates in some [stock assessment](https://www.fisheries.noaa.gov/alaska/population-assessments/north-pacific-groundfish-stock-assessments-and-fishery-evaluation) models or their inputs (e.g. abundance indices).
 
-![Cold pool area from 2004-2025, based on interpolated survey bottom temperature observations.](./plots/2025_coldpool_with_area.png)
+![Cold pool area from 2004-2025, based on interpolated survey bottom temperature observations.](./plots/ebs_nbs/2025_coldpool_with_area.png)
  <font size="1"><b>Figure 2.</b> Cold pool extent in the eastern Bering Sea from 2005–2025, showing areas with bottom temperatures ≤ 2°C, ≤ 1°C, ≤ 0°C, and ≤ -1°C (upper panels), and proportion of the southeastern Bering Sea survey area with bottom temperatures ≤ 2°C, ≤ 1°C, ≤ 0°C, and ≤ -1°C (lower panel). Solid black lines in the interior of the surface represent the 50m and 100m isobaths.</font>
 
-![Mean bottom temperature in the eastern Bering Sea, based on interpolated survey temperature observations.](./plots/2025_nbs_ebs_temperature_map_grid.png)
+![Mean bottom temperature in the eastern Bering Sea, based on interpolated survey temperature observations.](./plots/ebs_nbs/2025_nbs_ebs_temperature_map_grid.png)
  <font size="1"><b>Figure 3.</b> Contour map of bottom temperatures from the past four eastern and northern Bering Sea shelf bottom trawl surveys (2022-2025). Solid black contour lines denote stratum boundaries.</font>
 
-![Mean bottom and sea surface temperatures in the eastern Bering Sea from 1982-2025, based on interpolated survey temperature observations.](./plots/2025_average_temperature.png)
+![Mean bottom and sea surface temperatures in the eastern Bering Sea from 1982-2025, based on interpolated survey temperature observations.](./plots/ebs_nbs/2025_average_temperature.png)
  <font size="1"><b>Figure 4.</b> Average summer surface (green triangles) and bottom (blue circles) temperatures (°C) of the eastern Bering Sea (EBS) shelf and northern Bering Sea (NBS) shelf based on data collected during standardized summer bottom trawl surveys from 1982–2024. Dashed lines represent the time series mean for the EBS (1982–2025, except 2020) and NBS (2010, 2017, 2019, 2021-2023).</font>
  
 # AI temperature time series
 
+![Mean bottom and sea surface temperatures in the Aleutian Islands.](./plots/ai/2024_temperature_by_subarea_depth.png)
+ <font size="1"><b>Figure 5.</b> Average summer surface and bottom) temperatures (°C) in Aleutian Islands Ecosystem Status Report subareas based on data collected during standardized summer bottom trawl surveys from 1991 to 2024. Solid horizontal line denotes the mean from 1991–2012, dashed horizontal lines denote one standard deviation from the 1991–2012 mean. Circles denote annual means and vertical lines denote two standard errors from the annual mean.</font>
+
 # GOA temperature time series
- 
+
+![Mean bottom and sea surface temperatures in the Gulf of Alaska.](./plots/goa/2025_temperature_by_subarea_depth.png)
+ <font size="1"><b>Figure 6.</b> Average summer surface and 200 m temperatures (°C) in Gulf of Alaska Ecosystem Status Report subareas based on data collected during standardized summer bottom trawl surveys from 1993 to 2025. Solid horizontal line denotes the mean from 1993–2014 and dashed horizontal lines denote one standard deviation from the 1993–2014 mean. Circles denote annual means and vertical lines denote two standard errors from the annual mean.</font>
 
 # Citation
 
+### Eastern Bering Sea and northern Bering Sea
+
 Rohan, S.K., Barnett L.A.K., and Charriere, N. 2022. Evaluating approaches to estimating mean temperatures and cold pool area from AFSC bottom trawl surveys of the eastern Bering Sea. U.S. Dep. Commer., NOAA Tech. Mem. NMFS-AFSC-456, 42 p. [https://doi.org/10.25923/1wwh-q418](https://doi.org/10.25923/1wwh-q418)
+
+### Aleutian Islands and Gulf of Alaska
+
+Rohan, S. K. 2025. coldpool: AFSC/RACE Groundfish Assessment Program oceanographic data products. R package version 3.5-1. [doi](doi)
+
 
 # NOAA README
 This repository is a scientific product and is not official communication of the National Oceanic and Atmospheric Administration, or the United States Department of Commerce. All NOAA GitHub project code is provided on an ‘as is’ basis and the user assumes responsibility for its use. Any claims against the Department of Commerce or Department of Commerce bureaus stemming from the use of this GitHub project will be governed by all applicable Federal law. Any reference to specific commercial products, processes, or services by service mark, trademark, manufacturer, or otherwise, does not constitute or imply their endorsement, recommendation or favoring by the Department of Commerce. The Department of Commerce seal and logo, or the seal and logo of a DOC bureau, shall not be used in any manner to imply endorsement of any commercial product or activity by DOC or the United States Government.
