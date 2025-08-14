@@ -2,7 +2,7 @@
 #' @export
 
 theme_multi_map <- function() {
-  return(theme_base() %+replace%
+  theme_base() %+replace%
            theme(panel.background = element_blank(),
                  panel.border = element_rect(color = "black", fill = NA),
                  panel.grid = element_blank(),
@@ -10,7 +10,7 @@ theme_multi_map <- function() {
                  axis.title = element_blank(),
                  axis.text = element_text(size = 9),
                  legend.position = "none",
-                 plot.background = element_rect(fill = NA, color = NA)))
+                 plot.background = element_rect(fill = NA, color = NA))
 }
 
 

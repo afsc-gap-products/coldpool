@@ -388,7 +388,7 @@ make_goa_ai_temp <- function(survey_definition_id, max_year, channel = NULL) {
     dplyr::ungroup()
     
   # Temperature data for QA/QC evaluation
-  write.csv(here::here("assets", paste0(region, "_raw_temperature_table.csv"), row.names(FALSE)))
+  write.csv(temp_by_year, here::here("assets", paste0(region, "_raw_temperature_table.csv"), row.names(FALSE)))
   
   # Data product
   output_temperature <- 
