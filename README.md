@@ -6,6 +6,7 @@ This repository contains an R package that is used to calculate the *cold pool i
 - [Accessing datasets using the package](https://github.com/afsc-gap-products/coldpool#accessing-datasets-using-the-package)
 - [Accessing datasets without installing the package](https://github.com/afsc-gap-products/coldpool#accessing-datasets-without-installing-the-package)
 - [Datasets in the package](https://github.com/afsc-gap-products/coldpool#datasets-in-the-package)
+- [Limitations and alternatives](https://github.com/afsc-gap-products/coldpool#limitations-and-alternatives)
 - [EBS/NBS data collection and processing methods](https://github.com/afsc-gap-products/coldpool#data-collection)
 - [EBS/NBS cold pool area and temperature time series](https://github.com/afsc-gap-products/coldpool#cold-pool-area-and-temperature-trends)
 - [AI temperature time series](https://github.com/afsc-gap-products/coldpool#ai-temperature-time-series)
@@ -77,7 +78,7 @@ cold_pool_index
 <dd><p>Interpolated rasters of bottom salinity (PSS-78) for the full EBS and NBS survey area for 2010, 2017, and 2021-2024</p></dd>
 </dl>
 
-## Caveat emptor
+## Limitations and alternatives
 
 The temperature data products in this package are an annual snapshot of temperatures during summer bottom trawl surveys. Combined with biological data collected during bottom trawl surveys, these temperature data can provide a simultaneous characterization of thermal habitat and demersal fauna distribution and abundance in the eastern Bering Sea. However, these temperature data products are not adjusted to account for seasonal heating so they do not provide a snapshot of temperature at a specific point in time. Users who are interested in spatially integrated or spatially resolved estimates of temperature at specific points in time that do account for seasonal heating may want to consider using temperature predictions from the [Bering10K BEST-NPZ model](https://github.com/beringnpz/roms-bering-sea) [(Kearney et al., 2020)](http://www.doi.org/10.5194/gmd-13-597-2020), [satellite-derived sea surface temperature](https://github.com/jordanwatson/aksst) products, or alternative oceanographic sampling data, such as those collected by NOAA's [EcoFOCI](https://www.ecofoci.noaa.gov/) program.
 
