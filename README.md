@@ -130,11 +130,11 @@ Cold pool area and temperature time series are reported in the annual [Ecosystem
 
 ### Eastern Bering Sea and northern Bering Sea
 
-Rohan, S.K., Barnett L.A.K., and Charriere, N. 2022. Evaluating approaches to estimating mean temperatures and cold pool area from AFSC bottom trawl surveys of the eastern Bering Sea. U.S. Dep. Commer., NOAA Tech. Mem. NMFS-AFSC-456, 42 p. [https://doi.org/10.25923/1wwh-q418](https://doi.org/10.25923/1wwh-q418)
+Rohan, S.K., Barnett, L.A.K., and Charriere, N. 2022. Evaluating approaches to estimating mean temperatures and cold pool area from AFSC bottom trawl surveys of the eastern Bering Sea. U.S. Dep. Commer., NOAA Tech. Mem. NMFS-AFSC-456, 42 p. [https://doi.org/10.25923/1wwh-q418](https://doi.org/10.25923/1wwh-q418)
 
 ### Aleutian Islands and Gulf of Alaska
 
-Rohan, S. K. 2025. coldpool: AFSC/RACE Groundfish Assessment Program oceanographic data products. R package version 3.5-1. [doi](doi)
+Rohan, S. K. and Barnett, L.A.K. 2025. coldpool: AFSC/RACE Groundfish Assessment Program oceanographic data products. R package version 3.5-1. [doi](doi)
 
 
 # NOAA README
