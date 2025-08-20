@@ -1,4 +1,6 @@
-# Introduction
+[![DOI](https://zenodo.org/badge/356049308.svg)](https://doi.org/10.5281/zenodo.16915337)
+
+# coldpool
 
 This repository contains an R package that is used to calculate the *cold pool index*, mean sea surface temperature, and mean bottom temperature using temperature data collected during bottom trawl surveys of the eastern Bering Sea conducted by NOAA/AFSC/RACE's Groundfish Assessment Program and Shellfish Assessment Program [(Rohan, Barnett, and Charriere, 2022)](https://doi.org/10.25923/1wwh-q418). The cold pool index is defined as the area of the NOAA/AFSC/RACE eastern Bering Sea bottom trawl survey footprint with bottom temperatures less than or equal to 2° Celsius, in square kilometers. The package also includes temperature data products (mean temperature and cold pool area time series, interpolated temperature rasters) for the eastern Bering Sea (EBS) shelf, northern Bering Sea (NBS), Gulf of Alaska (GOA), and Aleutian Islands (AI). Data products are updated in August to September after the conclusion of summer bottom trawl surveys.
 
@@ -130,11 +132,11 @@ Cold pool area and temperature time series are reported in the annual [Ecosystem
 
 ### Eastern Bering Sea and northern Bering Sea
 
-Rohan, S.K., Barnett, L.A.K., and Charriere, N. 2022. Evaluating approaches to estimating mean temperatures and cold pool area from AFSC bottom trawl surveys of the eastern Bering Sea. U.S. Dep. Commer., NOAA Tech. Mem. NMFS-AFSC-456, 42 p. [https://doi.org/10.25923/1wwh-q418](https://doi.org/10.25923/1wwh-q418)
+Rohan, S.K., Barnett, L.A.K., and Charriere, N. 2022. Evaluating approaches to estimating mean temperatures and cold pool area from AFSC bottom trawl surveys of the eastern Bering Sea. U.S. Dep. Commer., NOAA Tech. Mem. NMFS-AFSC-456, 42 p. [doi: 10.25923/1wwh-q418](https://doi.org/10.25923/1wwh-q418)
 
 ### Aleutian Islands and Gulf of Alaska
 
-Rohan, S. K. and Barnett, L.A.K. 2025. coldpool: AFSC/RACE Groundfish Assessment Program oceanographic data products. R package version 3.5-1. [doi](doi)
+Rohan, S. K. and Barnett, L.A.K. 2025. coldpool: AFSC/RACE Groundfish Assessment Program oceanographic data products. R package version 3.5-1. [doi: 10.5281/zenodo.16915338](https://doi.org/10.5281/zenodo.16915337)
 
 
 # NOAA README
