@@ -3,9 +3,9 @@
 \docType{data}
 \name{nbs_mean_temperature}
 \alias{nbs_mean_temperature}
-\title{Northern Bering Sea Mean Temperature (nbs_mean_temperature)}
+\title{Northern Bering Sea summer bottom trawl survey mean temperature (nbs_mean_temperature)}
 \format{
-A data frame with 4 rows and 4 columns.
+data.frame
 \describe{
      \item{YEAR}{Year}
      \item{MEAN_GEAR_TEMPERATURE}{Mean gear temperature (i.e. bottom temperature) in the NBS survey area.}
@@ -15,7 +15,7 @@ A data frame with 4 rows and 4 columns.
      \item{AREA_LTE1_KM2}{Total area with bottom temperatures less than or equal to 1 celsius, in square kilometers, in the NBS survey area.}
      \item{AREA_LTE0_KM2}{Total area with bottom temperatures less than or equal to 0 celsius, in square kilometers, in the NBS survey area.}
      \item{AREA_LTEMINUS1_KM2}{Total area with bottom temperatures less than or equal to -1 celsius, in square kilometers, in the NBS survey area.}
-     \item{LAST_UPDATE}{Date when cold pool index and temperature rasters were last updated.}
+     \item{LAST_UPDATE}{Date when data set was last updated.}
 }
 }
 \source{
@@ -25,6 +25,6 @@ A data frame with 4 rows and 4 columns.
 nbs_mean_temperature
 }
 \description{
-Data frame containing average bottom temperature and surface temperature for the NBS survey area. Does not include the unplanned 2018 northern extension because the entire survey area was not sampled.
+Data frame containing average bottom temperature and surface temperature for the NBS survey area.
 }
 \keyword{datasets}

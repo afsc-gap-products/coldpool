@@ -1,4 +1,4 @@
-citHeader("Please cite Rohan, Barnett and Charriere (2022) if using this package")
+citHeader("Please cite Rohan et al. (2022) when using this package or built-in data sets:")
 
 citEntry(entry = "TechReport",
  title = "Evaluating approaches to estimating mean temperatures and cold pool area from AFSC bottom trawl surveys of the eastern Bering Sea",

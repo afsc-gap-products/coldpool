@@ -95,13 +95,16 @@ interpolate_variable <- function(dat,
         # Make raster for interpolation ----
         n_dim <- floor(abs(-1625000 - -35000))/cell.resolution
       
-        interp_raster <- terra::rast(xmin = -1625000, 
-                                     xmax = -35000, 
-                                     ymin = 379500, 
-                                     ymax = 1969500, 
-                                     nrow = n_dim[1], 
-                                     ncol = n_dim[2],
-                                     crs = interpolation.crs)
+        interp_raster <- 
+          terra::rast(
+            xmin = -1625000, 
+            xmax = -35000, 
+            ymin = 379500, 
+            ymax = 1969500, 
+            nrow = n_dim[1], 
+            ncol = n_dim[2],
+            crs = interpolation.crs
+          )
       
       } else {
       
@@ -115,13 +118,16 @@ interpolate_variable <- function(dat,
         
         n_dim <- floor(abs(plot.boundary$x[1] - plot.boundary$x[2]))/cell.resolution
       
-        interp_raster <- terra::rast(xmin = plot.boundary$x[1], 
-                                     xmax = plot.boundary$x[2], 
-                                     ymin = plot.boundary$y[1], 
-                                     ymax = plot.boundary$y[2], 
-                                     nrow = n_dim[1], 
-                                     ncol = n_dim[2],
-                                     crs = interpolation.crs)
+        interp_raster <- 
+          terra::rast(
+            xmin = plot.boundary$x[1], 
+            xmax = plot.boundary$x[2], 
+            ymin = plot.boundary$y[1], 
+            ymax = plot.boundary$y[2], 
+            nrow = n_dim[1], 
+            ncol = n_dim[2],
+            crs = interpolation.crs
+          )
 
       }
     } else { # Default interpolation bounds for sf object regions
@@ -131,24 +137,30 @@ interpolate_variable <- function(dat,
       yshift <- ((379500/cell_resolution) - floor(379500/cell_resolution))*cell_resolution
       bbox <- bbox + c(xshift,yshift,xshift,yshift)
       
-      interp_raster <- terra::rast(xmin = bbox["xmin"],
-                                   xmax = bbox["xmax"],
-                                   ymin = bbox["ymin"],
-                                   ymax = bbox["ymax"],
-                                   nrows = floor((bbox["ymax"]-bbox["ymin"])/cell.resolution),
-                                   ncols = floor((bbox["xmax"]-bbox["xmin"])/cell.resolution),
-                                   crs = interpolation.crs)
+      interp_raster <- 
+        terra::rast(
+          xmin = bbox["xmin"],
+          xmax = bbox["xmax"],
+          ymin = bbox["ymin"],
+          ymax = bbox["ymax"],
+          nrows = floor((bbox["ymax"]-bbox["ymin"])/cell.resolution),
+          ncols = floor((bbox["xmax"]-bbox["xmin"])/cell.resolution),
+          crs = interpolation.crs
+        )
       
     }
   } else { # User-customized interpolation bounds
     
-    interp_raster <- terra::rast(xmin = bbox["xmin"],
-                                 xmax = bbox["xmax"],
-                                 ymin = bbox["ymin"],
-                                 ymax = bbox["ymax"],
-                                 nrows = floor((bbox["ymax"]-bbox["ymin"])/cell.resolution),
-                                 ncols = floor((bbox["xmax"]-bbox["xmin"])/cell.resolution),
-                                 crs = interpolation.crs)
+    interp_raster <- 
+      terra::rast(
+        xmin = bbox["xmin"],
+        xmax = bbox["xmax"],
+        ymin = bbox["ymin"],
+        ymax = bbox["ymax"],
+        nrows = floor((bbox["ymax"]-bbox["ymin"])/cell.resolution),
+        ncols = floor((bbox["xmax"]-bbox["xmin"])/cell.resolution),
+        crs = interpolation.crs
+      )
   }
   
   
@@ -207,7 +219,9 @@ interpolate_variable <- function(dat,
                                   nmax = Inf)
       
       # Estimate variogram
-      vgfit <- gstat::fit.variogram(object = gstat::variogram(idw_vgm_fit),
+      vgm0 <- gstat::variogram(idw_vgm_fit)
+      
+      vgfit <- gstat::fit.variogram(object = vgm0,
                                     model = gstat::vgm(vgm_type))
       
       # Add variogram
@@ -217,6 +231,8 @@ interpolate_variable <- function(dat,
                           nmax = nm)
       
       fit <- predict(object = mod, newdata = loc_df)
+      
+      print(plot(vgm0, vgfit, main = methods[ii]))
       
     }
     

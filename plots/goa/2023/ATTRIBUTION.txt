@@ -1,0 +1,3 @@
+ATTRIBUTION FOR 2023 GOA FIGURES
+
+GOA temperature data products and figures from 2023 were created by Cecilia O'Leary. They are provided here to facilitate user access. Code for producing these figures is available from https://github.com/afsc-gap-products/ESR_temperature_data/

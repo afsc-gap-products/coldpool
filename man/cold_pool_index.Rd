@@ -3,9 +3,9 @@
 \docType{data}
 \name{cold_pool_index}
 \alias{cold_pool_index}
-\title{Cold Pool Index and SEBS Mean Temperature (cold_pool_index)}
+\title{eastern Bering Sea bottom summer trawl survey cold pool index and mean temperature (cold_pool_index)}
 \format{
-A data frame with 39 rows and 9 columns.
+data.frame
 \describe{
      \item{YEAR}{Year}
      \item{AREA_LTE2_KM2}{Cold Pool Index. Total area with bottom temperatures less than or equal to 2 celsius, in square kilometers, in the EBS shelf survey area.}
@@ -13,9 +13,10 @@ A data frame with 39 rows and 9 columns.
      \item{AREA_LTE0_KM2}{Total area with bottom temperatures less than or equal to 0 celsius, in square kilometers, in the EBS shelf survey area.}
      \item{AREA_LTEMINUS1_KM2}{Total area with bottom temperatures less than or equal to -1 celsius, in square kilometers, in the EBS shelf survey area.}
      \item{MEAN_GEAR_TEMPERATURE}{Mean gear temperature (i.e. bottom temperature) in the EBS shelf survey area.}
+     \item{MEAN_BT_LT100M}{Mean gear temperature (i.e. bottom temperature) for EBS shelf strata with bottom depth less than 100 m (strata 10, 20, 31, 32, 41, 42, 43).}
      \item{MEAN_SURFACE_TEMPERATURE}{Mean sea surface temperature in the survey area.}
-     \item{MEAN_BT_LT100M}{Mean gear temperature (i.e. bottom temperature) for EBS shelf *STANDARD* strata (i.e., excluding northwest strata 82 and 90) with bottom depth less than 100 m (strata 10, 20, 31, 32, 41, 42, 43).}
-     \item{LAST_UPDATE}{Date when cold pool index and temperature rasters were last updated.}
+     \item{MEAN_GEAR_SALINITY}{Mean gear PSS-78 salinity (, i.e., bottom salinity) in the EBS survey area.}
+     \item{LAST_UPDATE}{Date when data set was last updated.}
 }
 }
 \source{
@@ -25,6 +26,6 @@ A data frame with 39 rows and 9 columns.
 cold_pool_index
 }
 \description{
-Data frame containing mean gear temperature (i.e., bottom temperature), mean surface temperatures, and areas of temperatures less than or equal to 2, 1, 0, and -1 degree celcius. The Cold Pool Index (i.e., cold pool area) is the area of the eastern Bering Sea continental shelf bottom trawl survey area with bottom temperatures less than or equal to two (2) degrees celsius during AFSC/RACE/GAP summer bottom trawl surveys. In this data set, the Cold Pool Index has the column name AREA_LTE2_KM2.
+Data frame containing temperature and cold pool area time series from AFSC/RACE summer bottom trawl surveys of the eastern Bering Sea continental shelf. Includes mean gear temperature (i.e., bottom temperature), mean surface temperatures, and areas of temperatures less than or equal to 2, 1, 0, and -1 degree celcius. The Cold Pool Index (i.e., cold pool area) is the area of the eastern Bering Sea continental shelf bottom trawl survey area with bottom temperatures less than or equal to two (2) degrees celsius during AFSC/RACE/GAP summer bottom trawl surveys. In this data set, the Cold Pool Index has the column name AREA_LTE2_KM2.
 }
 \keyword{datasets}

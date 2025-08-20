@@ -1,3 +1,30 @@
+coldpool 3.5-1 (August 20, 2025)
+----------------------------------------------------------------
+
+NEW FEATURES
+
+- Added temperature timeseries from Gulf of Alaska and Aleutian 
+  Islands bottom trawl surveys that are used for Alaska 
+  Ecosystem Status Reports. Internal data sets:
+    - goa_mean_temperature
+    - ai_mean_temperature
+- interpolate_variable() makes rudimentary variogram plots.
+- New cluster_spatraster() function to perform hierarchical
+  cluster analysis on terra SpatRaster objects.
+- New calc_fixed_depth_var_bt() function from gapctd to 
+  calculate variable values from oceanographic profiles (casts).
+- New ggplot2 theme: theme_timeseries_blue_strip().
+  
+DATA UPDATE
+
+- Preliminary EBS shelf data update for 2025.
+
+FUNCTIONALITY CHANGES
+
+- theme_multi_map_blue_strip() now includes a strip.background 
+  color.
+
+
 coldpool 3.4-3 (March 7, 2025)
 ----------------------------------------------------------------
 

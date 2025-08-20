@@ -5,7 +5,7 @@
 \alias{ebs_bottom_salinity}
 \title{Rasters of summer salinity (PSS-78) in the eastern Bering Sea at 5-km resolution}
 \format{
-A PackedSpatRast class with five layers.
+terra PackedSpatRast
 #' \describe{
      \item{ste_(year)_gear_temperature}{Raster layer of salinity (PSS-78) for a given year}
 }

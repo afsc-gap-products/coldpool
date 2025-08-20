@@ -5,7 +5,7 @@
 \alias{ebs_bottom_temperature}
 \title{Rasters of summer bottom temperature in the eastern Bering Sea at 5-km resolution}
 \format{
-A PackedSpatRast class with 39 layers, one for every year from 1982-2021, except for 2020 (due to survey cancellation).
+terra PackedSpatRast
 #' \describe{
      \item{ste_(year)_gear_temperature}{Raster layer of temperature for a given year}
 }
