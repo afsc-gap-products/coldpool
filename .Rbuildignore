@@ -6,6 +6,7 @@
 0_update_ebs_nbs_data.R
 1_2025_ebs_nbs_plots.R
 2_update_goa_data.R
+3_2025_goa_ai_plots.R
 
 analysis
 archive

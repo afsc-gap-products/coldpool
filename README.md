@@ -1,4 +1,6 @@
-# Introduction
+[![DOI](https://zenodo.org/badge/356049308.svg)](https://doi.org/10.5281/zenodo.16915337)
+
+# coldpool
 
 This repository contains an R package that is used to calculate the *cold pool index*, mean sea surface temperature, and mean bottom temperature using temperature data collected during bottom trawl surveys of the eastern Bering Sea conducted by NOAA/AFSC/RACE's Groundfish Assessment Program and Shellfish Assessment Program [(Rohan, Barnett, and Charriere, 2022)](https://doi.org/10.25923/1wwh-q418). The cold pool index is defined as the area of the NOAA/AFSC/RACE eastern Bering Sea bottom trawl survey footprint with bottom temperatures less than or equal to 2° Celsius, in square kilometers. The package also includes temperature data products (mean temperature and cold pool area time series, interpolated temperature rasters) for the eastern Bering Sea (EBS) shelf, northern Bering Sea (NBS), Gulf of Alaska (GOA), and Aleutian Islands (AI). Data products are updated in August to September after the conclusion of summer bottom trawl surveys.
 
@@ -42,15 +44,12 @@ Documentation for the dataset can be accessed using:
 ```
 
 ## Accessing datasets without installing the package
-Users can access temperature products in an R data format (.rda) without installing the package. To do so, download the [sysdata.rda](./R/sysdata.rda) file in the R directory of the coldpool repository. The data set can then be loaded in R after installing and loading the [terra](https://cran.r-project.org/web/packages/terra/index.html) package, as follows:
+Users can access temperature products in an R data format (.rda) without installing the package. To do so, download .rda files from the [/data/](https://github.com/afsc-gap-products/coldpool/tree/main/data) directory of the coldpool repository. The data set can then be loaded in R after installing and loading the [terra](https://cran.r-project.org/web/packages/terra/index.html) package, as follows:
 
 ```{r}
 # Load SpatRast package and data
 library(terra)
-load("[local_path]\\sysdata.rda")
-
-# View loaded cold pool index data frame
-cold_pool_index
+load("[local_path].rda")
 ```
 
 ## Datasets in the package
@@ -61,7 +60,7 @@ cold_pool_index
 <dt><b>nbs_mean_bottom_temperature</b></dt>
 <dd><p>Data frame containing the total area of EBS waters with bottom temperatures less than or equal to 2, 1, 0, and -1 °C, mean bottom temperature, and mean surface temperature in the NBS during years with a full EBS+NBS standardized survey (2010, 2017, 2019, 2021, 2022, 2023).</p></dd>
 <dt><b>goa_mean_bottom_temperature</b></dt>
-<dd><p>Data frame containing mean surface, bottom, and 200 m temperatures in Gulf of Alaska Ecosystem Status Report subareas from 1990-2025.</p></dd>
+<dd><p>Data frame containing mean surface, bottom, and 200 m temperatures in Gulf of Alaska Ecosystem Status Report subareas from 1990-2023.</p></dd>
 <dt><b>ai_mean_bottom_temperature</b></dt>
 <dd><p>Data frame containing mean surface, bottom, and 200 m temperatures in Aleutian Islands Ecosystem Status Report subareas from 1991-2024.</p></dd>
 <dt><b>ebs_bottom_temperature</b></dt>
@@ -124,17 +123,17 @@ Cold pool area and temperature time series are reported in the annual [Ecosystem
 # GOA temperature time series
 
 ![Mean bottom and sea surface temperatures in the Gulf of Alaska.](./plots/goa/2025_temperature_by_subarea_depth.png)
- <font size="1"><b>Figure 6.</b> Average summer surface and 200 m temperatures (°C) in Gulf of Alaska Ecosystem Status Report subareas (western and eastern Gulf of Alaska) based on data collected during standardized summer bottom trawl surveys from 1993 to 2025. Solid horizontal line denotes the historical mean (1993–2014) and dashed horizontal lines denote one standard deviation from the 1993–2014 mean. Circles denote annual means and vertical lines denote two standard errors from the annual mean.</font>
+ <font size="1"><b>Figure 6.</b> Average summer surface and 200 m temperatures (°C) in Gulf of Alaska Ecosystem Status Report subareas (western and eastern Gulf of Alaska) based on data collected during standardized summer bottom trawl surveys from 1993 to 2023. Solid horizontal line denotes the historical mean (1993–2014) and dashed horizontal lines denote one standard deviation from the 1993–2014 mean. Circles denote annual means and vertical lines denote two standard errors from the annual mean.</font>
 
 # Citation
 
 ### Eastern Bering Sea and northern Bering Sea
 
-Rohan, S.K., Barnett L.A.K., and Charriere, N. 2022. Evaluating approaches to estimating mean temperatures and cold pool area from AFSC bottom trawl surveys of the eastern Bering Sea. U.S. Dep. Commer., NOAA Tech. Mem. NMFS-AFSC-456, 42 p. [https://doi.org/10.25923/1wwh-q418](https://doi.org/10.25923/1wwh-q418)
+Rohan, S.K., Barnett, L.A.K., and Charriere, N. 2022. Evaluating approaches to estimating mean temperatures and cold pool area from AFSC bottom trawl surveys of the eastern Bering Sea. U.S. Dep. Commer., NOAA Tech. Mem. NMFS-AFSC-456, 42 p. [doi: 10.25923/1wwh-q418](https://doi.org/10.25923/1wwh-q418)
 
 ### Aleutian Islands and Gulf of Alaska
 
-Rohan, S. K. 2025. coldpool: AFSC/RACE Groundfish Assessment Program oceanographic data products. R package version 3.5-1. [doi](doi)
+Rohan, S. K. and Barnett, L.A.K. 2025. coldpool: AFSC/RACE Groundfish Assessment Program oceanographic data products. R package version 3.5-1. [doi: 10.5281/zenodo.16915338](https://doi.org/10.5281/zenodo.16915337)
 
 
 # NOAA README
