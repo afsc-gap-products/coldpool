@@ -12,8 +12,11 @@ update_sysdata <- TRUE
 
 # Setup mask to calculate mean bottom temperature from <100 m strata
 
-ebs_layers <- akgfmaps::get_base_layers(select.region = "ebs",
-                                        set.crs = coldpool::ebs_proj_crs)
+ebs_layers <- akgfmaps::get_base_layers(
+  select.region = "ebs",
+  set.crs = coldpool::ebs_proj_crs
+)
+
 # Filepath to csv containing data to use for temperature interpolation
 ebs_csv_path <- here::here("data", paste0("index_hauls_temperature_data.csv"))
 nbs_ebs_csv_path <- here::here("data", paste0("ebs_nbs_temperature_full_area.csv"))

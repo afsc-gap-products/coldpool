@@ -19,12 +19,14 @@ make_goa_ai_temp <- function(survey_definition_id, max_year, channel = NULL) {
   if(survey_definition_id == 47) {
     region <- "GOA"
     min_year <- 1993 # First year with temperature data from every haul
+    range_baseline <- c(1993, 2014)
     subarea_levels <- c("Western Gulf of Alaska", "Eastern Gulf of Alaska") # Panel/timeseries order
   }
   
   if(survey_definition_id == 52) {
     region <- "AI"
     min_year <- 1991
+    range_baseline <- c(1991, 2012)
     subarea_levels <- c("Western Aleutians", "Central Aleutians", "Eastern Aleutians") # Panel/timeseries order
   }
   
