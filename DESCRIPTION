@@ -1,7 +1,7 @@
 Package: coldpool
 Type: Package
 Title: AFSC/RACE Groundfish Assessment Program oceanographic data products
-Version: 3.5-1
+Version: 3.5-2
 Date: 2025-08-20
 Authors@R: c(person("Sean", "Rohan", email = "sean.rohan@noaa.gov", role = c("aut", "cre")),
     person("Lewis", "Barnett", email = "lewis.barnett@noaa.gov", role = "aut"),
