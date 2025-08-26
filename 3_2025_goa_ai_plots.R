@@ -1,6 +1,7 @@
 library(coldpool)
 
 # Select which region to plot (GOA or AI)
+
 # survey_definition_id <- 47 # GOA
 survey_definition_id <- 52 # AI
 
@@ -10,7 +11,7 @@ if(survey_definition_id == 47) {
   region <- "GOA"
   min_year <- 1993 # First year with temperature data from every haul
   max_year <- 2025 # Most recent survey
-  range_baseline <- c(1993, 2014)
+  range_baseline <- c(1993, 2013)
   subarea_levels <- c("Western Gulf of Alaska", "Eastern Gulf of Alaska") # Panel/timeseries order
   point_colors <- c("Surface" =  "#0071ff", "200 m" = "#000040")
 }

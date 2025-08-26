@@ -183,14 +183,14 @@ interpolate_variable <- function(dat,
     
     if(tolower(methods[ii]) == "nn") {
       mod <- gstat::gstat(formula = var.col ~ 1,
-                             locations = interp_df,
-                             set = list(idp = 0),
-                             nmax = 4)
+                          locations = interp_df,
+                          set = list(idp = 0),
+                          nmax = 4)
       fit <- predict(object = mod, newdata = loc_df)
     }
     
     if(tolower(methods[ii]) == "idw4") {
-  
+      
       mod <- gstat::gstat(formula = var.col ~ 1,
                           locations = interp_df,
                           set = list(idp = 2),
@@ -212,7 +212,7 @@ interpolate_variable <- function(dat,
     if(tolower(methods[ii]) %in% c("exp", "sph", "bes", "gau", "cir", "mat", "ste")) {
       
       vgm_type <- c("Exp", "Sph", "Bes", "Gau", "Cir", "Mat", "Ste")[match(tolower(methods[ii]), c("exp", "sph", "bes", "gau", "cir", "mat", "ste"))]
-
+      
       # Set up object for kriging ----
       idw_vgm_fit <- gstat::gstat(formula = var.col ~ 1, 
                                   locations = interp_df, 
@@ -241,7 +241,7 @@ interpolate_variable <- function(dat,
       
       mod <- fields::Tps(x = sf::st_coordinates(interp_df),
                          Y = interp_df$var.col)
-
+      
       fit <- loc_df
       
       fit$var1.pred <- predict(object = mod, x = sf::st_coordinates(loc_df))
@@ -287,12 +287,14 @@ interpolate_variable <- function(dat,
     
     # Rasterize and save to geotiff
     
-    akgfmaps::rasterize_and_mask(sgrid = fit, 
-                                 amask = region_mask) |>
-    coldpool::make_raster_file(filename = file.path(outfolder, outfile),
-                               format = "GTiff",
-                               overwrite = TRUE,
-                               layer_name = dat.year)
+    akgfmaps::rasterize_and_mask(
+      sgrid = fit, 
+      amask = region_mask) |>
+      terra::trim() |> # Trim raster to extent of data
+      coldpool::make_raster_file(filename = file.path(outfolder, outfile),
+                                 format = "GTiff",
+                                 overwrite = TRUE,
+                                 layer_name = dat.year)
      
   }
   

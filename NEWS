@@ -1,3 +1,19 @@
+coldpool 3.5-2 (August 26, 2025)
+----------------------------------------------------------------
+
+DATA UPDATE
+
+- Added finalized 2025 EBS shelf data.
+- Added finalized 2025 GOA surface and 200 m data.
+- Added preliminary 2025 NBS data.
+
+
+FUNCTIONALITY CHANGES
+
+- interpolate_variable() trims rasters to the extent with data 
+  using terra::trim().
+
+
 coldpool 3.5-1 (August 20, 2025)
 ----------------------------------------------------------------
 
