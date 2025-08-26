@@ -174,8 +174,8 @@ make_goa_ai_temp <- function(survey_definition_id, max_year, channel = NULL) {
                 race_edit.rb2_sgt sgt,
                 race_edit.rb2_hpden hd
               where 
-                c.survey_definition_id = 47
-                and c.cruise = hd.cruise
+                c.survey_definition_id = ", survey_definition_id,
+                " and c.cruise = hd.cruise
                 and c.vessel_id = hd.vessel
                 and c.cruisejoin = h.cruisejoin 
                 and h.haul = hd.haul
@@ -198,8 +198,8 @@ make_goa_ai_temp <- function(survey_definition_id, max_year, channel = NULL) {
                 race_edit.rb2_sgt sgt,
                 race_edit.rb2_hpden hd
               where 
-                c.survey_definition_id = 47
-                and c.cruise = hd.cruise
+                c.survey_definition_id = ", survey_definition_id,
+                " and c.cruise = hd.cruise
                 and c.vessel_id = hd.vessel
                 and c.cruisejoin = h.cruisejoin 
                 and h.haul = hd.haul
@@ -390,7 +390,7 @@ make_goa_ai_temp <- function(survey_definition_id, max_year, channel = NULL) {
     dplyr::ungroup()
     
   # Temperature data for QA/QC evaluation
-  write.csv(temp_by_year, here::here("assets", paste0(region, "_raw_temperature_table.csv"), row.names = FALSE))
+  write.csv(temp_by_year, here::here("assets", paste0(region, "_raw_temperature_table.csv")), row.names = FALSE)
   
   # Data product
   output_temperature <- 
@@ -421,6 +421,7 @@ make_goa_ai_temp <- function(survey_definition_id, max_year, channel = NULL) {
     usethis::use_data(ai_mean_temperature, overwrite = TRUE)
   }
   
+  return(output_temperature)
 }
 
 # Run function to get data -------------------------------------------------------------------------

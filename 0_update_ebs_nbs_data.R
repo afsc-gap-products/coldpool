@@ -21,8 +21,8 @@ ebs_layers <- akgfmaps::get_base_layers(
 ebs_csv_path <- here::here("data", paste0("index_hauls_temperature_data.csv"))
 nbs_ebs_csv_path <- here::here("data", paste0("ebs_nbs_temperature_full_area.csv"))
 
-nbs_bt_years <- c(2010, 2017, 2018, 2019, 2021, 2022, 2023)
-nbs_sst_years <- c(2010, 2017, 2018, 2019, 2021, 2022, 2023)
+nbs_bt_years <- c(2010, 2017, 2018, 2019, 2021, 2022, 2023, 2025)
+nbs_sst_years <- c(2010, 2017, 2018, 2019, 2021, 2022, 2023, 2025)
 nbs_salinity_years <- c(2010, 2017, 2021, 2022, 2023)
 
 # 3. Retrieve temperature data ----
@@ -33,7 +33,7 @@ if(update_sysdata) {
   channel <- get_connected(schema = "AFSC")
   
   # Get temperature data and write csvs to data directory
-  coldpool:::get_data(channel = channel, include_preliminary_data = "ebs")
+  coldpool:::get_data(channel = channel, include_preliminary_data = "nbs")
 }
 
 # 4. Interpolate bottom and surface temperature ---- 
@@ -45,7 +45,7 @@ interpolation_wrapper(
   temp_data_path = ebs_csv_path,
   proj_crs = proj_crs,
   cell_resolution = c(5000, 5000), # 5x5 km grid resolution
-  select_years = 2025, #1982:2025,
+  select_years = 1982:2025,
   interp_variable = "gear_temperature",
   select_region = "sebs",
   methods = "Ste"
@@ -56,7 +56,7 @@ interpolation_wrapper(
   temp_data_path = ebs_csv_path,
   proj_crs = proj_crs,
   cell_resolution = c(5000, 5000), # 5x5 km grid resolution
-  select_years = 2025, #1982:2025,
+  select_years = 1982:2025,
   interp_variable = "surface_temperature",
   select_region = "sebs",
   methods = "Ste"
