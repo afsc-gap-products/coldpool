@@ -2,7 +2,7 @@ library(coldpool)
 library(navmaps)
 library(spmodel)
 
-survey_definition_id <- 47
+survey_definition_id <- 52
 
 # Setup
 if(all(survey_definition_id == 47)) {
@@ -15,7 +15,7 @@ if(all(survey_definition_id == 47)) {
 if(all(survey_definition_id == 52)) {
   utmcrs <- "EPSG:32660"
   region <- "AI"
-  min_year <- 1991
+  min_year <- 1994
   subarea_levels <- c("Western Aleutians", "Central Aleutians", "Eastern Aleutians") # Panel/timeseries order
 }
 
