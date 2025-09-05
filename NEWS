@@ -1,3 +1,14 @@
+coldpool 3.5-3 (September 4, 2025)
+----------------------------------------------------------------
+
+DATA UPDATE
+
+- Add finalized NBS data.
+
+BUG FIX
+
+- Fix convert_ddm_to_dd conversion.
+
 coldpool 3.5-2 (August 26, 2025)
 ----------------------------------------------------------------
 

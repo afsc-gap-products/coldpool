@@ -2,7 +2,7 @@
 # Last update: August 6, 2025
 # Created by Sean Rohan
 
-library(coldpool) # 3.5-1
+library(coldpool) # 3.5-2
 library(akgfmaps) # 4.1.0
 library(ggrepel)
 library(shadowtext)
@@ -1048,7 +1048,7 @@ dev.off()
 
 year_vec <- c(1982:2019, 2021:2025)
 
-nbs_years <- c(2010, 2017, 2019, 2021:2023)
+nbs_years <- c(2010, 2017, 2019, 2021:2023, 2025)
 
 temp_breaks <- c(-Inf, seq(-1,8,1), Inf)
 color_pal <- "H"

@@ -1,5 +1,8 @@
 # Explore plotting options
 library(tidyterra)
+library(coldpool)
+
+bt_layers <- readRDS(here::here("output", paste0(region, "_bt.rds")))
 
 ggplot() +
   geom_spatraster(data = bt_layers) +
