@@ -58,7 +58,10 @@ get_connected <- function(channel = NULL, schema = NA, check_connections = TRUE)
 #' @export
 
 convert_ddm_to_dd <- function(x) {
-  return(floor(x/100) + x%%100/60)
+  abs_x <- abs(x)
+  degrees <- floor(abs_x/100)
+  minutes <- abs_x%%100
+  return(sign(x) * (degrees + minutes/60))
 }
 
 

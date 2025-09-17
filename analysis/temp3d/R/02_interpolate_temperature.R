@@ -1,7 +1,8 @@
 library(coldpool)
+library(navmaps)
 library(spmodel)
 
-survey_definition_id <- 47
+survey_definition_id <- 52
 
 # Setup
 if(all(survey_definition_id == 47)) {
@@ -14,7 +15,7 @@ if(all(survey_definition_id == 47)) {
 if(all(survey_definition_id == 52)) {
   utmcrs <- "EPSG:32660"
   region <- "AI"
-  min_year <- 1991
+  min_year <- 1994
   subarea_levels <- c("Western Aleutians", "Central Aleutians", "Eastern Aleutians") # Panel/timeseries order
 }
 
@@ -100,44 +101,65 @@ fit_spmod <- function(data,
   
 }
   
-aicc_table <- data.frame()
+# Set latitude and longitude as the midpoint for each haul
 
-haul_data <- readRDS(here::here("data", region, paste0(region, "_akfin_haul.rds"))) |>
-  sf::st_as_sf(coords = c("LONGITUDE_DD_START", "LATITUDE_DD_START"), crs = "WGS84") |>
+haul_data <- readRDS(here::here("data", region, paste0(region, "_akfin_haul.rds")))
+
+towpath <- vector(mode = "list", length = length(haul_data))
+
+for(ii in 1:nrow(haul_data)) {
+  
+  towpath[[ii]] <- c(
+    sf::st_point(c(haul_data$LONGITUDE_DD_START[ii], haul_data$LATITUDE_DD_START[ii])),
+    sf::st_point(c(haul_data$LONGITUDE_DD_END[ii], haul_data$LATITUDE_DD_END[ii]))
+  ) |>
+    sf::st_linestring()
+  
+}
+
+towpath <- towpath |>
+  sf::st_as_sfc(crs = "WGS84")
+
+haul_data <- sf::st_sf(haul_data, geometry = towpath) |>
+  navmaps::st_line_midpoints() |>
   sf::st_transform(crs = utmcrs)
+
+# Fit candidate models
 
 unique_years <- sort(unique(haul_data$YEAR))
 
+aicc_table <- data.frame()
+
 for(jj in 1:length(unique_years)) {
   
-  message("Region: ", region, ", Year: ", unique_years[jj])
+  message(Sys.time(), " - Region: ", region, ", Year: ", unique_years[jj])
   
   # Fit gear temperature models in UTM
-  aicc_table <- fit_spmod(
+    aicc_table <- fit_spmod(
     data = dplyr::filter(haul_data, YEAR == unique_years[jj]),
     spcov_type = c("exponential", "circular", "gaussian", "spherical", "matern"),
-    model_formula = c(I(log(GEAR_TEMPERATURE_C)) ~ 1, 
-                      I(log(GEAR_TEMPERATURE_C)) ~ DEPTH_M, 
-                      I(log(GEAR_TEMPERATURE_C)) ~ DEPTH_M + I(DEPTH_M^2), 
-                      I(log(GEAR_TEMPERATURE_C)) ~ I(log(DEPTH_M))),
+    model_formula = c(GEAR_TEMPERATURE_C ~ 1, 
+                      GEAR_TEMPERATURE_C ~ DEPTH_M, 
+                      GEAR_TEMPERATURE_C ~ DEPTH_M + I(DEPTH_M^2), 
+                      GEAR_TEMPERATURE_C ~ I(log(DEPTH_M))),
     anisotropy = c(TRUE, FALSE), 
     estmethod = "ml"
   ) |>
-    dplyr::mutate(YEAR = unique_years[jj], layer = "bottom")
+    dplyr::mutate(YEAR = unique_years[jj], layer = "bottom") |>
   dplyr::bind_rows(aicc_table)
   
   # Fit surface temperature models in UTM
   aicc_table <- fit_spmod(
     data = dplyr::filter(haul_data, YEAR == unique_years[jj]),
     spcov_type = c("exponential", "circular", "gaussian", "spherical", "matern"),
-    model_formula = c(I(log(SURFACE_TEMPERATURE_C)) ~ 1, 
-                      I(log(SURFACE_TEMPERATURE_C)) ~ DEPTH_M, 
-                      I(log(SURFACE_TEMPERATURE_C)) ~ DEPTH_M + I(DEPTH_M^2), 
-                      I(log(SURFACE_TEMPERATURE_C)) ~ I(log(DEPTH_M))),
+    model_formula = c(SURFACE_TEMPERATURE_C ~ 1, 
+                    SURFACE_TEMPERATURE_C ~ DEPTH_M, 
+                    SURFACE_TEMPERATURE_C ~ DEPTH_M + I(DEPTH_M^2), 
+                    SURFACE_TEMPERATURE_C ~ I(log(DEPTH_M))),
     anisotropy = c(TRUE, FALSE), 
     estmethod = "ml"
   ) |>
-    dplyr::mutate(YEAR = unique_years[jj], layer = "surface")
+    dplyr::mutate(YEAR = unique_years[jj], layer = "surface") |>
   dplyr::bind_rows(aicc_table)
   
 }
@@ -188,7 +210,7 @@ for(jj in 1:length(unique_years)) {
   
   bt_mod <- 
     spmodel::splm(
-      formula = best_bt_model$formula[1], 
+      formula = best_bt_model$formula[[1]], 
       data = sel_dat, 
       spcov_type = best_bt_model$spcov_type[1],
       anisotropy = best_bt_model$anisotropy[1]
@@ -204,7 +226,7 @@ for(jj in 1:length(unique_years)) {
   
   sst_mod <- 
     spmodel::splm(
-      formula = best_sst_model$formula[1], 
+      formula = best_sst_model$formula[[1]], 
       data = sel_dat, 
       spcov_type = best_sst_model$spcov_type[1],
       anisotropy = best_sst_model$anisotropy[1]
@@ -245,20 +267,19 @@ for(jj in 1:length(unique_years)) {
 }
 
 
-# Regional clean up
+# Region-specific data wrangling
 
-if(region == "goa") {
+if(region == "GOA") {
   
   # Eastern GOA wasn't sampled in 2001
-  bt_layers["2001"] <- 
-    mask(
-      bt_layers["2001"], , 
+  bt_layers[["2001"]] <- 
+    terra::mask(
+      bt_layers["2001"],
       esr_subareas[esr_subareas$AREA_NAME == "Eastern Gulf of Alaska", ],
       inverse = TRUE
     )
   
 }
-
 
 saveRDS(bt_layers, here::here("output", paste0(region, "_bt.rds")))
 saveRDS(sst_layers, here::here("output", paste0(region, "_sst.rds")))

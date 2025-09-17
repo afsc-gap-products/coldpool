@@ -34,7 +34,14 @@ if(update_sysdata) {
   
   # Get temperature data and write csvs to data directory
   coldpool:::get_data(channel = channel, include_preliminary_data = "nbs")
+  
 }
+
+# REMOVE THIS BEFORE 2026 RUNS - only included right now because data in RACEBASE are not final
+
+read.csv(file = nbs_ebs_csv_path) |>
+  dplyr::filter(!(cruise == 202502 & !preliminary)) |>
+  write.csv(nbs_ebs_csv_path, row.names = FALSE)
 
 # 4. Interpolate bottom and surface temperature ---- 
 # Use ordinary kriging with Stein's Matern to interpolate temperature and write GeoTIFF rasters to
@@ -45,7 +52,8 @@ interpolation_wrapper(
   temp_data_path = ebs_csv_path,
   proj_crs = proj_crs,
   cell_resolution = c(5000, 5000), # 5x5 km grid resolution
-  select_years = 1982:2025,
+  select_years = 2025,
+  # select_years = 1982:2025,
   interp_variable = "gear_temperature",
   select_region = "sebs",
   methods = "Ste"
@@ -56,7 +64,8 @@ interpolation_wrapper(
   temp_data_path = ebs_csv_path,
   proj_crs = proj_crs,
   cell_resolution = c(5000, 5000), # 5x5 km grid resolution
-  select_years = 1982:2025,
+  select_years = 2025,
+  # select_years = 1982:2025,
   interp_variable = "surface_temperature",
   select_region = "sebs",
   methods = "Ste"
@@ -67,7 +76,8 @@ interpolation_wrapper(
   temp_data_path = nbs_ebs_csv_path,
   proj_crs = proj_crs,
   cell_resolution = c(5000, 5000), # 5x5 km grid resolution
-  select_years = nbs_bt_years,
+  select_years = 2025,
+  # select_years = nbs_bt_years,
   interp_variable = "gear_temperature",
   select_region = "ebs",
   methods = "Ste"
@@ -78,7 +88,8 @@ interpolation_wrapper(
   temp_data_path = nbs_ebs_csv_path,
   proj_crs = proj_crs,
   cell_resolution = c(5000, 5000), # 5x5 km grid resolution
-  select_years = nbs_sst_years,
+  select_years = 2025,
+  # select_years = nbs_sst_years,
   interp_variable = "surface_temperature",
   select_region = "ebs",
   methods = "Ste"

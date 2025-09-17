@@ -2,7 +2,7 @@
 # Last update: August 6, 2025
 # Created by Sean Rohan
 
-library(coldpool) # 3.5-1
+library(coldpool) # 3.5-2
 library(akgfmaps) # 4.1.0
 library(ggrepel)
 library(shadowtext)
@@ -1048,7 +1048,7 @@ dev.off()
 
 year_vec <- c(1982:2019, 2021:2025)
 
-nbs_years <- c(2010, 2017, 2019, 2021:2023)
+nbs_years <- c(2010, 2017, 2019, 2021:2023, 2025)
 
 temp_breaks <- c(-Inf, seq(-1,8,1), Inf)
 color_pal <- "H"
@@ -1237,6 +1237,8 @@ coldpool::cold_pool_index |>
 
 # Cluster analysis plots ---------------------------------------------------------------------------
 
+library(ggdendro)
+
 bt_clust <-
   cluster_spatraster(
     x = terra::unwrap(coldpool::ebs_bottom_temperature),
@@ -1244,6 +1246,32 @@ bt_clust <-
     dist_method = "euclidean",
     hclust_method = "complete"
   )
+
+bt_ddata <- ggdendro::dendro_data(bt_clust$clust)
+
+bt_segments <- segment(bt_ddata)
+
+bt_clust_labels <- 
+  label(bt_ddata) |>
+  dplyr::rename(YEAR = label) |>
+  dplyr::mutate(YEAR = as.numeric(YEAR)) |>
+  dplyr::inner_join(coldpool::cold_pool_index, by = "YEAR")
+
+ggplot() + 
+  geom_segment(
+    data = bt_segments,
+    mapping = aes(x = x, y = y, xend = xend, yend = yend)
+  ) + 
+  geom_text(data = bt_clust_labels,
+            mapping = aes(x = x, y = y, label = YEAR, color = MEAN_GEAR_TEMPERATURE), hjust = -0.5) +
+  coord_flip() + 
+  scale_y_reverse(expand = c(0.2, 0)) +
+  scale_color_viridis_c(name = expression('Mean BT ('*degree*C*')'), option = "H") +
+  theme_minimal() +
+  theme(panel.grid = element_blank(),
+        axis.title = element_blank(),
+        axis.label = element_blank(),
+        axis.text = element_blank())
 
 
 st_clust <-
@@ -1253,3 +1281,32 @@ st_clust <-
     dist_method = "euclidean",
     hclust_method = "complete"
   )
+
+
+st_ddata <- ggdendro::dendro_data(st_clust$clust)
+
+st_segements <- segment(st_ddata)
+
+st_clust_labels <- 
+  label(st_ddata) |>
+  dplyr::rename(YEAR = label) |>
+  dplyr::mutate(YEAR = as.numeric(YEAR)) |>
+  dplyr::inner_join(coldpool::cold_pool_index, by = "YEAR")
+
+ggplot() + 
+  geom_segment(
+    data = st_segements,
+    mapping = aes(x = x, y = y, xend = xend, yend = yend)
+  ) + 
+  geom_text(data = st_clust_labels,
+            mapping = aes(x = x, y = y, label = YEAR, color = MEAN_SURFACE_TEMPERATURE), hjust = -0.5) +
+  coord_flip() + 
+  scale_y_reverse(expand = c(0.2, 0)) +
+  scale_color_viridis_c(name = expression('Mean SST ('*degree*C*')'), option = "H") +
+  theme_minimal() +
+  theme(panel.grid = element_blank(),
+        axis.title = element_blank(),
+        axis.label = element_blank(),
+        axis.text = element_blank())
+
+

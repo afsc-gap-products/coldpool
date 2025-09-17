@@ -6,9 +6,15 @@
 
 get_data <- function(channel, include_preliminary_data = NULL) {
   
-  temperature_all_hauls_df <- RODBC::sqlQuery(channel, coldpool::sql_to_rqry(system.file("sql", 
-                                                                                         "ebs_gear_temperature_all_hauls.sql", 
-                                                                                         package = "coldpool"))) |>
+  temperature_all_hauls_df <- 
+    RODBC::sqlQuery(
+      channel, 
+      coldpool::sql_to_rqry(
+        system.file("sql", 
+                    "ebs_gear_temperature_all_hauls.sql", 
+                    package = "coldpool")
+      )
+    ) |>
     dplyr::mutate(LATITUDE = (START_LATITUDE + END_LATITUDE)/2,
                   LONGITUDE = (START_LONGITUDE + END_LONGITUDE)/2,
                   YEAR = floor(CRUISE/100)) |>
