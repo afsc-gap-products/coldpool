@@ -1,8 +1,4 @@
-library(coldpool)
-
 channel <- coldpool:::get_connected(schema = "AFSC")
-
-survey_definition_id <- 47
 
 # Setup
 if(all(survey_definition_id == 47)) {
@@ -15,27 +11,27 @@ if(all(survey_definition_id == 47)) {
 if(all(survey_definition_id == 52)) {
   utmcrs <- "EPSG:32660"
   region <- "AI"
-  min_year <- 1991
+  min_year <- 1994
   subarea_levels <- c("Western Aleutians", "Central Aleutians", "Eastern Aleutians") # Panel/timeseries order
 }
 
-if(all(survey_definition_id == 98)) {
-  utmcrs <- "EPSG:32602"
-  region <- "SEBS"
-  min_year <- 1982
-}
-
-if(all(survey_definition_id == 143)) {
-  utmcrs <- "EPSG:32602"
-  region <- "NBS"
-  min_year <- 2010
-}
-
-if(all(survey_definition_id %in% c(143, 98))) {
-  utmcrs <- "EPSG:32602"
-  region <- "EBS"
-  min_year <- 1982
-}
+# if(all(survey_definition_id == 98)) {
+#   utmcrs <- "EPSG:32602"
+#   region <- "SEBS"
+#   min_year <- 1982
+# }
+# 
+# if(all(survey_definition_id == 143)) {
+#   utmcrs <- "EPSG:32602"
+#   region <- "NBS"
+#   min_year <- 2010
+# }
+# 
+# if(all(survey_definition_id %in% c(143, 98))) {
+#   utmcrs <- "EPSG:32602"
+#   region <- "EBS"
+#   min_year <- 1982
+# }
 
 haul_data <- 
   RODBC::sqlQuery(

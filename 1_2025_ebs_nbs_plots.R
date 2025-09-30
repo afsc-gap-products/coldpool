@@ -6,6 +6,7 @@ library(coldpool) # 3.5-2
 library(akgfmaps) # 4.1.0
 library(ggrepel)
 library(shadowtext)
+library(ggdendro)
 
 # Setup directories and figure options
 if(!dir.exists("plots")) {dir.create("plots")}
@@ -1236,8 +1237,6 @@ coldpool::cold_pool_index |>
 
 
 # Cluster analysis plots ---------------------------------------------------------------------------
-
-library(ggdendro)
 
 bt_clust <-
   cluster_spatraster(
