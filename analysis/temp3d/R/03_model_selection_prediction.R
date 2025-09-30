@@ -178,7 +178,7 @@ bathy <-
   terra::mask(map_layers$survey.area) |>
   terra::trim() 
 
-# Create a UTM 
+# Create a UTM prediction grid
 bathy_utm <- bathy |>
   terra::as.points(na.rm = TRUE) |>
   sf::st_as_sf() |>

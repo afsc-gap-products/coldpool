@@ -42,7 +42,7 @@ area_map_1 <-
           color = NA) +
   geom_sf(
     data = bts_layers$survey.area,
-    mapping = aes(color = c("AI BTS", "GOA BTS")),
+    mapping = aes(color = c("GOA BTS", "AI BTS")),
     fill = NA,
     linewidth = rel(1.02)
   ) +
@@ -92,7 +92,7 @@ area_map_2 <-
   ) +
   geom_sf(
     data = bts_layers$survey.area,
-    mapping = aes(fill = c("AI BTS", "GOA BTS")),
+    mapping = aes(fill = c("GOA BTS", "AI BTS")),
     color = NA,
     alpha = 0.7
   ) +

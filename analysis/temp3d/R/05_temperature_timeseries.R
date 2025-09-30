@@ -5,7 +5,7 @@ library(spmodel)
 
 fig_res <- 300
 
-survey_definition_id = 52
+survey_definition_id <- 47
 
 # Setup
 if(all(survey_definition_id == 47)) {
@@ -122,46 +122,124 @@ subarea_baseline_bt <- subarea_bt |>
   dplyr::filter(YEAR >= range_baseline[1] & YEAR <= range_baseline[2]) |>
   dplyr::group_by(AREA_NAME) |>
   dplyr::summarise(
-    SD_GEAR_TEMPERATURE = sd(MEAN_GEAR_TEMPERATURE),
-    MEAN_GEAR_TEMPERATURE = mean(MEAN_GEAR_TEMPERATURE)
+    SD_GEAR_TEMPERATURE = round(sd(MEAN_GEAR_TEMPERATURE, na.rm = TRUE), 2),
+    MAX_GEAR_TEMPERATURE = round(max(MEAN_GEAR_TEMPERATURE, na.rm = TRUE), 2),
+    MIN_GEAR_TEMPERATURE = round(min(MEAN_GEAR_TEMPERATURE, na.rm = TRUE), 2),
+    MEAN_GEAR_TEMPERATURE = round(mean(MEAN_GEAR_TEMPERATURE, na.rm = TRUE), 2)
   ) |>
   dplyr::mutate(
     MIN_YEAR = range_baseline[1],
-    MAX_YEAR = range_baseline[2]
+    MAX_YEAR = range_baseline[2],
+    PERIOD = "Baseline"
+  )
+
+subarea_recent_bt <- subarea_bt |>
+  dplyr::filter(YEAR > range_baseline[2]) |>
+  dplyr::group_by(AREA_NAME) |>
+  dplyr::summarise(
+    SD_GEAR_TEMPERATURE = round(sd(MEAN_GEAR_TEMPERATURE, na.rm = TRUE), 2),
+    MAX_GEAR_TEMPERATURE = round(max(MEAN_GEAR_TEMPERATURE, na.rm = TRUE), 2),
+    MIN_GEAR_TEMPERATURE = round(min(MEAN_GEAR_TEMPERATURE, na.rm = TRUE), 2),
+    MEAN_GEAR_TEMPERATURE = round(mean(MEAN_GEAR_TEMPERATURE, na.rm = TRUE), 2)
+  ) |>
+  dplyr::mutate(
+    MIN_YEAR = min(subarea_bt$YEAR[subarea_bt$YEAR > range_baseline[2]]),
+    MAX_YEAR = max(subarea_bt$YEAR),
+    PERIOD = "Recent"
+  )
+
+subarea_full_bt <- subarea_bt |>
+  dplyr::group_by(AREA_NAME) |>
+  dplyr::summarise(
+    SD_GEAR_TEMPERATURE = round(sd(MEAN_GEAR_TEMPERATURE, na.rm = TRUE), 2),
+    MAX_GEAR_TEMPERATURE = round(max(MEAN_GEAR_TEMPERATURE, na.rm = TRUE), 2),
+    MIN_GEAR_TEMPERATURE = round(min(MEAN_GEAR_TEMPERATURE, na.rm = TRUE), 2),
+    MEAN_GEAR_TEMPERATURE = round(mean(MEAN_GEAR_TEMPERATURE, na.rm = TRUE), 2)
+  ) |>
+  dplyr::mutate(
+    MIN_YEAR = range_baseline[1],
+    MAX_YEAR = max(subarea_bt$YEAR),
+    PERIOD = "Full"
   )
 
 subarea_baseline_sst <- subarea_sst |>
   dplyr::filter(YEAR >= range_baseline[1] & YEAR <= range_baseline[2]) |>
   dplyr::group_by(AREA_NAME) |>
   dplyr::summarise(
-    SD_SURFACE_TEMPERATURE = sd(MEAN_SURFACE_TEMPERATURE),
-    MEAN_SURFACE_TEMPERATURE = mean(MEAN_SURFACE_TEMPERATURE)
+    SD_SURFACE_TEMPERATURE = round(sd(MEAN_SURFACE_TEMPERATURE, na.rm = TRUE), 2),
+    MAX_SURFACE_TEMPERATURE = round(max(MEAN_SURFACE_TEMPERATURE, na.rm = TRUE), 2),
+    MIN_SURFACE_TEMPERATURE = round(min(MEAN_SURFACE_TEMPERATURE, na.rm = TRUE), 2),
+    MEAN_SURFACE_TEMPERATURE = round(mean(MEAN_SURFACE_TEMPERATURE, na.rm = TRUE), 2)
   ) |>
   dplyr::mutate(
     MIN_YEAR = range_baseline[1],
-    MAX_YEAR = range_baseline[2]
+    MAX_YEAR = range_baseline[2],
+    PERIOD = "Baseline"
   )
 
-ggplot() +
-  geom_path(data = subarea_baseline_bt |>
-              tidyr::pivot_longer(cols = c("MIN_YEAR", "MAX_YEAR")),
-            mapping = aes(x = value, y = MEAN_GEAR_TEMPERATURE),
-            linetype = 1) +
-  geom_path(data = subarea_baseline_bt |>
-              tidyr::pivot_longer(cols = c("MIN_YEAR", "MAX_YEAR")),
-            mapping = aes(x = value, y = MEAN_GEAR_TEMPERATURE + SD_GEAR_TEMPERATURE),
-            linetype = 2) +
-  geom_path(data = subarea_baseline_bt |>
-              tidyr::pivot_longer(cols = c("MIN_YEAR", "MAX_YEAR")),
-            mapping = aes(x = value, y = MEAN_GEAR_TEMPERATURE - SD_GEAR_TEMPERATURE),
-            linetype = 2) +
-  geom_point(data = subarea_bt,
-             mapping = aes(x = YEAR, y = MEAN_GEAR_TEMPERATURE),
-             color = "#0085CA") +
-  scale_x_continuous(name = "Year") +
-  scale_y_continuous(name = expression('Mean bottom temperature ('*degree*C*')')) +
-  facet_wrap(~factor(AREA_NAME, levels = subarea_levels)) +
-  theme_timeseries_blue_strip()
+subarea_recent_sst <- subarea_sst |>
+  dplyr::filter(YEAR > range_baseline[2]) |>
+  dplyr::group_by(AREA_NAME) |>
+  dplyr::summarise(
+    SD_SURFACE_TEMPERATURE = round(sd(MEAN_SURFACE_TEMPERATURE, na.rm = TRUE), 2),
+    MAX_SURFACE_TEMPERATURE = round(max(MEAN_SURFACE_TEMPERATURE, na.rm = TRUE), 2),
+    MIN_SURFACE_TEMPERATURE = round(min(MEAN_SURFACE_TEMPERATURE, na.rm = TRUE), 2),
+    MEAN_SURFACE_TEMPERATURE = round(mean(MEAN_SURFACE_TEMPERATURE, na.rm = TRUE), 2)
+  ) |>
+  dplyr::mutate(
+    MIN_YEAR = min(subarea_bt$YEAR[subarea_bt$YEAR > range_baseline[2]]),
+    MAX_YEAR = max(subarea_bt$YEAR),
+    PERIOD = "Recent"
+  )
+
+subarea_full_sst <- subarea_sst |>
+  dplyr::group_by(AREA_NAME) |>
+  dplyr::summarise(
+    SD_SURFACE_TEMPERATURE = round(sd(MEAN_SURFACE_TEMPERATURE, na.rm = TRUE), 2),
+    MAX_SURFACE_TEMPERATURE = round(max(MEAN_SURFACE_TEMPERATURE, na.rm = TRUE), 2),
+    MIN_SURFACE_TEMPERATURE = round(min(MEAN_SURFACE_TEMPERATURE, na.rm = TRUE), 2),
+    MEAN_SURFACE_TEMPERATURE = round(mean(MEAN_SURFACE_TEMPERATURE, na.rm = TRUE), 2)
+  ) |>
+  dplyr::mutate(
+    MIN_YEAR = range_baseline[1],
+    MAX_YEAR = max(subarea_bt$YEAR),
+    PERIOD = "Full"
+  )
+
+
+mean_temperature_by_period <-
+dplyr::bind_rows(
+  subarea_baseline_bt,
+  subarea_recent_bt,
+  subarea_full_bt
+) |>
+  dplyr::inner_join(
+    dplyr::bind_rows(
+      subarea_baseline_sst,
+      subarea_recent_sst,
+      subarea_full_sst
+    )
+  ) |>
+  dplyr::select(
+    AREA_NAME, 
+    PERIOD,
+    MIN_YEAR, 
+    MAX_YEAR,
+    MEAN_GEAR_TEMPERATURE, 
+    SD_GEAR_TEMPERATURE, 
+    MIN_GEAR_TEMPERATURE, 
+    MAX_GEAR_TEMPERATURE, 
+    MEAN_SURFACE_TEMPERATURE,
+    MIN_SURFACE_TEMPERATURE, 
+    MAX_SURFACE_TEMPERATURE, 
+    SD_SURFACE_TEMPERATURE
+  )
+
+write.csv(
+  mean_temperature_by_period,
+  file = here::here("plots", paste0(region, "_temperature_by_period.csv"))
+)
+  
 
 z_levels <- factor(
   c(paste0("Mean (", range_baseline[1], "–", range_baseline[2], ")"), "\u00B1 1 SD"),
@@ -204,7 +282,7 @@ p_bt_timeseries <-
              mapping = aes(x = YEAR, y = MEAN_GEAR_TEMPERATURE),
              color = "#0085CA") +
   scale_x_continuous(name = "Year", breaks = year_breaks, labels = year_lab) +
-  scale_y_continuous(name = expression('Mean bottom temperature ('*degree*C*')')) +
+  scale_y_continuous(name = expression('Mean BT ('*degree*C*')')) +
   facet_wrap(~factor(AREA_NAME, levels = subarea_levels)) +
   theme_timeseries_blue_strip() +
   theme(legend.position = "bottom",
@@ -249,8 +327,46 @@ png(here::here("plots", region, paste0(sel_year, "_", region, "_sst_timeseries.p
 print(p_sst_timeseries)
 dev.off()
 
+sst_bt_legend_position <- switch(
+  region, AI = c(0.86, 0.82), GOA = c(0.21, 0.82)
+  )
 
-# Bottom and surace temperature time series relative to full time series ---------------------------
+sst_bt_plot_width_mm <- switch(
+  region, AI = 169, GOA = 120
+)
+
+p_sst_bt <- 
+  cowplot::plot_grid(
+    p_sst_timeseries +
+      theme(legend.position = "inside",
+            legend.position.inside = sst_bt_legend_position,
+            legend.text = element_text(size = 7),
+            legend.box = element_blank(),
+            legend.key.width = unit(2.5, units = "mm"),
+            legend.key.height = unit(1.5, units = "mm"),
+            strip.text = element_text(size = 8),
+            legend.direction = "horizontal",
+            axis.title.y = element_text(size = 8),
+            axis.text.y = element_text(size = 7),
+            axis.text.x = element_blank()),
+    p_bt_timeseries +
+      theme(legend.position = "none",
+            axis.text = element_text(size = 7),
+            axis.title.y = element_text(size = 8),
+            strip.text = element_blank(),
+            strip.background = element_blank()),
+    align = "v",
+    nrow = 2
+  )
+
+png(here::here("plots", region, paste0(sel_year, "_", region, "_sst_bt_timeseries.png")),
+    width = sst_bt_plot_width_mm, height = 60, units = "mm", res = 300)
+print(p_sst_bt)
+dev.off()
+
+
+
+# Bottom and surface temperature time series relative to full time series --------------------------
 
 subarea_baseline_bt <- subarea_bt |>
   dplyr::group_by(AREA_NAME) |>
@@ -307,7 +423,7 @@ p_bt_timeseries_no_baseline <-
              mapping = aes(x = YEAR, y = MEAN_GEAR_TEMPERATURE),
              color = "#0085CA") +
   scale_x_continuous(name = "Year", breaks = year_breaks, labels = year_lab) +
-  scale_y_continuous(name = expression('Mean bottom temperature ('*degree*C*')')) +
+  scale_y_continuous(name = expression('Mean BT ('*degree*C*')')) +
   facet_wrap(~factor(AREA_NAME, levels = subarea_levels)) +
   theme_timeseries_blue_strip() +
   theme(legend.position = "bottom",
@@ -349,3 +465,37 @@ png(here::here("plots", region, paste0(sel_year, "_", region, "_sst_timeseries_n
     width = 7, height = 3, units = "in", res = 300)
 print(p_sst_timeseries_no_baseline)
 dev.off()
+
+# Combined SST and BT plot
+
+sst_bt_legend_position <- switch(
+  region, AI = c(0.88, 0.82), GOA = c(0.18, 0.82))
+
+p_sst_bt_no_baseline <- 
+  cowplot::plot_grid(
+  p_sst_timeseries_no_baseline +
+    theme(legend.position = "inside",
+          legend.position.inside = sst_bt_legend_position,
+          legend.text = element_text(size = 7),
+          legend.box = element_blank(),
+          legend.key.height = unit(1.5, units = "mm"),
+          strip.text = element_text(size = 8),
+          legend.direction = "horizontal",
+          axis.title.y = element_text(size = 8),
+          axis.text.y = element_text(size = 7),
+          axis.text.x = element_blank()),
+  p_bt_timeseries_no_baseline +
+    theme(legend.position = "none",
+          axis.text = element_text(size = 7),
+          axis.title.y = element_text(size = 8),
+          strip.text = element_blank(),
+          strip.background = element_blank()),
+  align = "v",
+  nrow = 2
+)
+
+png(here::here("plots", region, paste0(sel_year, "_", region, "_sst_bt_no_baseline.png")),
+    width = 169*length(subarea_levels)/3, height = 60, units = "mm", res = 300)
+print(p_sst_bt_no_baseline)
+dev.off()
+
