@@ -1,8 +1,8 @@
-# Create 2025 EBS and NBS temperature figures
-# Last update: August 6, 2025
+# Create 2026 EBS and NBS temperature figures
+# Last update: August 26, 2026
 # Created by Sean Rohan
 
-library(coldpool) # 3.5-2
+library(coldpool) # 3.6-1
 library(akgfmaps) # 4.1.0
 library(ggrepel)
 library(shadowtext)
@@ -13,7 +13,7 @@ if(!dir.exists("plots")) {dir.create("plots")}
 
 fig_res <- 600
 cpa_palette <- c("#21dae7", "#0071ff", "#0000e3", "#000040")
-max_year <- 2025
+max_year <- 2026
 min_year <- max_year - 19 # Default for 20 panel cold pool maps
 
 coldpool::cold_pool_index$YEAR[order(coldpool::cold_pool_index$AREA_LTE2_KM2)]
@@ -249,7 +249,7 @@ cold_pool_cbar <-
     "text", 
     x = 1.1, 
     y = 2.05, 
-    label =  expression(bold("Bottom\nTemperature"~(degree*C))), 
+    label =  "Bottom\nTemperature (\u00B0C)", 
     size = rel(3.2)
   ) + 
   theme(plot.margin = unit(c(-25, 0,0,-10), units = "pt"))
@@ -496,7 +496,7 @@ temp_map_cbar <-
     "text", 
     x = 1.15, 
     y = 3.5, 
-    label =  expression(bold("Bottom Temperature"~(degree*C))), 
+    label =  "Bottom Temperature (\u00B0C)", 
     size = rel(3.2)
   ) + 
   theme(plot.margin = unit(c(0,0, 0, 5), units = "mm"))
@@ -799,7 +799,7 @@ sst_map_cbar <-
   annotate("text",
            x = 1.15,
            y = 3.5,
-           label =  expression(bold("Surface Temperature"~(degree*C))),
+           label =  "Surface Temperature (\u00B0C)", 
            size = rel(3.2)) +
   theme(plot.margin = unit(c(0,0, 0, 5), units = "mm"))
 
@@ -1047,7 +1047,7 @@ dev.off()
 
 # Annual temperature maps --------------------------------------------------------------------------
 
-year_vec <- c(1982:2019, 2021:2025)
+year_vec <- c(1982:2019, 2021:2026)
 
 nbs_years <- c(2010, 2017, 2019, 2021:2023, 2025)
 
@@ -1158,7 +1158,7 @@ temp_map_cbar <-
   annotate("text", 
            x = 1.15, 
            y = 3.5, 
-           label =  expression(bold("Bottom Temperature"~(degree*C))), 
+           label =  "Bottom Temperature (\u00B0C)", 
            size = rel(3.2)) + 
   theme(plot.margin = unit(c(0,0, 0, 5), units = "mm"))
 
