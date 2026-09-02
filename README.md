@@ -56,23 +56,23 @@ load("[local_path].rda")
 
 <dl>
 <dt><b>cold_pool_index</b></dt>
-<dd><p>Data frame containing the total area of EBS waters with bottom temperatures less than or equal to 2, 1, 0, and -1 °C, mean bottom temperature, and mean surface temperature during the EBS survey for 1982-2025 (excluding 2020 due to cancelled survey).</p></dd>
+<dd><p>Data frame containing the total area of EBS waters with bottom temperatures less than or equal to 2, 1, 0, and -1 °C, mean bottom temperature, and mean surface temperature during the EBS survey for 1982-2026 (excluding 2020 due to cancelled survey).</p></dd>
 <dt><b>nbs_mean_bottom_temperature</b></dt>
 <dd><p>Data frame containing the total area of EBS waters with bottom temperatures less than or equal to 2, 1, 0, and -1 °C, mean bottom temperature, and mean surface temperature in the NBS during years with a full EBS+NBS standardized survey (2010, 2017, 2019, 2021, 2022, 2023).</p></dd>
 <dt><b>goa_mean_bottom_temperature</b></dt>
-<dd><p>Data frame containing mean surface, bottom, and 200 m temperatures in Gulf of Alaska Ecosystem Status Report subareas from 1990-2023.</p></dd>
+<dd><p>Data frame containing mean surface, bottom, and 200 m temperatures in Gulf of Alaska Ecosystem Status Report subareas from 1990-2025.</p></dd>
 <dt><b>ai_mean_bottom_temperature</b></dt>
 <dd><p>Data frame containing mean surface, bottom, and 200 m temperatures in Aleutian Islands Ecosystem Status Report subareas from 1991-2024.</p></dd>
 <dt><b>ebs_bottom_temperature</b></dt>
-<dd><p>Interpolated rasters of bottom temperature for the EBS survey area from 1982-2025 (excluding 2020 due to cancelled survey).</p></dd>
+<dd><p>Interpolated rasters of bottom temperature for the EBS survey area from 1982-2026.</p></dd>
 <dt><b>ebs_surface_temperature</b></dt> 
-<dd><p>Interpolated rasters of sea surface temperature for the EBS survey area from 1982-2025 (excluding 2020 due to cancelled survey).</p></dd>
+<dd><p>Interpolated rasters of sea surface temperature for the EBS survey area from 1982-2026.</p></dd>
 <dt><b>ebs_bottom_salinity</b></dt>
 <dd><p>Interpolated rasters of bottom salinity (PSS-78) for the EBS survey area for 2010, 2017, and 2021-2024</p></dd>
 <dt><b>nbs_ebs_bottom_temperature</b></dt> 
-<dd><p>Interpolated rasters of bottom temperature for the full EBS and NBS survey area for years with a full EBS+NBS standardized survey (2010, 2017, 2019, 2021, 2022, 2023).</p></dd>
+<dd><p>Interpolated rasters of bottom temperature for the full EBS and NBS survey area for years with a full EBS+NBS standardized survey (2010, 2017, 2019, 2021, 2022, 2023, 2025).</p></dd>
 <dt><b>nbs_ebs_surface_temperature</b></dt> 
-<dd><p>Interpolated rasters of sea surface temperature for the full EBS and NBS survey area for years with a full EBS+NBS standardized survey (2010, 2017, 2019, 2021, 2022, 2023).</p></dd>
+<dd><p>Interpolated rasters of sea surface temperature for the full EBS and NBS survey area for years with a full EBS+NBS standardized survey (2010, 2017, 2019, 2021, 2022, 2023, 2025).</p></dd>
 <dt><b>nbs_ebs_bottom_salinity</b></dt> 
 <dd><p>Interpolated rasters of bottom salinity (PSS-78) for the full EBS and NBS survey area for 2010, 2017, and 2021-2024</p></dd>
 </dl>
@@ -85,7 +85,7 @@ The temperature data products in this package are an annual snapshot of temperat
 
 ## Data collection
 
-Temperature data have been collected annually during AFSC's standardized summer bottom trawl surveys of the eastern Bering Sea continental shelf (EBS shelf) and northern Bering Sea (BS). The EBS shelf survey has been conducted annually since 1982 (except for 2020) and the NBS survey was conducted in 2010, 2017, 2019, 2021-2023, and 2025. In the eastern Bering Sea, surveys are conducted from late May or early June through late July to early August and the northern Bering Sea survey is conducted immediately after the EBS shelf survey (July-August). The EBS shelf survey samples 350 index stations and the NBS survey samples 142 index stations per year, although the survey footprint and number of stations has changed over time (e.g. EBS NW strata added in 1987). The EBS shelf survey progresses from the nearshore waters inside Bristol Bay to the outer continental shelf in the NW portion of southeastern Bering Sea (Figure 1). The NBS survey starts offshore where the EBS shelf survey ends, then progresses northward towards the Bering Strait and Norton Sound, before heading south towards Nunivak Island.
+Temperature data have been collected annually during AFSC's standardized summer bottom trawl surveys of the eastern Bering Sea continental shelf (EBS shelf) and northern Bering Sea (BS). The EBS shelf survey has been conducted annually since 1982 (except for 2020) and the NBS survey was conducted in 2010, 2017, 2019, 2021-2023, 2025, and 2026. In the eastern Bering Sea, surveys are conducted from late May or early June through late July to early August and the northern Bering Sea survey is conducted immediately after the EBS shelf survey (July-August). The EBS shelf survey samples 350 index stations and the NBS survey samples 142 index stations per year, although the survey footprint and number of stations has changed over time (e.g. EBS NW strata added in 1987). The EBS shelf survey progresses from the nearshore waters inside Bristol Bay to the outer continental shelf in the NW portion of southeastern Bering Sea (Figure 1). The NBS survey starts offshore where the EBS shelf survey ends, then progresses northward towards the Bering Strait and Norton Sound, before heading south towards Nunivak Island.
 
 ![Map of eastern Bering Sea and northern Bering Sea survey areas showing the EBS standard, EBS NW, and NBS survey strata.](./plots/ebs_nbs/ebs_nbs_survey_area.png)
  <font size="1"><b>Figure 1.</b> Map of eastern Bering Sea (EBS) shelf and northern Bering Sea (NBS) shelf survey areas and station grid, including EBS standard (sampled since 1982) and northwest (sampled since 1987) subareas. Thick black lines denote survey boundaries and fill color denotes the average day of year when stations are sampled by the survey.</font>
@@ -106,24 +106,24 @@ Temperature data products in the coldpool package are updated annually in August
 
 Cold pool area and temperature time series are reported in the annual [Ecosystem Status Reports](https://www.fisheries.noaa.gov/alaska/ecosystems/ecosystem-status-reports-gulf-alaska-bering-sea-and-aleutian-islands) for the eastern Bering Sea and ecosystem and socioeconomic profiles for EBS stocks. Temperature products are also used as covariates in some [stock assessment](https://www.fisheries.noaa.gov/alaska/population-assessments/north-pacific-groundfish-stock-assessments-and-fishery-evaluation) models or their inputs (e.g. abundance indices).
 
-![Cold pool area from 2004-2025, based on interpolated survey bottom temperature observations.](./plots/ebs_nbs/2025_coldpool_with_area.png)
- <font size="1"><b>Figure 2.</b> Cold pool extent in the eastern Bering Sea from 2005–2025, showing areas with bottom temperatures ≤ 2°C, ≤ 1°C, ≤ 0°C, and ≤ -1°C (upper panels), and proportion of the southeastern Bering Sea survey area with bottom temperatures ≤ 2°C, ≤ 1°C, ≤ 0°C, and ≤ -1°C (lower panel). Solid black lines in the interior of the surface represent the 50m and 100m isobaths.</font>
+![Cold pool area from 2004-2025, based on interpolated survey bottom temperature observations.](./plots/ebs_nbs/2026_coldpool_with_area.png)
+ <font size="1"><b>Figure 2.</b> Cold pool extent in the eastern Bering Sea from 2005–2026, showing areas with bottom temperatures ≤ 2°C, ≤ 1°C, ≤ 0°C, and ≤ -1°C (upper panels), and proportion of the southeastern Bering Sea survey area with bottom temperatures ≤ 2°C, ≤ 1°C, ≤ 0°C, and ≤ -1°C (lower panel). Solid black lines in the interior of the surface represent the 50m and 100m isobaths.</font>
 
-![Mean bottom temperature in the eastern Bering Sea, based on interpolated survey temperature observations.](./plots/ebs_nbs/2025_nbs_ebs_temperature_map_grid.png)
- <font size="1"><b>Figure 3.</b> Contour map of bottom temperatures from the past four eastern and northern Bering Sea shelf bottom trawl surveys (2022-2025). Solid black contour lines denote stratum boundaries.</font>
+![Mean bottom temperature in the eastern Bering Sea, based on interpolated survey temperature observations.](./plots/ebs_nbs/2026_nbs_ebs_temperature_map_grid.png)
+ <font size="1"><b>Figure 3.</b> Contour map of bottom temperatures from the past four eastern and northern Bering Sea shelf bottom trawl surveys (2022-2026). Solid black contour lines denote stratum boundaries.</font>
 
-![Mean bottom and sea surface temperatures in the eastern Bering Sea from 1982-2025, based on interpolated survey temperature observations.](./plots/ebs_nbs/2025_average_temperature.png)
- <font size="1"><b>Figure 4.</b> Average summer surface (green triangles) and bottom (blue circles) temperatures (°C) of the eastern Bering Sea (EBS) shelf and northern Bering Sea (NBS) shelf based on data collected during standardized summer bottom trawl surveys from 1982–2024. Dashed lines represent the time series mean for the EBS (1982–2025, except 2020) and NBS (2010, 2017, 2019, 2021-2023).</font>
+![Mean bottom and sea surface temperatures in the eastern Bering Sea from 1982-2026, based on interpolated survey temperature observations.](./plots/ebs_nbs/2026_average_temperature.png)
+ <font size="1"><b>Figure 4.</b> Average summer surface (green triangles) and bottom (blue circles) temperatures (°C) of the eastern Bering Sea (EBS) shelf and northern Bering Sea (NBS) shelf based on data collected during standardized summer bottom trawl surveys from 1982–2024. Dashed lines represent the time series mean for the EBS (1982–2026) and NBS (2010, 2017, 2019, 2021-2023, 2025).</font>
  
 # AI temperature time series
 
-![Mean bottom and sea surface temperatures in the Aleutian Islands.](./plots/ai/2024_temperature_by_subarea_depth.png)
- <font size="1"><b>Figure 5.</b> Average summer surface and bottom temperatures (°C) in Aleutian Islands Ecosystem Status Report subareas (western, central, and eastern Aleutian Islands) based on data collected during standardized summer bottom trawl surveys from 1991 to 2024. Solid horizontal line denotes the historical mean (1991–2012), dashed horizontal lines denote one standard deviation from the 1991–2012 mean. Circles denote annual means and vertical lines denote two standard errors from the annual mean.</font>
+![Mean bottom and sea surface temperatures in the Aleutian Islands.](./plots/ai/2026_temperature_by_subarea_depth.png)
+ <font size="1"><b>Figure 5.</b> Average summer surface and bottom temperatures (°C) in Aleutian Islands Ecosystem Status Report subareas (western, central, and eastern Aleutian Islands) based on data collected during standardized summer bottom trawl surveys from 1991 to 2026. Solid horizontal line denotes the historical mean (1991–2012), dashed horizontal lines denote one standard deviation from the 1991–2012 mean. Circles denote annual means and vertical lines denote two standard errors from the annual mean.</font>
 
 # GOA temperature time series
 
 ![Mean bottom and sea surface temperatures in the Gulf of Alaska.](./plots/goa/2025_temperature_by_subarea_depth.png)
- <font size="1"><b>Figure 6.</b> Average summer surface and 200 m temperatures (°C) in Gulf of Alaska Ecosystem Status Report subareas (western and eastern Gulf of Alaska) based on data collected during standardized summer bottom trawl surveys from 1993 to 2023. Solid horizontal line denotes the historical mean (1993–2014) and dashed horizontal lines denote one standard deviation from the 1993–2014 mean. Circles denote annual means and vertical lines denote two standard errors from the annual mean.</font>
+ <font size="1"><b>Figure 6.</b> Average summer surface and 200 m temperatures (°C) in Gulf of Alaska Ecosystem Status Report subareas (western and eastern Gulf of Alaska) based on data collected during standardized summer bottom trawl surveys from 1993 to 2025. Solid horizontal line denotes the historical mean (1993–2014) and dashed horizontal lines denote one standard deviation from the 1993–2014 mean. Circles denote annual means and vertical lines denote two standard errors from the annual mean.</font>
 
 # Citation
 
