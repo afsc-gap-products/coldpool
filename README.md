@@ -117,7 +117,7 @@ Cold pool area and temperature time series are reported in the annual [Ecosystem
  
 # AI temperature time series
 
-![Mean bottom and sea surface temperatures in the Aleutian Islands.](./plots/ai/2026_temperature_by_subarea_depth.png)
+![Mean bottom and sea surface temperatures in the Aleutian Islands.](./plots/ai/2026_AI_sst_bt_timeseries.png)
  <font size="1"><b>Figure 5.</b> Average summer surface and bottom temperatures (°C) in Aleutian Islands Ecosystem Status Report subareas (western, central, and eastern Aleutian Islands) based on data collected during standardized summer bottom trawl surveys from 1991 to 2026. Solid horizontal line denotes the historical mean (1991–2012), dashed horizontal lines denote one standard deviation from the 1991–2012 mean. Circles denote annual means and vertical lines denote two standard errors from the annual mean.</font>
 
 # GOA temperature time series
