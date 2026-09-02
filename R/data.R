@@ -173,3 +173,25 @@
 #' }
 #' @source \url{https://www.fisheries.noaa.gov/contact/groundfish-assessment-program}
 "nbs_ebs_bottom_salinity"
+
+#' Rasters of summer bottom temperature in the Aleutian Islands 1-km resolution
+#' 
+#' Summer bottom temperatures in the Aleutian Islands survey area, calculated from interpolation of temperature data from summer bottom trawl surveys conducted by AFSC/RACE/GAP. To load this data set, it is necessary to first load the coldpool package or terra.
+#' 
+#' @format terra PackedSpatRast
+#' #' \describe{
+#'      \item{year}{Raster layer of temperature for a given year}
+#' }
+#' @source \url{https://www.fisheries.noaa.gov/contact/groundfish-assessment-program}
+"ai_bottom_temperature"
+
+#' Rasters of summer surface temperature in the Aleutian Islands 1-km resolution
+#' 
+#' Summer surface temperatures in the Aleutian Islands survey area, calculated from interpolation of temperature data from summer bottom trawl surveys conducted by AFSC/RACE/GAP. To load this data set, it is necessary to first load the coldpool package or terra.
+#' 
+#' @format terra PackedSpatRast
+#' #' \describe{
+#'      \item{year}{Raster layer of temperature for a given year}
+#' }
+#' @source \url{https://www.fisheries.noaa.gov/contact/groundfish-assessment-program}
+"ai_surface_temperature"

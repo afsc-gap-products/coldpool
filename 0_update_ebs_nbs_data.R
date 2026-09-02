@@ -18,8 +18,8 @@ ebs_layers <- akgfmaps::get_base_layers(
 )
 
 # Filepath to csv containing data to use for temperature interpolation
-ebs_csv_path <- here::here("data", paste0("index_hauls_temperature_data.csv"))
-nbs_ebs_csv_path <- here::here("data", paste0("ebs_nbs_temperature_full_area.csv"))
+ebs_csv_path <- here::here("inst", "extdata", paste0("index_hauls_temperature_data.csv"))
+nbs_ebs_csv_path <- here::here("inst", "extdata", paste0("ebs_nbs_temperature_full_area.csv"))
 
 nbs_bt_years <- c(2010, 2017, 2018, 2019, 2021, 2022, 2023, 2025)
 nbs_sst_years <- c(2010, 2017, 2018, 2019, 2021, 2022, 2023, 2025)

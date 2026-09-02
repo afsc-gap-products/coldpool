@@ -33,6 +33,35 @@ if(all(survey_definition_id == 52)) {
 #   min_year <- 1982
 # }
 
+# haul_data <- 
+#   RODBC::sqlQuery(
+#     channel = channel,
+#     query = 
+#       paste0("select 
+#       c.vessel_id as vessel, 
+#       c.cruise, 
+#       c.year,
+#       h.haul, 
+#       h.latitude_dd_start, 
+#       h.latitude_dd_end, 
+#       h.longitude_dd_start, 
+#       h.longitude_dd_end, 
+#       h.station, 
+#       h.stratum,
+#       h.depth_gear_m, 
+#       h.depth_m, 
+#       h.surface_temperature_c, 
+#       h.gear_temperature_c 
+#       from 
+#       gap_products.akfin_cruise c,
+#       gap_products.akfin_haul h 
+#              where survey_definition_id = ", survey_definition_id,
+#              " and c.cruisejoin = h.cruisejoin 
+#              and year >= ", min_year
+#       )
+#   )
+
+
 haul_data <- 
   RODBC::sqlQuery(
     channel = channel,

@@ -1,3 +1,17 @@
+coldpool 3.6-1 (September 2, 2026)
+----------------------------------------------------------------
+
+DATA UPDATE
+
+- Add 2026 EBS and AI data.
+
+FUNCTIONALITY CHANGES
+
+- Temperature data from RACEBASE and GAP_PRODUCTS are saved to
+  /inst/extdata/ instead of /data/ to prevent datasets from 
+  loading incorrectly. 
+  
+
 coldpool 3.5-3 (September 17, 2025)
 ----------------------------------------------------------------
 
