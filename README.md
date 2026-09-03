@@ -59,10 +59,6 @@ load("[local_path].rda")
 <dd><p>Data frame containing the total area of EBS waters with bottom temperatures less than or equal to 2, 1, 0, and -1 °C, mean bottom temperature, and mean surface temperature during the EBS survey for 1982-2026 (excluding 2020 due to cancelled survey).</p></dd>
 <dt><b>nbs_mean_bottom_temperature</b></dt>
 <dd><p>Data frame containing the total area of EBS waters with bottom temperatures less than or equal to 2, 1, 0, and -1 °C, mean bottom temperature, and mean surface temperature in the NBS during years with a full EBS+NBS standardized survey (2010, 2017, 2019, 2021, 2022, 2023).</p></dd>
-<dt><b>goa_mean_bottom_temperature</b></dt>
-<dd><p>Data frame containing mean surface, bottom, and 200 m temperatures in Gulf of Alaska Ecosystem Status Report subareas from 1990-2025.</p></dd>
-<dt><b>ai_mean_bottom_temperature</b></dt>
-<dd><p>Data frame containing mean surface, bottom, and 200 m temperatures in Aleutian Islands Ecosystem Status Report subareas from 1991-2024.</p></dd>
 <dt><b>ebs_bottom_temperature</b></dt>
 <dd><p>Interpolated rasters of bottom temperature for the EBS survey area from 1982-2026.</p></dd>
 <dt><b>ebs_surface_temperature</b></dt> 
@@ -75,6 +71,18 @@ load("[local_path].rda")
 <dd><p>Interpolated rasters of sea surface temperature for the full EBS and NBS survey area for years with a full EBS+NBS standardized survey (2010, 2017, 2019, 2021, 2022, 2023, 2025).</p></dd>
 <dt><b>nbs_ebs_bottom_salinity</b></dt> 
 <dd><p>Interpolated rasters of bottom salinity (PSS-78) for the full EBS and NBS survey area for 2010, 2017, and 2021-2024</p></dd>
+<dt><b>ai_mean_bottom_temperature</b></dt>
+<dd><p>Data frame containing mean surface and bottom temperatures in Aleutian Islands Ecosystem Status Report subareas from 1991-2026.</p></dd>
+<dt><b>ai_bottom_temperature</b></dt>
+<dd><p>Interpolated rasters of bottom temperature for the AI survey area from 1991-2026.</p></dd>
+<dt><b>ai_surface_temperature</b></dt>
+<dd><p>Interpolated rasters of surface temperature for the AI survey area from 1991-2026.</p></dd>
+<dt><b>goa_mean_bottom_temperature</b></dt>
+<dd><p>Data frame containing mean surface, bottom, and 200 m temperatures in Gulf of Alaska Ecosystem Status Report subareas from 1990-2025.</p></dd>
+<dt><b>goa_bottom_temperature</b></dt>
+<dd><p>Interpolated rasters of bottom temperature for the GOA survey area from 1994-2025.</p></dd>
+<dt><b>goa_surface_temperature</b></dt>
+<dd><p>Interpolated rasters of surface temperature for the GOA survey area from 1994-2025.</p></dd>
 </dl>
 
 ## Limitations and alternatives
@@ -102,11 +110,11 @@ Temperature data products in the coldpool package are updated annually in August
 
 
 # EBS/NBS cold pool area and temperature time series
-*Updated: August 14, 2025*
+*Updated: September 3, 2026*
 
 Cold pool area and temperature time series are reported in the annual [Ecosystem Status Reports](https://www.fisheries.noaa.gov/alaska/ecosystems/ecosystem-status-reports-gulf-alaska-bering-sea-and-aleutian-islands) for the eastern Bering Sea and ecosystem and socioeconomic profiles for EBS stocks. Temperature products are also used as covariates in some [stock assessment](https://www.fisheries.noaa.gov/alaska/population-assessments/north-pacific-groundfish-stock-assessments-and-fishery-evaluation) models or their inputs (e.g. abundance indices).
 
-![Cold pool area from 2004-2025, based on interpolated survey bottom temperature observations.](./plots/ebs_nbs/2026_coldpool_with_area.png)
+![Cold pool area from 2004-2026, based on interpolated survey bottom temperature observations.](./plots/ebs_nbs/2026_coldpool_with_area.png)
  <font size="1"><b>Figure 2.</b> Cold pool extent in the eastern Bering Sea from 2005–2026, showing areas with bottom temperatures ≤ 2°C, ≤ 1°C, ≤ 0°C, and ≤ -1°C (upper panels), and proportion of the southeastern Bering Sea survey area with bottom temperatures ≤ 2°C, ≤ 1°C, ≤ 0°C, and ≤ -1°C (lower panel). Solid black lines in the interior of the surface represent the 50m and 100m isobaths.</font>
 
 ![Mean bottom temperature in the eastern Bering Sea, based on interpolated survey temperature observations.](./plots/ebs_nbs/2026_nbs_ebs_temperature_map_grid.png)
