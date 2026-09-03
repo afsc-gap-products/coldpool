@@ -6,7 +6,7 @@ library(shadowtext)
 
 fig_res <- 300
 
-survey_definition_id <- 52
+survey_definition_id <- 47
 
 # Setup
 if(all(survey_definition_id == 47)) {
@@ -157,7 +157,53 @@ temperature_time_series <- temperature_time_series |>
 
 if(all(survey_definition_id == 47)) {
   
-  goa_mean_temperature <- temperature_time_series
+  # Calculate 200-m temperature
+  mask_200m <- bt |> 
+    terra::mask(bathy > 190 & bathy < 210, maskvalue = FALSE)
+  
+  bt_200m <- mask_200m  |>
+    terra::global(fun = "mean", na.rm = TRUE) |>
+    dplyr::mutate(YEAR = as.numeric(names(bt)),
+                  AREA_NAME = region_name) |>
+    dplyr::rename(MEAN_200M_TEMPERATURE = mean) |>
+    dplyr::filter(!is.na(MEAN_200M_TEMPERATURE))
+  
+  for(ii in 1:length(subarea_levels)) {
+    
+    sel_subarea <- 
+      dplyr::filter(
+        esr_subareas,
+        AREA_NAME == subarea_levels[ii]
+      )
+    
+    # Mask to subarea, calculate mean for each year, rename gear temperature column
+    bt_200m <- 
+      dplyr::bind_rows(
+        bt_200m,
+        terra::mask(
+          mask_200m,
+          sel_subarea,
+          touches = TRUE
+        ) |>
+          terra::global(
+            fun = "mean", 
+            na.rm = TRUE) |>
+          dplyr::mutate(
+            YEAR = as.numeric(names(mask_200m)),
+            AREA_NAME = sel_subarea$AREA_NAME
+          ) |>
+          dplyr::rename(MEAN_200M_TEMPERATURE = mean) |>
+          dplyr::filter(!is.na(MEAN_200M_TEMPERATURE))
+      )
+  }
+  
+  bt_200m <- bt_200m |>
+    dplyr::mutate(MEAN_200M_TEMPERATURE = round(MEAN_200M_TEMPERATURE, 2)) |>
+    dplyr::arrange(factor(AREA_NAME, levels = c(subarea_levels, region_name)), YEAR)
+  
+  goa_mean_temperature <- temperature_time_series |>
+    dplyr::inner_join(bt_200m, by = c("YEAR", "AREA_NAME")) |>
+    dplyr::select(YEAR, AREA_NAME, MEAN_GEAR_TEMPERATURE, MEAN_SURFACE_TEMPERATURE, MEAN_200M_TEMPERATURE, LAST_UPDATE)
 
   usethis::use_data(goa_mean_temperature, overwrite = TRUE)
   

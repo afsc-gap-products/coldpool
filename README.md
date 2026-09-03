@@ -118,12 +118,12 @@ Cold pool area and temperature time series are reported in the annual [Ecosystem
 # AI temperature time series
 
 ![Mean bottom and sea surface temperatures in the Aleutian Islands.](./plots/ai/2026_AI_sst_bt_timeseries.png)
- <font size="1"><b>Figure 5.</b> Average summer surface and bottom temperatures (°C) in Aleutian Islands Ecosystem Status Report subareas (western, central, and eastern Aleutian Islands) based on data collected during standardized summer bottom trawl surveys from 1991 to 2026. Solid horizontal line denotes the historical mean (1991–2012), dashed horizontal lines denote one standard deviation from the 1991–2012 mean. Circles denote annual means and vertical lines denote two standard errors from the annual mean.</font>
+ <font size="1"><b>Figure 5.</b> Average summer surface and bottom temperatures (°C) in Aleutian Islands Ecosystem Status Report subareas (western, central, and eastern Aleutian Islands) based on data collected during standardized summer bottom trawl surveys from 1991 to 2026. Solid horizontal line denotes the historical mean (1991–2012), dashed horizontal lines denote one standard deviation from the 1991–2012 mean.</font>
 
 # GOA temperature time series
 
-![Mean bottom and sea surface temperatures in the Gulf of Alaska.](./plots/goa/2025_temperature_by_subarea_depth.png)
- <font size="1"><b>Figure 6.</b> Average summer surface and 200 m temperatures (°C) in Gulf of Alaska Ecosystem Status Report subareas (western and eastern Gulf of Alaska) based on data collected during standardized summer bottom trawl surveys from 1993 to 2025. Solid horizontal line denotes the historical mean (1993–2014) and dashed horizontal lines denote one standard deviation from the 1993–2014 mean. Circles denote annual means and vertical lines denote two standard errors from the annual mean.</font>
+![Mean bottom and sea surface temperatures in the Gulf of Alaska.](./plots/goa/2025_GOA_sst_bt_timeseries.png)
+ <font size="1"><b>Figure 6.</b> Average summer surface and bottom temperatures (°C) in Gulf of Alaska Ecosystem Status Report subareas (western and eastern Gulf of Alaska) based on data collected during standardized summer bottom trawl surveys from 1993 to 2025. Solid horizontal line denotes the historical mean (1993–2014) and dashed horizontal lines denote one standard deviation from the 1993–2014 mean.</font>
 
 # Citation
 

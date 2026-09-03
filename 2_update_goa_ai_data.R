@@ -169,16 +169,12 @@ for(jj in 1:length(unique_years)) {
   
   varnames(bt_rast) <- "gear_temperature"
   
-  names(bt_rast) <- unique_years[jj]
-  
   sst_rast <- 
     dplyr::select(bathy_utm, SST) |>
     sf::st_transform(crs = "EPSG:3338") |>
     terra::rasterize(y = bathy, field = "SST")
   
   varnames(sst_rast) <- "surface_temperature"
-  
-  names(sst_rast) <- unique_years[jj]
   
   if(region == "GOA" & unique_years[jj] == 2001) {
     
@@ -190,7 +186,17 @@ for(jj in 1:length(unique_years)) {
         inverse = TRUE
       )
     
+    sst_rast <- 
+      terra::mask(
+        sst_rast,
+        esr_subareas[esr_subareas$AREA_NAME == "Eastern Gulf of Alaska", ],
+        inverse = TRUE
+      )
+    
   }
+  
+  names(bt_rast) <- unique_years[jj]
+  names(sst_rast) <- unique_years[jj]
   
   if(jj == 1) {
     bt_layers <- bt_rast
@@ -221,6 +227,9 @@ for(jj in 1:length(unique_years)) {
 # Region-specific data wrangling
 
 if(region == "GOA") {
+  
+  # bt_layers <- subset(bt_layers, "2001", negate = TRUE)
+  # sst_layers <- subset(sst_layers, "2001", negate = TRUE)
   
   goa_bottom_temperature <- terra::wrap(bt_layers)
   goa_surface_temperature <- terra::wrap(sst_layers)
