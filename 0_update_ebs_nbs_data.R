@@ -18,8 +18,8 @@ ebs_layers <- akgfmaps::get_base_layers(
 )
 
 # Filepath to csv containing data to use for temperature interpolation
-ebs_csv_path <- here::here("data", paste0("index_hauls_temperature_data.csv"))
-nbs_ebs_csv_path <- here::here("data", paste0("ebs_nbs_temperature_full_area.csv"))
+ebs_csv_path <- here::here("inst", "extdata", paste0("index_hauls_temperature_data.csv"))
+nbs_ebs_csv_path <- here::here("inst", "extdata", paste0("ebs_nbs_temperature_full_area.csv"))
 
 nbs_bt_years <- c(2010, 2017, 2018, 2019, 2021, 2022, 2023, 2025)
 nbs_sst_years <- c(2010, 2017, 2018, 2019, 2021, 2022, 2023, 2025)
@@ -33,15 +33,9 @@ if(update_sysdata) {
   channel <- get_connected(schema = "AFSC")
   
   # Get temperature data and write csvs to data directory
-  coldpool:::get_data(channel = channel, include_preliminary_data = "nbs")
+  coldpool:::get_data(channel = channel, include_preliminary_data = NULL)
   
 }
-
-# REMOVE THIS BEFORE 2026 RUNS - only included right now because data in RACEBASE are not final
-
-read.csv(file = nbs_ebs_csv_path) |>
-  dplyr::filter(!(cruise == 202502 & !preliminary)) |>
-  write.csv(nbs_ebs_csv_path, row.names = FALSE)
 
 # 4. Interpolate bottom and surface temperature ---- 
 # Use ordinary kriging with Stein's Matern to interpolate temperature and write GeoTIFF rasters to
@@ -52,7 +46,7 @@ interpolation_wrapper(
   temp_data_path = ebs_csv_path,
   proj_crs = proj_crs,
   cell_resolution = c(5000, 5000), # 5x5 km grid resolution
-  select_years = 2025,
+  select_years = 2025:2026,
   # select_years = 1982:2025,
   interp_variable = "gear_temperature",
   select_region = "sebs",
@@ -64,7 +58,7 @@ interpolation_wrapper(
   temp_data_path = ebs_csv_path,
   proj_crs = proj_crs,
   cell_resolution = c(5000, 5000), # 5x5 km grid resolution
-  select_years = 2025,
+  select_years = 2025:2026,
   # select_years = 1982:2025,
   interp_variable = "surface_temperature",
   select_region = "sebs",
