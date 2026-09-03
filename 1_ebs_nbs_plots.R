@@ -249,6 +249,33 @@ cold_pool_cbar <-
     "text", 
     x = 1.1, 
     y = 2.05, 
+    fontface = "bold",
+    label =  "Bottom\nTemperature (\u00B0C)", 
+    size = rel(3.2)
+  ) + 
+  theme(plot.margin = unit(c(-25, 0,0,-10), units = "pt"))
+
+cold_pool_cbar_short <- 
+  coldpool::legend_discrete_cbar(
+    breaks = c(-Inf, -1, 0, 1, 2),
+    colors = rev(cpa_palette),
+    legend_direction = "vertical",
+    font_size = 3.5,
+    width = 0.1,
+    expand_size.x = 0.3,
+    expand_size.y = 0.3,
+    expand.x = 0.2,
+    expand.y = 0.9,
+    spacing_scaling = 1,
+    text.hjust = 0,
+    font.family = "sans",
+    neat.labels = FALSE
+  ) + 
+  annotate(
+    "text", 
+    x = 1.1, 
+    y = 2.4, 
+    fontface = "bold",
     label =  "Bottom\nTemperature (\u00B0C)", 
     size = rel(3.2)
   ) + 
@@ -306,7 +333,7 @@ cold_pool_panels <-
 cold_pool_grid <- 
   cowplot::plot_grid(
   cold_pool_panels,
-  cowplot::plot_grid(NA, cold_pool_cbar, NA,
+  cowplot::plot_grid(NA, cold_pool_cbar_short, NA,
                      nrow = 3),
   rel_widths = c(0.9,0.2)
 )
@@ -496,6 +523,7 @@ temp_map_cbar <-
     "text", 
     x = 1.15, 
     y = 3.5, 
+    fontface = "bold",
     label =  "Bottom Temperature (\u00B0C)", 
     size = rel(3.2)
   ) + 
@@ -799,6 +827,7 @@ sst_map_cbar <-
   annotate("text",
            x = 1.15,
            y = 3.5,
+           fontface = "bold",
            label =  "Surface Temperature (\u00B0C)", 
            size = rel(3.2)) +
   theme(plot.margin = unit(c(0,0, 0, 5), units = "mm"))
@@ -1158,6 +1187,7 @@ temp_map_cbar <-
   annotate("text", 
            x = 1.15, 
            y = 3.5, 
+           fontface = "bold",
            label =  "Bottom Temperature (\u00B0C)", 
            size = rel(3.2)) + 
   theme(plot.margin = unit(c(0,0, 0, 5), units = "mm"))
