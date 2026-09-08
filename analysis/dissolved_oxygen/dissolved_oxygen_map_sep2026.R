@@ -20,7 +20,8 @@ sebs_years <- c(2024, 2026)
 full_ebs_years <- 2023
 
 
-do_breaks <- c(-Inf, 2:10, Inf)
+# do_breaks <- c(-Inf, seq(2,10,2), Inf)
+do_breaks <- c(-Inf, 3:9, Inf)
 
 do_rcl <- cbind(
   do_breaks[1:(length(do_breaks)-1)], 
@@ -147,9 +148,9 @@ p_do_map <- ggplot() +
           mapping = aes(fill = level), color = NA) +
   geom_sf(data = dplyr::filter(all_do_sf, sf::st_geometry_type(geometry) == "POINT"),
           mapping = aes(fill = level), shape = 21, size = 1.7) +
-  geom_sf(data = stns,
-          shape = 4,
-          size = 0.5) +
+  # geom_sf(data = stns,
+  #         shape = 4,
+  #         size = 0.3) +
   geom_sf(data = map_layers_2023$akland) +
   geom_sf(data = map_layers_2023$survey.strata, fill = NA) +
   facet_wrap(~year) +
