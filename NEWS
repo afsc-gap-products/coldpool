@@ -9,7 +9,7 @@ FUNCTIONALITY CHANGES
 
 - Temperature data from RACEBASE and GAP_PRODUCTS are saved to
   /inst/extdata/ instead of /data/ to prevent datasets from 
-  loading incorrectly. 
+  loading incorrectly.
   
 
 coldpool 3.5-3 (September 17, 2025)
