@@ -26,6 +26,7 @@ map_layers <- akgfmaps::get_base_layers(
 con <- ncdf4::nc_open(here::here("analysis", "dissolved_oxygen", "data", "GAPCTD_2024_AI.nc"))
 
 do_df <- data.frame(sea_floor_dissolved_oxygen = ncvar_get(con, "sea_floor_dissolved_oxygen"),
+                    sea_floor_practical_salinity = ncvar_get(con, "sea_floor_practical_salinity"),
                     latitude = ncvar_get(con, "latitude"),
                     longitude = ncvar_get(con, "longitude"),
                     stationid = ncvar_get(con, "stationid"),
@@ -37,6 +38,7 @@ con <- ncdf4::nc_open(here::here("analysis", "dissolved_oxygen", "data", "GAPCTD
 do_df <- 
   dplyr::bind_rows(do_df,
                    data.frame(sea_floor_dissolved_oxygen = ncvar_get(con, "sea_floor_dissolved_oxygen"),
+                              sea_floor_practical_salinity = ncvar_get(con, "sea_floor_practical_salinity"),
                               latitude = ncvar_get(con, "latitude"),
                               longitude = ncvar_get(con, "longitude"),
                               stationid = ncvar_get(con, "stationid"),
@@ -45,9 +47,14 @@ do_df <-
   )
 
 do_sf <- sf::st_as_sf(do_df, coords = c("longitude", "latitude"), crs = "WGS84") |>
+  dplyr::mutate(nearest_longitude = plyr::round_any(sf::st_coordinates(geometry)[,1], 4)) |>
   sf::st_transform(crs = "EPSG:3338")
 
 do_sf$do_mg_l <- do_sf$sea_floor_dissolved_oxygen * 1.428
+
+do_sf <- dplyr::filter(do_sf, depth > 0)
+
+# Dissolved oxygen map for the AI with hypoxic stations circled
 
 p_ai_map <- 
   ggplot() +
@@ -74,49 +81,6 @@ p_ai_map <-
         plot.margin = unit(c(5,0,5,5), units = "mm"),
         axis.title = element_blank(),
         axis.text = element_text(size = 9))
-
-ggplot() +
-  geom_point(
-    data = dplyr::filter(do_sf, depth >0),
-    mapping = aes(x = depth, y = do_mg_l, color = factor(year))
-  ) +
-  geom_hline(yintercept = 2, linetype = 2) +
-  scale_x_continuous(name = "Depth (m)") +
-  scale_y_continuous(name = "Dissolved oxygen (mg/l)")
-
-ggplot() +
-  geom_boxplot(
-    data = dplyr::filter(do_sf, depth >0),
-    mapping = aes(x = cut(depth, seq(0,500,50)), y = do_mg_l, color = factor(year))
-  ) +
-  # geom_hline(yintercept = 2, linetype = 2) +
-  scale_x_discrete(name = "Depth (m)") +
-  scale_y_continuous(name = "Dissolved oxygen (mg/l)")
-
-ggplot() +
-  geom_sf(data = map_layers$akland) +
-  geom_sf(data = map_layers$bathymetry, color = "grey70", linewidth = 0.15) +
-  geom_sf(data = do_sf#,
-          # size = rel(0.5)
-  ) +
-  geom_sf(data = dplyr::filter(do_sf, do_mg_l <= 2),
-          mapping = aes(color = "Hypoxia (<2 mg/l)")#,
-          # size = rel(0.8)
-  ) +
-  geom_sf(data = map_layers$graticule, linewidth = 0.3, alpha = 0.2) +
-  scale_color_manual(values = "red") +
-  facet_wrap(~year, nrow = 2) +
-  coord_sf(xlim = map_layers$plot.boundary$x,
-           ylim = map_layers$plot.boundary$y) +
-  scale_x_continuous(breaks = map_layers$lon.breaks) +
-  scale_y_continuous(breaks = map_layers$lat.breaks) +
-  coldpool::theme_multi_map_blue_strip() +
-  theme(legend.position = "none",
-        plot.title = element_text(hjust = 0.5),
-        plot.margin = unit(c(5,5,5,5), units = "mm"),
-        axis.title = element_blank(),
-        axis.text = element_text(size = 9))
-
 
 cbar_legend <- 
   coldpool::legend_discrete_cbar(
@@ -159,3 +123,73 @@ ragg::agg_png(filename = here::here("analysis", "dissolved_oxygen", "plots",
 print(do_map_grid)
 dev.off()
 
+ggplot() +
+  geom_point(
+    data = dplyr::filter(do_sf, depth >0),
+    mapping = aes(x = depth, y = do_mg_l, color = factor(year))
+  ) +
+  geom_hline(yintercept = 2, linetype = 2) +
+  scale_x_continuous(name = "Depth (m)") +
+  scale_y_continuous(name = "Dissolved oxygen (mg/l)")
+
+ggplot() +
+  geom_boxplot(
+    data = dplyr::filter(do_sf, depth >0),
+    mapping = aes(x = cut(depth, seq(0,500,50), labels = paste0(seq(0, 450, 50), "-", seq(50, 500, 50))), y = do_mg_l, color = factor(year))
+  ) +
+  geom_hline(yintercept = 2, linetype = 2) +
+  scale_color_tableau(name = "Year") +
+  scale_x_discrete(name = "Bottom Depth (m)") +
+  scale_y_continuous(name = "Bottom Dissolved oxygen (mg/l)") +
+  theme_bw()
+
+ggplot() +
+  geom_point(
+    data = do_sf,
+    mapping = aes(x = depth, y = sea_floor_practical_salinity)
+  )
+
+ggplot() +
+  geom_sf(
+    data = do_sf,
+    mapping = aes(color = sea_floor_practical_salinity)
+  ) +
+  scale_color_viridis_c(option = "H")
+
+
+ggplot(data = do_sf,
+           mapping = aes(x = depth, y = sea_floor_practical_salinity, color = factor(nearest_longitude))) +
+  geom_point() + 
+  geom_smooth(se = FALSE) +
+  scale_color_viridis_d(option = "H") +
+  theme_bw()
+
+ggplot() +
+  geom_point(
+    data = do_sf,
+    mapping = aes(x = sea_floor_practical_salinity, y = sea_floor_dissolved_oxygen)
+  )
+
+ggplot() +
+  geom_sf(data = map_layers$akland) +
+  geom_sf(data = map_layers$bathymetry, color = "grey70", linewidth = 0.15) +
+  geom_sf(data = do_sf#,
+          # size = rel(0.5)
+  ) +
+  geom_sf(data = dplyr::filter(do_sf, do_mg_l <= 2),
+          mapping = aes(color = "Hypoxia (<2 mg/l)")#,
+          # size = rel(0.8)
+  ) +
+  geom_sf(data = map_layers$graticule, linewidth = 0.3, alpha = 0.2) +
+  scale_color_manual(values = "red") +
+  facet_wrap(~year, nrow = 2) +
+  coord_sf(xlim = map_layers$plot.boundary$x,
+           ylim = map_layers$plot.boundary$y) +
+  scale_x_continuous(breaks = map_layers$lon.breaks) +
+  scale_y_continuous(breaks = map_layers$lat.breaks) +
+  coldpool::theme_multi_map_blue_strip() +
+  theme(legend.position = "none",
+        plot.title = element_text(hjust = 0.5),
+        plot.margin = unit(c(5,5,5,5), units = "mm"),
+        axis.title = element_blank(),
+        axis.text = element_text(size = 9))
